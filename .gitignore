@@ -9,9 +9,9 @@ frontend/.env.local
 
 backend/.env
 
-backend/public/uploads/avatars/*
-backend/public/uploads/certificates/*
-backend/public/uploads/decrees/*
+/backend/public/uploads/avatars/*
+/backend/public/uploads/certificates/*
+/backend/public/uploads/decrees/*
 
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
