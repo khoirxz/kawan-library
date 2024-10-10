@@ -15,3 +15,9 @@ export type UserFormProps = {
   phone: string;
   avatarImg?: null;
 };
+
+export type UserProps = {
+  id: number;
+  name: string;
+  username: string;
+};

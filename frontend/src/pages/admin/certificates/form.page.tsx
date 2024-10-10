@@ -6,7 +6,6 @@ import {
   Form,
   Button,
   DatePicker,
-  Select,
   message,
   Flex,
   Avatar,
@@ -29,33 +28,29 @@ import { UserFormProps } from "../../../utils/types/users";
 
 import AdminLayout from "../../../layouts/admin.layout";
 
-type DecreeFormProps = {
-  title: string;
+type CertificateFormProps = {
+  name: string;
   description: string;
-  category: string;
-  status: string;
-  effective_date: null;
-  expired_date: null;
+  date: null;
 };
 
-const DecreeFormPage: React.FC = () => {
-  const [form] = Form.useForm<DecreeFormProps>();
+const CertificateFormPage: React.FC = () => {
+  const [form] = Form.useForm<CertificateFormProps>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [fileDecree, setFileDecree] = useState<string | null>(null);
   const [userData, setUserData] = useState<UserFormProps>({} as UserFormProps);
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [messageApi, contextHolder] = message.useMessage();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [fileCertificate, setFileCertificate] = useState<string | null>(null);
 
-  const { id, decreeId } = useParams();
+  const { id, certificateId } = useParams();
 
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
 
     const getData = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-
         const response = await axios.get(`${DEV_API}/users/${id}`, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
@@ -66,6 +61,7 @@ const DecreeFormPage: React.FC = () => {
         if (response.status === 200 && response.data.data) {
           setUserData(response.data.data[0]);
         }
+
         setIsLoading(false);
       } catch (error) {
         if (axios.isCancel(error)) {
@@ -76,28 +72,29 @@ const DecreeFormPage: React.FC = () => {
       }
     };
 
-    const getDecree = async () => {
+    const getCertificate = async () => {
       try {
         setIsLoading(true);
 
-        const response = await axios.get(`${DEV_API}/decrees/${decreeId}`, {
-          headers: {
-            Authorization: `${localStorage.getItem("token")}`,
-          },
-          signal,
-        });
+        const response = await axios.get(
+          `${DEV_API}/certifications/${certificateId}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+            signal,
+          }
+        );
 
         if (response.status === 200 && response.data.data) {
           form.setFieldsValue({
-            title: response.data.data.title,
+            name: response?.data?.data?.name,
             description: response.data.data.description,
-            category: response.data.data.category,
-            status: response.data.data.status,
-            effective_date: [dayjs(response.data.data.effective_date)],
-            expired_date: [dayjs(response.data.data.expired_date)],
+            date: [dayjs(response.data.data.date)],
           });
-          setFileDecree(response.data.data.file_path);
+          setFileCertificate(response.data.data.file_path);
         }
+        console.log(response.data.data.file_path);
         setIsLoading(false);
       } catch (error) {
         if (axios.isCancel(error)) {
@@ -110,69 +107,62 @@ const DecreeFormPage: React.FC = () => {
 
     getData();
 
-    if (decreeId) {
-      getDecree();
+    if (certificateId) {
+      getCertificate();
     }
 
     return () => {
       controller.abort();
     };
-  }, [id, form, decreeId]);
+  }, [id, form, certificateId]);
 
-  const onFinish: FormProps<DecreeFormProps>["onFinish"] = async (values) => {
+  const onFinish: FormProps<CertificateFormProps>["onFinish"] = async (
+    values
+  ) => {
     // return console.log("Success:", values);
-    // return console.log("Success:", fileList[0]);
     try {
-      // insert to FormData
       const formData = new FormData();
-      formData.append("user_id", id?.toString() || "");
-      formData.append("title", values.title);
+      formData.append("user_id", id || "");
+      formData.append("name", values.name);
       formData.append("description", values.description);
-      formData.append("category", values.category);
-      formData.append("status", values.status);
-      formData.append(
-        "effective_date",
-        dayjs(values.effective_date).format("DD-MM-YYYY")
-      );
-      if (values.expired_date !== null) {
-        formData.append(
-          "expired_date",
-          dayjs(values.expired_date).format("DD-MM-YYYY")
-        );
-      }
-      // formData.append("decreeFile", fileList[0] as Blob);
+      formData.append("date", dayjs(values.date).format("YYYY-MM-DD"));
       fileList.forEach((file: any) => {
-        formData.append("decreeFile", file || "");
+        formData.append("certificateFile", file || "");
       });
 
       let response: any;
-      if (decreeId) {
-        response = await axios.put(`${DEV_API}/decrees/${decreeId}`, formData, {
-          headers: {
-            Authorization: `${localStorage.getItem("token")}`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
+
+      if (certificateId) {
+        response = await axios.put(
+          `${DEV_API}/certifications/${certificateId}`,
+          formData,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
       } else {
-        // insert to backend
-        response = await axios.post(`${DEV_API}/decrees`, formData, {
+        response = await axios.post(`${DEV_API}/certifications`, formData, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
-            "Content-Type": "multipart/form-data",
           },
         });
       }
 
-      //   console.log(response);
-      if (response.status === 200) {
-        messageApi.success("Surat keputusan created successfully");
+      if (response.status === 201) {
+        messageApi.success(response.data.message);
+        // form.resetFields();
+      } else if (response.status === 200) {
+        messageApi.success(response.data.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      messageApi.error(error.response.data.message);
     }
   };
 
-  const onFinishFailed: FormProps<DecreeFormProps>["onFinishFailed"] = (
+  const onFinishFailed: FormProps<CertificateFormProps>["onFinishFailed"] = (
     errorInfo
   ) => {
     console.log("Failed:", errorInfo);
@@ -198,8 +188,8 @@ const DecreeFormPage: React.FC = () => {
               <Typography.Text>{userData.name}</Typography.Text>
             </Flex>
             <div>
-              <h1>Buat Surat Keputusan</h1>
-              <p>Input detail dari surat keputusan</p>
+              <h1>Buat Data Portofolio</h1>
+              <p>Input detail dari Pelatihan/Sertifikat yang diikuti</p>
             </div>
           </Flex>
         </Col>
@@ -210,7 +200,7 @@ const DecreeFormPage: React.FC = () => {
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
             autoComplete="off">
-            {decreeId ? (
+            {certificateId ? (
               <Card
                 style={{
                   marginBottom: "2rem",
@@ -223,7 +213,7 @@ const DecreeFormPage: React.FC = () => {
                     icon={<DownloadOutlined />}
                     onClick={() => {
                       window.open(
-                        `http://localhost:5000/uploads/decrees/${fileDecree}`,
+                        `http://localhost:5000/uploads/certificates/${fileCertificate}`,
                         "_blank"
                       );
                     }}>
@@ -236,19 +226,19 @@ const DecreeFormPage: React.FC = () => {
                   <iframe
                     style={{ width: "100%", height: "100%" }}
                     title="Decree"
-                    src={`http://localhost:5000/uploads/decrees/${fileDecree}`}
+                    src={`http://localhost:5000/uploads/certificates/${fileCertificate}`}
                   />
                 )}
               </Card>
             ) : null}
 
             <Form.Item
-              label="File Surat Keputusan"
-              name="decreeFile"
+              label="File Sertifikat (Format PDF)"
+              name="certificateFile"
               rules={[
                 {
-                  required: true,
-                  message: "Please input file!",
+                  required: certificateId ? false : true,
+                  message: "Wajib diisi",
                 },
               ]}>
               <Upload
@@ -263,72 +253,27 @@ const DecreeFormPage: React.FC = () => {
               </Upload>
             </Form.Item>
 
-            <Form.Item<DecreeFormProps>
-              label="Judul Surat Keputusan"
-              name="title"
-              rules={[{ required: true, message: "Please input title!" }]}
-              style={{
-                marginBottom: "2rem",
-              }}>
+            <Form.Item<CertificateFormProps>
+              label="Nama pelatihan/sertifikat"
+              name="name"
+              rules={[{ required: true, message: "Wajib diisi" }]}
+              style={{ marginBottom: "1rem" }}>
               <Input disabled={isLoading} />
             </Form.Item>
 
-            <Form.Item<DecreeFormProps>
-              label="Deskripsi Surat Keputusan"
+            <Form.Item<CertificateFormProps>
+              label="Deskripsi singkat tentang pelatihan/sertifikat"
               name="description"
-              rules={[{ required: true, message: "Please input description!" }]}
-              style={{
-                marginBottom: "2rem",
-              }}>
+              rules={[{ required: true, message: "Wajib diisi" }]}
+              style={{ marginBottom: "1rem" }}>
               <Input.TextArea disabled={isLoading} />
             </Form.Item>
 
-            <Form.Item<DecreeFormProps>
-              label="Kategori Surat Keputusan"
-              name="category"
-              rules={[{ required: true, message: "Please input category!" }]}
-              style={{
-                marginBottom: "2rem",
-              }}>
-              <Input disabled={isLoading} />
-            </Form.Item>
-
-            <Form.Item<DecreeFormProps>
-              label="Status Surat Keputusan"
-              name="status"
-              rules={[{ required: true, message: "Please input status!" }]}
-              style={{
-                marginBottom: "2rem",
-              }}>
-              <Select disabled={isLoading}>
-                <Select.Option value="draft">Draft</Select.Option>
-                <Select.Option value="approved">Di setujui</Select.Option>
-                <Select.Option value="canceled">Di batalkan</Select.Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item<DecreeFormProps>
-              label="Tgl Efektif Surat Keputusan"
-              name="effective_date"
-              rules={[
-                { required: true, message: "Please input effective date!" },
-              ]}
-              style={{
-                marginBottom: "2rem",
-              }}>
-              <DatePicker
-                format={"DD-MM-YYYY"}
-                disabled={isLoading}
-                style={{ width: "100%" }}
-              />
-            </Form.Item>
-
-            <Form.Item<DecreeFormProps>
-              label="Tgl Expired Surat Keputusan"
-              name="expired_date"
-              style={{
-                marginBottom: "2rem",
-              }}>
+            <Form.Item<CertificateFormProps>
+              label="Tahun pelatihan/sertifikat"
+              name="date"
+              rules={[{ required: true, message: "Wajib diisi" }]}
+              style={{ marginBottom: "1rem" }}>
               <DatePicker
                 format={"DD-MM-YYYY"}
                 disabled={isLoading}
@@ -337,8 +282,12 @@ const DecreeFormPage: React.FC = () => {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" size="large">
-                Submit
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                loading={isLoading}>
+                Simpan
               </Button>
             </Form.Item>
           </Form>
@@ -348,4 +297,4 @@ const DecreeFormPage: React.FC = () => {
   );
 };
 
-export default DecreeFormPage;
+export default CertificateFormPage;

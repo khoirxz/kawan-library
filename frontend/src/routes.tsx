@@ -7,6 +7,8 @@ import UserListPage from "./pages/admin/users/list.page";
 import UserFormPage from "./pages/admin/users/form.page";
 import DecreeListPage from "./pages/admin/decrees/list.page";
 import DecreeFormPage from "./pages/admin/decrees/form.page";
+import CertificateListPage from "./pages/admin/certificates/list.page";
+import CertificateFormPage from "./pages/admin/certificates/form.page";
 
 export const routes: MenuProps = [
   {
@@ -143,6 +145,48 @@ export const routes: MenuProps = [
     name: "Form edit Surat Keputusan By Id",
     show: false,
     id: "decree",
+    icon: <UserOutlined />,
+    parent: "2",
+  },
+  {
+    key: "11",
+    path: "/admin/portfolio/:id",
+    element: (
+      <ProtectedRoute>
+        <CertificateListPage />
+      </ProtectedRoute>
+    ),
+    name: "List Sertifikat",
+    show: false,
+    id: "certificate",
+    icon: <UserOutlined />,
+    parent: "2",
+  },
+  {
+    key: "12",
+    path: "/admin/portofolio/form/add/:id",
+    element: (
+      <ProtectedRoute>
+        <CertificateFormPage />
+      </ProtectedRoute>
+    ),
+    name: "Form add Sertifikat By Id",
+    show: false,
+    id: "certificate",
+    icon: <UserOutlined />,
+    parent: "2",
+  },
+  {
+    key: "13",
+    path: "/admin/portofolio/form/edit/:id/:certificateId",
+    element: (
+      <ProtectedRoute>
+        <CertificateFormPage />
+      </ProtectedRoute>
+    ),
+    name: "Form edit Sertifikat By Id",
+    show: false,
+    id: "certificate",
     icon: <UserOutlined />,
     parent: "2",
   },

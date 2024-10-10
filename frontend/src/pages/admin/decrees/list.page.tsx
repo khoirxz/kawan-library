@@ -7,6 +7,7 @@ import { DEV_API } from "../../../api";
 
 import AdminLayout from "../../../layouts/admin.layout";
 import { ListDecreeProps } from "../../../utils/types/decrees";
+import { UserProps } from "../../../utils/types/users";
 
 const columns: TableProps<ListDecreeProps>["columns"] = [
   {
@@ -46,15 +47,9 @@ const columns: TableProps<ListDecreeProps>["columns"] = [
   },
 ];
 
-type UserProps = {
-  id: number;
-  name: string;
-  username: string;
-};
-
 const DecreeListPage = () => {
   const [user, setUser] = useState<UserProps>();
-  const [fileList, setFileList] = useState<ListDecreeProps[]>([]);
+  const [decreeList, setDecreeList] = useState<ListDecreeProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { id } = useParams();
@@ -98,7 +93,7 @@ const DecreeListPage = () => {
 
         if (response.status === 200) {
           const data = response.data.data.map((item: ListDecreeProps) => {
-            // setFileList((prev) => [...prev, item]);
+            // setDecreeList((prev) => [...prev, item]);
             return {
               key: item.id,
               id: item.id,
@@ -114,7 +109,7 @@ const DecreeListPage = () => {
               updatedAt: item.updatedAt,
             };
           });
-          setFileList(data);
+          setDecreeList(data);
           setIsLoading(false);
         }
       } catch (error) {
@@ -149,7 +144,7 @@ const DecreeListPage = () => {
         {isLoading ? (
           <p>Loading...</p>
         ) : (
-          <Table<ListDecreeProps> columns={columns} dataSource={fileList} />
+          <Table<ListDecreeProps> columns={columns} dataSource={decreeList} />
         )}
       </div>
     </AdminLayout>
