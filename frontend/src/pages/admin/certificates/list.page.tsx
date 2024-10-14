@@ -4,7 +4,7 @@ import type { TableProps } from "antd";
 import { Link, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import axios from "axios";
-import { DEV_API } from "../../../api";
+import { baseAPI } from "../../../api";
 
 import AdminLayout from "../../../layouts/admin.layout";
 import { UserProps } from "../../../utils/types/users";
@@ -49,7 +49,7 @@ const CertificateListPage: React.FC = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(`${DEV_API}/users/${id}`, {
+        const response = await axios.get(`${baseAPI.dev}/users/${id}`, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
@@ -77,7 +77,7 @@ const CertificateListPage: React.FC = () => {
       setIsLoading(true);
       try {
         const response = await axios.get(
-          `${DEV_API}/certifications/user/${id}`,
+          `${baseAPI.dev}/certifications/user/${id}`,
           {
             headers: {
               Authorization: `${localStorage.getItem("token")}`,

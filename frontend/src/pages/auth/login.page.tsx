@@ -9,7 +9,7 @@ import {
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../app/store";
-import { LoginUser, reset } from "../../features/AuthSlices";
+import { LoginUser, VerifyToken } from "../../features/AuthSlices";
 import { useEffect } from "react";
 
 const LoginPage: React.FC = () => {
@@ -17,7 +17,7 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const {
-    main: { isLoading, message, data },
+    main: { isLoading, message, data, isSuccess },
   } = useAppSelector((state) => state.authState);
   type FieldType = {
     username?: string;
@@ -41,19 +41,33 @@ const LoginPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (data.code === 200) {
-      localStorage.setItem("token", data.token);
+    if (data.logout === false) {
+      if (localStorage.getItem("token")) {
+        dispatch(VerifyToken({}));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      dispatch(reset());
-      navigate("/admin/dashboard", { replace: true });
+  useEffect(() => {
+    if (isSuccess) {
+      if (data.logout === true) {
+        localStorage.clear();
+        navigate("/", { replace: true });
+      } else {
+        if (data.code === 200) {
+          localStorage.setItem("token", data.token);
+          navigate("/admin/dashboard", { replace: true });
+        }
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, dispatch]);
 
   useEffect(() => {
-    if (data.code !== 200 && message) {
+    if (message) {
       messageApi.open({
-        type: "error",
+        type: isSuccess ? "success" : "error",
         content: message,
       });
     }

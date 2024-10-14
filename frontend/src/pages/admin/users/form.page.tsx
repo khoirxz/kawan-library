@@ -15,7 +15,7 @@ import type { FormProps } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { DEV_API } from "../../../api";
+import { baseAPI } from "../../../api";
 
 import AdminLayout from "../../../layouts/admin.layout";
 
@@ -43,7 +43,7 @@ const UserFormPage: React.FC = () => {
     const getData = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get(`${DEV_API}/users/${id}`, {
+        const response = await axios.get(`${baseAPI.dev}/users/${id}`, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
@@ -87,14 +87,14 @@ const UserFormPage: React.FC = () => {
       let response: any;
 
       if (id) {
-        response = await axios.put(`${DEV_API}/users/${id}`, values, {
+        response = await axios.put(`${baseAPI.dev}/users/${id}`, values, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
         });
         // console.log(response);
       } else {
-        response = await axios.post(`${DEV_API}/users`, values, {
+        response = await axios.post(`${baseAPI.dev}/users`, values, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
@@ -170,7 +170,7 @@ const UserFormPage: React.FC = () => {
               <Form.Item valuePropName="fileList">
                 <Upload
                   name="avatar"
-                  action={`${DEV_API}/users/avatar/${id}}`}
+                  action={`${baseAPI.dev}/users/avatar/${id}}`}
                   headers={{
                     Authorization: `${localStorage.getItem("token")}`,
                   }}

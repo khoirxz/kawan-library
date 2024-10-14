@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
-import { DEV_API } from "../api";
+import { baseAPI } from "../api";
 
 interface initialStateProps {
   main: {
@@ -9,6 +9,7 @@ interface initialStateProps {
     isSuccess: boolean;
     message: string | null;
     data: {
+      logout?: boolean;
       code: number;
       status: string;
       token: string;
@@ -30,6 +31,7 @@ const initialState: initialStateProps = {
     isSuccess: false,
     message: null,
     data: {
+      logout: false,
       code: 0,
       status: "",
       token: "",
@@ -59,7 +61,7 @@ export const LoginUser = createAsyncThunk<
   }
 >("auth/login", async (data, thunkAPI) => {
   try {
-    const response = await axios.post(`${DEV_API}/auth/login`, data, {
+    const response = await axios.post(`${baseAPI.dev}/auth/login`, data, {
       timeout: 6000,
     });
     return response.data;
@@ -87,8 +89,39 @@ export const VerifyToken = createAsyncThunk<
   }
 >("auth/verify", async (data, thunkAPI) => {
   try {
-    const response = await axios.get(`${DEV_API}/auth/verify/`, {
+    const response = await axios.get(`${baseAPI.dev}/auth/verify/`, {
       timeout: 6000,
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.status === "ERR_CONNECTION_REFUSED") {
+      return thunkAPI.rejectWithValue({
+        message: error.message,
+        status: "ERR_CONNECTION_REFUSED",
+        code: 404,
+      });
+    }
+    return thunkAPI.rejectWithValue(error.response.data);
+  }
+});
+
+export const LogoutUser = createAsyncThunk<
+  any,
+  any,
+  {
+    rejectValue: {
+      status: string;
+      code: number;
+      message: string;
+    };
+  }
+>("auth/logout", async (token: string, thunkAPI) => {
+  try {
+    const response = await axios.delete(`${baseAPI.dev}/auth/logout/`, {
+      timeout: 6000,
+      headers: {
+        Authorization: token,
+      },
     });
     return response.data;
   } catch (error: any) {
@@ -141,6 +174,29 @@ export const AuthSlice = createSlice({
         state.main.isError = true;
         state.main.message = action.payload.message;
         state.main.data = action.payload;
+      });
+
+    builder
+      .addCase(LogoutUser.pending, (state) => {
+        state.main.isLoading = true;
+      })
+      .addCase(LogoutUser.fulfilled, (state, action: PayloadAction<any>) => {
+        state.main.isLoading = false;
+        state.main.isSuccess = true;
+        state.main.message = "Logout Berhasil";
+        state.main.data.logout = true;
+        state.main.data.data = {
+          name: "",
+          role: "",
+          token: "",
+          userId: null,
+          username: "",
+        };
+      })
+      .addCase(LogoutUser.rejected, (state, action: PayloadAction<any>) => {
+        state.main.isLoading = false;
+        state.main.isError = true;
+        state.main.message = action.payload.message;
       });
   },
 });

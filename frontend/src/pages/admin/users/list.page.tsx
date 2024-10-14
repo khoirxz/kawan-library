@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 
 import { useAppSelector } from "../../../app/store";
-import { DEV_API } from "../../../api";
+import { baseAPI } from "../../../api";
 import AdminLayout from "../../../layouts/admin.layout";
 import { ListUsersProps } from "../../../utils/types/users";
 
@@ -52,7 +52,7 @@ const UserListPage: React.FC = () => {
     const getUsers = async (): Promise<ListUsersProps[]> => {
       try {
         setIsLoading(true);
-        const response = await axios.get(`${DEV_API}/users`, {
+        const response = await axios.get(`${baseAPI.dev}/users`, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
@@ -176,7 +176,7 @@ const DeleteButton = ({
 }) => {
   const deleteAction = async (id: number) => {
     try {
-      await axios.delete(`${DEV_API}/users/${id}`, {
+      await axios.delete(`${baseAPI.dev}/users/${id}`, {
         headers: {
           Authorization: `${localStorage.getItem("token")}`,
         },

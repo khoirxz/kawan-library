@@ -2,7 +2,7 @@ import type { FormProps } from "antd";
 import { Button, Flex, Form, Input, Typography } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { DEV_API } from "../../api";
+import { baseAPI } from "../../api";
 
 type FieldType = {
   name?: string;
@@ -16,7 +16,7 @@ const SignupPage: React.FC = () => {
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     console.log("Success:", values);
     try {
-      const response = await axios.post(`${DEV_API}/auth/signup`, values);
+      const response = await axios.post(`${baseAPI.dev}/auth/signup`, values);
 
       if (response.status === 201) {
         navigate("/?signup=true");

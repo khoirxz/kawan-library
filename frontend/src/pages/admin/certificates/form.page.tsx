@@ -23,7 +23,7 @@ import type { FormProps, UploadFile } from "antd";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
-import { DEV_API } from "../../../api";
+import { baseAPI } from "../../../api";
 import { UserFormProps } from "../../../utils/types/users";
 
 import AdminLayout from "../../../layouts/admin.layout";
@@ -51,7 +51,7 @@ const CertificateFormPage: React.FC = () => {
     const getData = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(`${DEV_API}/users/${id}`, {
+        const response = await axios.get(`${baseAPI.dev}/users/${id}`, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
@@ -77,7 +77,7 @@ const CertificateFormPage: React.FC = () => {
         setIsLoading(true);
 
         const response = await axios.get(
-          `${DEV_API}/certifications/${certificateId}`,
+          `${baseAPI.dev}/certifications/${certificateId}`,
           {
             headers: {
               Authorization: `${localStorage.getItem("token")}`,
@@ -134,7 +134,7 @@ const CertificateFormPage: React.FC = () => {
 
       if (certificateId) {
         response = await axios.put(
-          `${DEV_API}/certifications/${certificateId}`,
+          `${baseAPI.dev}/certifications/${certificateId}`,
           formData,
           {
             headers: {
@@ -143,7 +143,7 @@ const CertificateFormPage: React.FC = () => {
           }
         );
       } else {
-        response = await axios.post(`${DEV_API}/certifications`, formData, {
+        response = await axios.post(`${baseAPI.dev}/certifications`, formData, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },

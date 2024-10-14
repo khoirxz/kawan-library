@@ -1,5 +1,18 @@
-import { Layout, Button, theme, Flex, Avatar } from "antd";
+import {
+  Layout,
+  Button,
+  theme,
+  Flex,
+  Avatar,
+  Popover,
+  Menu,
+  Skeleton,
+} from "antd";
+import type { MenuProps } from "antd";
 import { MenuUnfoldOutlined, UserOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import { useAppSelector, useAppDispatch } from "../../app/store";
+import { LogoutUser } from "../../features/AuthSlices";
 
 const { Header } = Layout;
 
@@ -8,6 +21,8 @@ type HeaderComponentProps = {
   setCollapsed: (collapsed: boolean) => void;
 };
 
+type MenuItem = Required<MenuProps>["items"][number];
+
 const HeaderComponent: React.FC<HeaderComponentProps> = ({
   collapsed,
   setCollapsed,
@@ -15,6 +30,39 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({
   const {
     token: { colorBgContainer },
   } = theme.useToken();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const {
+    main: { isLoading, data },
+  } = useAppSelector((state) => state.authState);
+
+  const items: MenuItem[] = [
+    {
+      key: "1",
+      label: "Profile",
+    },
+    {
+      key: "2",
+      label: (
+        <>
+          <span
+            onClick={() => {
+              dispatch(LogoutUser(localStorage.getItem("token")));
+              localStorage.clear();
+              navigate("/", { replace: true });
+              try {
+              } catch (error) {
+                console.log(error);
+              }
+            }}
+            style={{ color: "red" }}>
+            Logout
+          </span>
+        </>
+      ),
+    },
+  ];
 
   return (
     <Header style={{ padding: "0 28px", background: colorBgContainer }}>
@@ -28,7 +76,20 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({
           onClick={() => setCollapsed(!collapsed)}
           icon={<MenuUnfoldOutlined />}
         />
-        <Avatar icon={<UserOutlined />} />
+        {isLoading ? (
+          <Skeleton />
+        ) : (
+          <Popover
+            placement="bottomRight"
+            title={
+              <p style={{ padding: "0 16px" }}>
+                {data?.data?.name.substring(0, 6)}
+              </p>
+            }
+            content={<Menu items={items} />}>
+            <Avatar icon={<UserOutlined />} />
+          </Popover>
+        )}
       </Flex>
     </Header>
   );

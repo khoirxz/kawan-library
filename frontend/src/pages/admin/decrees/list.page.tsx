@@ -3,7 +3,7 @@ import { Space, Table, Button, Flex, Typography } from "antd";
 import type { TableProps } from "antd";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
-import { DEV_API } from "../../../api";
+import { baseAPI } from "../../../api";
 
 import AdminLayout from "../../../layouts/admin.layout";
 import { ListDecreeProps } from "../../../utils/types/decrees";
@@ -58,7 +58,7 @@ const DecreeListPage = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(`${DEV_API}/users/${id}`, {
+        const response = await axios.get(`${baseAPI.dev}/users/${id}`, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
@@ -85,7 +85,7 @@ const DecreeListPage = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(`${DEV_API}/decrees/user/${id}`, {
+        const response = await axios.get(`${baseAPI.dev}/decrees/user/${id}`, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },

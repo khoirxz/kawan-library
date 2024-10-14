@@ -24,7 +24,7 @@ import type { FormProps, UploadFile } from "antd";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
-import { DEV_API } from "../../../api";
+import { baseAPI } from "../../../api";
 import { UserFormProps } from "../../../utils/types/users";
 
 import AdminLayout from "../../../layouts/admin.layout";
@@ -56,7 +56,7 @@ const DecreeFormPage: React.FC = () => {
       try {
         setIsLoading(true);
 
-        const response = await axios.get(`${DEV_API}/users/${id}`, {
+        const response = await axios.get(`${baseAPI.dev}/users/${id}`, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
@@ -80,7 +80,7 @@ const DecreeFormPage: React.FC = () => {
       try {
         setIsLoading(true);
 
-        const response = await axios.get(`${DEV_API}/decrees/${decreeId}`, {
+        const response = await axios.get(`${baseAPI.dev}/decrees/${decreeId}`, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
@@ -147,15 +147,19 @@ const DecreeFormPage: React.FC = () => {
 
       let response: any;
       if (decreeId) {
-        response = await axios.put(`${DEV_API}/decrees/${decreeId}`, formData, {
-          headers: {
-            Authorization: `${localStorage.getItem("token")}`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        response = await axios.put(
+          `${baseAPI.dev}/decrees/${decreeId}`,
+          formData,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
       } else {
         // insert to backend
-        response = await axios.post(`${DEV_API}/decrees`, formData, {
+        response = await axios.post(`${baseAPI.dev}/decrees`, formData, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
             "Content-Type": "multipart/form-data",

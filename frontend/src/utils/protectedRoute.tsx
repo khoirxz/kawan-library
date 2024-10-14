@@ -12,7 +12,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const {
-    main: { isLoading, isError },
+    main: {
+      isLoading,
+      isError,
+      data: { logout },
+    },
   } = useAppSelector((state) => state.authState);
 
   useEffect(() => {
@@ -25,6 +29,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       navigate("/");
     }
   }, [isError, dispatch, navigate]);
+
+  useEffect(() => {
+    if (logout) {
+      navigate("/");
+    }
+  }, [logout, navigate]);
 
   return (
     <>
