@@ -1,5 +1,6 @@
 var Joi = require("joi");
 var fs = require("fs");
+var Op = require("sequelize").Op;
 var CertificationsModel = require("../model/CertificationsModel");
 
 var getCertificationsByIdUser = async function (req, res) {
@@ -208,10 +209,44 @@ var deleteCertificateById = async function (req, res) {
   }
 };
 
+/**
+ * Search certification by name and description
+ * @param {Object} req - Request object
+ * @param {Object} res - Response object
+ * @param {String} req.query.search - Search query
+ * @returns {Object} - Response object, containing status code and data
+ */
+var searchCertificate = async function (req, res) {
+  try {
+    var data = await CertificationsModel.findAll({
+      where: {
+        [Op.or]: [
+          { name: { [Op.like]: `%${req.query.search}%` } },
+          { description: { [Op.like]: `%${req.query.search}%` } },
+        ],
+        user_id: req.params.id,
+      },
+    });
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      data: data,
+    });
+  } catch (error) {
+    res.status(500).json({
+      code: 500,
+      status: "failed",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getCertificationsByIdUser,
   getCertificateById,
   createCertificate,
   updateCertificateById,
   deleteCertificateById,
+  searchCertificate,
 };

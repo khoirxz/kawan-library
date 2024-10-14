@@ -46,13 +46,18 @@ var signup = async function (req, res) {
     password = await argon2.hash(password);
 
     // create user
-    data = await UsersModel.create({
-      name: name,
-      username: username,
-      password: password,
-      role: "admin",
-      verified: false,
-    });
+    data = await UsersModel.create(
+      {
+        name: name,
+        username: username,
+        password: password,
+        role: "admin",
+        verified: false,
+      },
+      {
+        fields: ["name", "username", "role"],
+      }
+    );
     res.status(201).json({
       code: 201,
       status: "success",

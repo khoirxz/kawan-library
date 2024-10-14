@@ -1,5 +1,6 @@
 var Joi = require("joi");
 var fs = require("fs");
+var Op = require("sequelize").Op;
 var DecreesModel = require("../model/DecreesModel");
 
 // same as getAllDecrees
@@ -240,10 +241,38 @@ var deleteDecreeById = async function (req, res) {
   }
 };
 
+// search decrees by name and userID
+var searchDecrees = async function (req, res) {
+  try {
+    var data = await DecreesModel.findAll({
+      where: {
+        [Op.or]: [
+          { title: { [Op.like]: `%${req.query.search}%` } },
+          { description: { [Op.like]: `%${req.query.search}%` } },
+        ],
+        user_id: req.params.id,
+      },
+    });
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      data: data,
+    });
+  } catch (error) {
+    res.status(500).json({
+      code: 500,
+      status: "failed",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getAllDecreesByIdUser,
   getDecreeById,
   createDecree,
   updateDecreeById,
   deleteDecreeById,
+  searchDecrees,
 };

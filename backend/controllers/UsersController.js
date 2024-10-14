@@ -5,7 +5,9 @@ var UsersModel = require("../model/UsersModel");
 
 var getUsers = async function (req, res) {
   try {
-    var data = await UsersModel.findAll();
+    var data = await UsersModel.findAll({
+      attributes: ["id", "name", "role", "username", "avatarImg", "phone"],
+    });
     res.status(200).json({
       code: 200,
       status: "success",
