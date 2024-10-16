@@ -40,16 +40,19 @@ app.use(express.static("public"));
 
 // routes
 app.get("/api.library", function (req, res) {
-  // check if databse connected
-  var status;
-
-  if (db.authenticate()) {
-    status = "connected";
-  } else {
-    status = "failed";
-  }
-
-  res.status(200).json({ version: "1.0.0", databse: "mysql", status: status });
+  db.authenticate()
+    .then(function () {
+      res
+        .status(200)
+        .json({ version: "1.0.0", database: "mysql", status: "connected" });
+    })
+    .catch(function () {
+      res.status(500).json({
+        version: "1.0.0",
+        database: "mysql",
+        status: "failed",
+      });
+    });
 });
 
 app.use("/api.library/auth/", AuthRoute);

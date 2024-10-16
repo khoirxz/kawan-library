@@ -10,6 +10,7 @@ var {
   updateCertificateById,
   deleteCertificateById,
   searchCertificate,
+  getAllCertificates,
 } = require("../controllers/CertificationsController.js");
 var {
   authMiddleware,
@@ -35,6 +36,8 @@ var upload = multer({
 });
 
 router.get("/search/:id", authMiddleware, searchCertificate);
+router.get("/", authMiddleware, getAllCertificates);
+
 router.get("/user/:id", authMiddleware, getCertificationsByIdUser);
 router.get("/:id", authMiddleware, getCertificateById);
 router.post(

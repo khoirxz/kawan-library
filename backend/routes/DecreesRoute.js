@@ -10,6 +10,7 @@ var {
   updateDecreeById,
   deleteDecreeById,
   searchDecrees,
+  getAllDecrees,
 } = require("../controllers/DecreesController.js");
 var {
   authMiddleware,
@@ -32,6 +33,7 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage, limits: { fileSize: 2000000 } });
 
 router.get("/search/:id", authMiddleware, searchDecrees);
+router.get("/", authMiddleware, getAllDecrees);
 
 router.get("/user/:id", authMiddleware, getAllDecreesByIdUser);
 router.get("/:id", authMiddleware, getDecreeById);

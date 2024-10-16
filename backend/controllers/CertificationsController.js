@@ -242,6 +242,26 @@ var searchCertificate = async function (req, res) {
   }
 };
 
+var getAllCertificates = async function (req, res) {
+  try {
+    var data = await CertificationsModel.findAll({
+      where: { user_id: req.decoded.userId },
+    });
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      data: data,
+    });
+  } catch (error) {
+    res.status(500).json({
+      code: 500,
+      status: "failed",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getCertificationsByIdUser,
   getCertificateById,
@@ -249,4 +269,5 @@ module.exports = {
   updateCertificateById,
   deleteCertificateById,
   searchCertificate,
+  getAllCertificates,
 };

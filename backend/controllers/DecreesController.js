@@ -268,6 +268,28 @@ var searchDecrees = async function (req, res) {
   }
 };
 
+// fungsi ini digunakan untuk menampilkan semua decrees
+// dari id user yang didapatkan dari req.decoded.id (middleware/auth.js)
+var getAllDecrees = async function (req, res) {
+  try {
+    var data = await DecreesModel.findAll({
+      where: { user_id: req.decoded.userId },
+    });
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      data: data,
+    });
+  } catch (error) {
+    res.status(500).json({
+      code: 500,
+      status: "failed",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getAllDecreesByIdUser,
   getDecreeById,
@@ -275,4 +297,5 @@ module.exports = {
   updateDecreeById,
   deleteDecreeById,
   searchDecrees,
+  getAllDecrees,
 };
