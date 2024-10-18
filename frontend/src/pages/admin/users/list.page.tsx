@@ -44,7 +44,9 @@ const UserListPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const {
     main: {
-      data: { data: UserData },
+      verify: {
+        data: { userId },
+      },
     },
   } = useAppSelector((state) => state.authState);
 
@@ -131,18 +133,18 @@ const UserListPage: React.FC = () => {
                       <Col xs={24} sm={12} md={8}>
                         <Card.Grid style={{ width: "100%", height: "100%" }}>
                           <Link to={`/admin/decree/${record.id}`}>
-                            Surat Keputusan
+                            <Button type="text">Surat Keputusan</Button>
                           </Link>
                         </Card.Grid>
                       </Col>
                       <Col xs={24} sm={12} md={8}>
                         <Card.Grid style={{ width: "100%", height: "100%" }}>
                           <Link to={`/admin/portfolio/${record.id}`}>
-                            Portofolio
+                            <Button type="text">Portofolio</Button>
                           </Link>
                         </Card.Grid>
                       </Col>
-                      {UserData?.userId !== record.id ? (
+                      {userId !== record.id ? (
                         <Col xs={24} sm={12} md={8}>
                           <Card.Grid style={{ width: "100%", height: "100%" }}>
                             <DeleteButton

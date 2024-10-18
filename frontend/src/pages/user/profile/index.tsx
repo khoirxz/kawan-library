@@ -3,7 +3,7 @@ import { Layout } from "antd";
 
 const { Header, Content, Footer } = Layout;
 
-const UserPage: React.FC = () => {
+const ProfilePage: React.FC = () => {
   return (
     <Layout>
       <Header>Header</Header>
@@ -13,4 +13,4 @@ const UserPage: React.FC = () => {
   );
 };
 
-export default UserPage;
+export default ProfilePage;

@@ -1,5 +1,5 @@
 import { MenuProps } from "./utils/menu";
-import ProtectedRoute from "./utils/protectedRoute";
+import ProtectedRoute, { AdminOnly } from "./utils/protectedRoute";
 import { UserOutlined, DashboardOutlined } from "@ant-design/icons";
 
 import DashboardPage from "./pages/admin/dashboard.page";
@@ -10,6 +10,12 @@ import DecreeFormPage from "./pages/admin/decrees/form.page";
 import CertificateListPage from "./pages/admin/certificates/list.page";
 import CertificateFormPage from "./pages/admin/certificates/form.page";
 
+import HomePage from "./pages/user/home.page";
+import ProfilePage from "./pages/user/profile";
+import UserDecreeListPage from "./pages/user/decrees/list.page";
+import UserCertificationListPage from "./pages/user/certificates/list.page";
+import PortfolioPage from "./pages/user/portofolio";
+
 export const routes: MenuProps = [
   {
     key: "1",
@@ -17,7 +23,9 @@ export const routes: MenuProps = [
     show: true,
     element: (
       <ProtectedRoute>
-        <DashboardPage />
+        <AdminOnly>
+          <DashboardPage />
+        </AdminOnly>
       </ProtectedRoute>
     ),
     name: "Dashboard",
@@ -30,7 +38,9 @@ export const routes: MenuProps = [
     show: true,
     element: (
       <ProtectedRoute>
-        <UserListPage />{" "}
+        <AdminOnly>
+          <UserListPage />
+        </AdminOnly>
       </ProtectedRoute>
     ),
     id: "users",
@@ -189,5 +199,72 @@ export const routes: MenuProps = [
     id: "certificate",
     icon: <UserOutlined />,
     parent: "2",
+  },
+  //! USER ROUTES
+  //! START HERE
+  {
+    key: "14",
+    path: "/home",
+    element: (
+      <ProtectedRoute>
+        <HomePage />
+      </ProtectedRoute>
+    ),
+    name: "Home page",
+    show: false,
+    id: "home",
+    icon: <UserOutlined />,
+  },
+  {
+    key: "15",
+    path: "/profile/:id",
+    element: (
+      <ProtectedRoute>
+        <ProfilePage />
+      </ProtectedRoute>
+    ),
+    name: "Profile page",
+    show: false,
+    id: "profile",
+    icon: <UserOutlined />,
+  },
+  {
+    key: "16",
+    path: "/decree",
+    element: (
+      <ProtectedRoute>
+        <UserDecreeListPage />
+      </ProtectedRoute>
+    ),
+    name: "Decree User page",
+    show: false,
+    id: "decree-user",
+    icon: <UserOutlined />,
+  },
+  {
+    key: "17",
+    path: "/certificate",
+    element: (
+      <ProtectedRoute>
+        <UserCertificationListPage />
+      </ProtectedRoute>
+    ),
+    name: "Certificate User page",
+    show: false,
+    id: "certificate-user",
+    icon: <UserOutlined />,
+  },
+  {
+    key: "18",
+    path: "/portfolio",
+    element: (
+      <ProtectedRoute>
+        <PortfolioPage />
+      </ProtectedRoute>
+    ),
+    name: "Portfolio User page",
+    show: false,
+    id: "portfolio",
+    icon: <UserOutlined />,
   },
 ];

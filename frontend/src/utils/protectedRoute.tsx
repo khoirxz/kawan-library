@@ -1,8 +1,8 @@
-import { useEffect, ReactNode } from "react";
+import { useEffect, ReactNode, useState } from "react";
 import { Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../app/store";
-import { VerifyToken, reset } from "../features/AuthSlices";
+import { resetVerify, VerifyToken } from "../features/AuthSlices";
 
 type ProtectedRouteProps = {
   children: ReactNode;
@@ -12,29 +12,26 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const {
-    main: {
-      isLoading,
-      isError,
-      data: { logout },
-    },
+    main: { isLoading, isError, verify, logout },
   } = useAppSelector((state) => state.authState);
+  const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
     dispatch(VerifyToken({}));
+    setIsAuth(true);
   }, [dispatch]);
 
   useEffect(() => {
-    if (isError) {
-      dispatch(reset());
-      navigate("/");
-    }
-  }, [isError, dispatch, navigate]);
+    if (logout.code === 200) {
+      localStorage.clear();
 
-  useEffect(() => {
-    if (logout) {
-      navigate("/");
+      navigate("/", { replace: true });
+    } else if (isAuth && verify.code !== 200) {
+      localStorage.clear();
+      dispatch(resetVerify());
+      navigate("/", { replace: true });
     }
-  }, [logout, navigate]);
+  }, [verify, navigate, dispatch, isLoading, isAuth, logout]);
 
   return (
     <>
@@ -71,6 +68,40 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       {children}
     </>
   );
+};
+
+export const AdminOnly: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const {
+    main: { verify },
+  } = useAppSelector((state) => state.authState);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (verify.data.role !== "") {
+      if (verify.data.role !== "admin") {
+        navigate("/home");
+      }
+    }
+  }, [navigate, verify.data.role]);
+
+  return <>{children}</>;
+};
+
+export const UserOnly: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const {
+    main: { verify },
+  } = useAppSelector((state) => state.authState);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (verify.data.role !== "user") {
+      navigate("/admin/dashboard");
+    }
+  }, [navigate, verify.data.role]);
+
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

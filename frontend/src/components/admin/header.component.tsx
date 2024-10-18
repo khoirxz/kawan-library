@@ -10,7 +10,6 @@ import {
 } from "antd";
 import type { MenuProps } from "antd";
 import { MenuUnfoldOutlined, UserOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../app/store";
 import { LogoutUser } from "../../features/AuthSlices";
 
@@ -31,10 +30,9 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({
     token: { colorBgContainer },
   } = theme.useToken();
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
 
   const {
-    main: { isLoading, data },
+    main: { isLoading, verify },
   } = useAppSelector((state) => state.authState);
 
   const items: MenuItem[] = [
@@ -49,12 +47,6 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({
           <span
             onClick={() => {
               dispatch(LogoutUser(localStorage.getItem("token")));
-              localStorage.clear();
-              navigate("/", { replace: true });
-              try {
-              } catch (error) {
-                console.log(error);
-              }
             }}
             style={{ color: "red" }}>
             Logout
@@ -83,7 +75,7 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({
             placement="bottomRight"
             title={
               <p style={{ padding: "0 16px" }}>
-                {data?.data?.name.substring(0, 6)}
+                {verify?.data?.name?.substring(0, 6)}
               </p>
             }
             content={<Menu items={items} />}>

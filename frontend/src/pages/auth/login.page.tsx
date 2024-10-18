@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { FormProps } from "antd";
 import {
   Button,
@@ -9,15 +10,14 @@ import {
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../app/store";
-import { LoginUser, VerifyToken } from "../../features/AuthSlices";
-import { useEffect } from "react";
+import { LoginUser, resetAll, resetLogin } from "../../features/AuthSlices";
 
 const LoginPage: React.FC = () => {
   const [messageApi, contextHolder] = antMessage.useMessage();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const {
-    main: { isLoading, message, data, isSuccess },
+    main: { isLoading, message, login, isSuccess },
   } = useAppSelector((state) => state.authState);
   type FieldType = {
     username?: string;
@@ -26,6 +26,7 @@ const LoginPage: React.FC = () => {
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     // console.log("Success:", values);
+    dispatch(resetAll());
     dispatch(
       LoginUser({
         username: values.username,
@@ -41,28 +42,14 @@ const LoginPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (data.logout === false) {
-      if (localStorage.getItem("token")) {
-        dispatch(VerifyToken({}));
+    if (login.code === 200) {
+      localStorage.setItem("token", login.token);
+      if (!isLoading) {
+        dispatch(resetLogin());
+        navigate("/admin/dashboard", { replace: true });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (isSuccess) {
-      if (data.logout === true) {
-        localStorage.clear();
-        navigate("/", { replace: true });
-      } else {
-        if (data.code === 200) {
-          localStorage.setItem("token", data.token);
-          navigate("/admin/dashboard", { replace: true });
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, dispatch]);
+  }, [login, navigate, isLoading, dispatch]);
 
   useEffect(() => {
     if (message) {
@@ -72,7 +59,7 @@ const LoginPage: React.FC = () => {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, []);
 
   return (
     <Flex justify="center" align="center" style={{ height: "100vh" }}>

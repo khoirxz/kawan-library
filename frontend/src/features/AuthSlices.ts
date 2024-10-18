@@ -8,18 +8,26 @@ interface initialStateProps {
     isError: boolean;
     isSuccess: boolean;
     message: string | null;
-    data: {
-      logout?: boolean;
+    verify: {
+      code: number;
+      status: string;
+      data: {
+        userId: number;
+        name: string;
+        username: string;
+        role: string;
+        token: string;
+      };
+    };
+    login: {
       code: number;
       status: string;
       token: string;
-      data?: {
-        name: string;
-        role: string;
-        token: string;
-        userId: number | null;
-        username: string;
-      };
+    };
+    logout: {
+      code: number;
+      status: string;
+      message: string;
     };
   };
 }
@@ -30,18 +38,29 @@ const initialState: initialStateProps = {
     isError: false,
     isSuccess: false,
     message: null,
-    data: {
-      logout: false,
+    //state for login
+    login: {
       code: 0,
       status: "",
       token: "",
+    },
+    //state for verify
+    verify: {
+      code: 0,
+      status: "",
       data: {
+        userId: 0,
         name: "",
+        username: "",
         role: "",
         token: "",
-        userId: null,
-        username: "",
       },
+    },
+    //state for logout
+    logout: {
+      code: 0,
+      status: "",
+      message: "",
     },
   },
 };
@@ -140,7 +159,16 @@ export const AuthSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    reset: (state) => initialState,
+    resetAll: (state) => initialState,
+    resetLogin: (state) => {
+      state.main.login = initialState.main.login;
+    },
+    resetVerify: (state) => {
+      state.main.verify = initialState.main.verify;
+    },
+    resetLogout: (state) => {
+      state.main.logout = initialState.main.logout;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -150,14 +178,14 @@ export const AuthSlice = createSlice({
       .addCase(LoginUser.fulfilled, (state, action: PayloadAction<any>) => {
         state.main.isLoading = false;
         state.main.isSuccess = true;
-        state.main.data = action.payload;
-        state.main.message = "Login Berhasil";
+        state.main.message = action.payload.message;
+        state.main.login = action.payload;
       })
       .addCase(LoginUser.rejected, (state, action: PayloadAction<any>) => {
         state.main.isLoading = false;
         state.main.isError = true;
         state.main.message = action.payload.message;
-        state.main.data = action.payload;
+        state.main.login = action.payload;
       });
 
     builder
@@ -167,13 +195,14 @@ export const AuthSlice = createSlice({
       .addCase(VerifyToken.fulfilled, (state, action: PayloadAction<any>) => {
         state.main.isLoading = false;
         state.main.isSuccess = true;
-        state.main.data = action.payload;
+        state.main.verify = action.payload;
+        state.main.message = null;
       })
       .addCase(VerifyToken.rejected, (state, action: PayloadAction<any>) => {
         state.main.isLoading = false;
         state.main.isError = true;
         state.main.message = action.payload.message;
-        state.main.data = action.payload;
+        state.main.verify = action.payload;
       });
 
     builder
@@ -183,23 +212,17 @@ export const AuthSlice = createSlice({
       .addCase(LogoutUser.fulfilled, (state, action: PayloadAction<any>) => {
         state.main.isLoading = false;
         state.main.isSuccess = true;
-        state.main.message = "Logout Berhasil";
-        state.main.data.logout = true;
-        state.main.data.data = {
-          name: "",
-          role: "",
-          token: "",
-          userId: null,
-          username: "",
-        };
+        state.main.logout = action.payload;
+        state.main.message = action.payload.message;
       })
       .addCase(LogoutUser.rejected, (state, action: PayloadAction<any>) => {
         state.main.isLoading = false;
         state.main.isError = true;
-        state.main.message = action.payload.message;
+        state.main.logout = action.payload;
       });
   },
 });
 
-export const { reset } = AuthSlice.actions;
+export const { resetAll, resetLogin, resetVerify, resetLogout } =
+  AuthSlice.actions;
 export default AuthSlice.reducer;
