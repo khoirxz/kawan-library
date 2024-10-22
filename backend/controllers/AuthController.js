@@ -24,7 +24,7 @@ var signup = async function (req, res) {
     if (error) {
       return res.status(400).json({
         code: 400,
-        status: "failed",
+        status: "error",
         message: error.message,
       });
     }
@@ -37,7 +37,7 @@ var signup = async function (req, res) {
     if (data.length !== 0) {
       return res.status(401).json({
         code: 401,
-        status: "failed",
+        status: "error",
         message: "Username already exist",
       });
     }
@@ -81,7 +81,7 @@ var login = async function (req, res) {
     if (error) {
       return res.status(400).json({
         code: 400,
-        status: "failed",
+        status: "error",
         message: error.message,
       });
     }
@@ -94,7 +94,7 @@ var login = async function (req, res) {
     if (data.length === 0) {
       return res.status(401).json({
         code: 401,
-        status: "failed",
+        status: "error",
         message: "Incorrect username or password",
       });
     }
@@ -104,7 +104,7 @@ var login = async function (req, res) {
     if (!match) {
       return res.status(401).json({
         code: 401,
-        status: "failed",
+        status: "error",
         message: "Incorrect password",
       });
     }
@@ -125,7 +125,7 @@ var login = async function (req, res) {
       { expiresIn: "1d" }
     );
 
-    const refreshToken = jwt.sign(
+    var refreshToken = jwt.sign(
       {
         userId: userId,
         name: name,
@@ -143,6 +143,7 @@ var login = async function (req, res) {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "None",
     });
 
     res.status(200).json({
@@ -162,7 +163,7 @@ var logout = async function (req, res) {
     if (!refreshToken) {
       return res.status(401).json({
         code: 401,
-        status: "failed",
+        status: "error",
         message: "Operation failed, invalid authorization",
       });
     }
@@ -174,7 +175,7 @@ var logout = async function (req, res) {
     if (data.length === 0) {
       return res.status(401).json({
         code: 401,
-        status: "failed",
+        status: "error",
         message: "Invalid refresh token",
       });
     }
@@ -202,7 +203,7 @@ var verifyUser = async function (req, res) {
     if (!refreshToken) {
       return res.status(401).json({
         code: 401,
-        status: "failed",
+        status: "error",
         message: "Operation failed, invalid authorization",
       });
     }
@@ -214,7 +215,7 @@ var verifyUser = async function (req, res) {
     if (data.length === 0) {
       return res.status(401).json({
         code: 401,
-        status: "failed",
+        status: "error",
         message: "Something went wrong, please login again",
       });
     }
