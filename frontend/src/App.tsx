@@ -5,6 +5,7 @@ import { ConfigProvider } from "antd";
 
 import LoginPage from "./pages/auth/login.page";
 import SignupPage from "./pages/auth/signup.page";
+import ProtectedRoute from "./utils/protectedRoute";
 
 export const createRouteConfig = (routes: MenuProps) => {
   const routeList: {
@@ -35,19 +36,22 @@ export const createRouteConfig = (routes: MenuProps) => {
   return routeList.filter((route) => route.path !== "");
 };
 
-const router = createBrowserRouter([
-  ...createRouteConfig(route),
-  {
-    path: "/",
-    element: <LoginPage />,
-    id: "login",
-  },
-  {
-    path: "/signup",
-    element: <SignupPage />,
-    id: "signup",
-  },
-]);
+const router = createBrowserRouter(
+  [
+    ...createRouteConfig(route),
+    {
+      path: "/",
+      element: <LoginPage />,
+      id: "login",
+    },
+    {
+      path: "/signup",
+      element: <SignupPage />,
+      id: "signup",
+    },
+  ]
+  // { basename: "/library" }
+);
 
 const App: React.FC = () => {
   return (
