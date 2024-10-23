@@ -12,6 +12,6 @@ var router = express.Router();
 
 router.get("/:id", authMiddleware, getUserDataById);
 router.post("/", authMiddleware, createUserData);
-router.put("/:id", authMiddleware, updateUserData);
+router.put("/", authMiddleware, updateUserData);
 
 module.exports = router;

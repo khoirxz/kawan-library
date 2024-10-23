@@ -69,7 +69,7 @@ var createUser = async function (req, res) {
       });
     }
 
-    var data = await UsersModel.create({
+    data = await UsersModel.create({
       name: name,
       username: username,
       phone: phone,
@@ -169,7 +169,7 @@ var deleteUser = async function (req, res) {
     }
 
     // delete user
-    var data = await UsersModel.destroy({
+    data = await UsersModel.destroy({
       where: { id: req.params.id },
     });
     res.status(204).json({
@@ -214,7 +214,7 @@ var uploadAvatar = async function (req, res) {
     }
 
     // update avatar
-    var data = await UsersModel.update(
+    data = await UsersModel.update(
       { avatarImg: req.file.filename },
       { where: { id: req.params.id } }
     );

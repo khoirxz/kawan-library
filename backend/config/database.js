@@ -1,13 +1,9 @@
 var { Sequelize } = require("sequelize");
+const { globals } = require("./config");
 
-var db = new Sequelize(
-  process.env.TABLE,
-  process.env.USER,
-  process.env.PASSWORD,
-  {
-    host: "localhost",
-    dialect: "mysql",
-  }
-);
+var db = new Sequelize(globals.TABLE, globals.USER, globals.PASSWORD, {
+  host: "localhost",
+  dialect: "mysql",
+});
 
 module.exports = db;

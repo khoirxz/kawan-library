@@ -2,6 +2,7 @@ var express = require("express");
 var cors = require("cors");
 var dotenv = require("dotenv").config();
 var cookieParser = require("cookie-parser");
+var { globals } = require("./config/config.js");
 
 if (dotenv.error) {
   console.log(dotenv.error);
@@ -68,7 +69,7 @@ app.use("/api.library/userdata/", UserDataRoute);
   db.sync();
 })();
 
-app.listen(process.env.PORT || 5000, function () {
+app.listen(globals.PORT, function () {
   console.log(
     "Example app listening on port http://localhost:5000/api.library"
   );

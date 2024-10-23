@@ -3,16 +3,42 @@ var UserDataModel = require("../model/UserDataModel");
 
 var getUserDataById = async function (req, res) {
   try {
-    var data = await UserDataModel.findAll({
-      where: { user_id: req.params.id },
-    });
+    var data;
+    if (req.decoded.role === "admin") {
+      data = await UserDataModel.findAll({
+        where: { user_id: req.params.id },
+      });
+      if (data.length === 0) {
+        return res.status(404).json({
+          code: 404,
+          status: "error",
+          message: "User data not found",
+        });
+      }
+    } else {
+      data = await UserDataModel.findAll({
+        where: { user_id: req.decoded.userId },
+      });
+      if (data.length === 0) {
+        return res.status(404).json({
+          code: 404,
+          status: "error",
+          message: "User data not found",
+        });
+      }
+    }
+
     res.status(200).json({
       code: 200,
       status: "success",
-      data: data,
+      data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      code: 500,
+      status: "error",
+      message: error.message,
+    });
   }
 };
 
@@ -28,7 +54,7 @@ var createUserData = async function (req, res) {
     if (data.length > 0) {
       return res.status(409).json({
         code: 409,
-        status: "failed",
+        status: "error",
         message: "Data already exist",
       });
     }
@@ -47,20 +73,45 @@ var createUserData = async function (req, res) {
     if (error) {
       return res.status(400).json({
         code: 400,
-        status: "failed",
+        status: "error",
         message: error.message,
       });
     }
 
-    var data = await UserDataModel.create({
-      user_id: user_id,
-      address: address,
-      city: city,
-      state: state,
-      country: country,
-      postal_code: postal_code,
-      email: email,
-    });
+    if (req.decoded.role === "admin") {
+      data = await UserDataModel.create({
+        user_id: user_id,
+        address: address,
+        city: city,
+        state: state,
+        country: country,
+        postal_code: postal_code,
+        email: email,
+      });
+    } else {
+      // cek jika data sudah ada
+      data = await UserDataModel.findAll({
+        where: { user_id: req.decoded.userId },
+      });
+
+      if (data.length > 0) {
+        return res.status(409).json({
+          code: 409,
+          status: "error",
+          message: "Data already exist",
+        });
+      }
+
+      data = await UserDataModel.create({
+        user_id: req.decoded.userId,
+        address: address,
+        city: city,
+        state: state,
+        country: country,
+        postal_code: postal_code,
+        email: email,
+      });
+    }
 
     res.status(200).json({
       code: 200,
@@ -91,13 +142,26 @@ var updateUserData = async function (req, res) {
     if (error) {
       return res.status(400).json({
         code: 400,
-        status: "failed",
+        status: "error",
         message: error.message,
       });
     }
 
-    if (res.decoded.role === "admin") {
-      var data = await UserDataModel.update(
+    // check if data exist
+    var oldData = await UserDataModel.findAll({
+      where: { user_id: user_id },
+    });
+    if (oldData.length == 0) {
+      return res.status(404).json({
+        code: 404,
+        status: "error",
+        message: "Data not found",
+      });
+    }
+
+    var data;
+    if (req.decoded.role === "admin") {
+      data = await UserDataModel.update(
         {
           address: address,
           city: city,
@@ -111,14 +175,14 @@ var updateUserData = async function (req, res) {
         }
       );
     } else {
-      if (res.decoded.userId != user_id) {
+      if (req.decoded.userId != user_id) {
         return res.status(403).json({
           code: 403,
-          status: "failed",
+          status: "error",
           message: "Forbidden",
         });
       } else {
-        var data = await UserDataModel.update(
+        data = await UserDataModel.update(
           {
             address: address,
             city: city,

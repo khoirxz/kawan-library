@@ -2,6 +2,7 @@ var UsersModel = require("../model/UsersModel");
 var Joi = require("joi");
 var argon2 = require("argon2");
 var jwt = require("jsonwebtoken");
+var { globals } = require("../config/config");
 
 var signup = async function (req, res) {
   try {
@@ -112,16 +113,16 @@ var login = async function (req, res) {
     // generate token
     var userId = data[0].dataValues.id;
     var name = data[0].dataValues.name;
-    var username = data[0].dataValues.username;
+    var newUsername = data[0].dataValues.username;
     var role = data[0].dataValues.role;
     var accessToken = jwt.sign(
       {
         userId: userId,
         name: name,
-        username: username,
+        username: newUsername,
         role: role,
       },
-      process.env.ACCESS_TOKEN_SECRET,
+      globals.ACCESS_TOKEN_SECRET,
       { expiresIn: "1d" }
     );
 
@@ -129,10 +130,10 @@ var login = async function (req, res) {
       {
         userId: userId,
         name: name,
-        username: username,
+        username: newUsername,
         role: role,
       },
-      process.env.REFRESH_TOKEN_SECRET,
+      globals.REFRESH_TOKEN_SECRET,
       { expiresIn: "1h" }
     );
 
@@ -143,7 +144,6 @@ var login = async function (req, res) {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
-      sameSite: "None",
     });
 
     res.status(200).json({
@@ -220,36 +220,32 @@ var verifyUser = async function (req, res) {
       });
     }
 
-    jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET,
-      function (err, decoded) {
-        if (err) return res.status(401).json({ code: 401, status: "failed" });
+    jwt.verify(refreshToken, globals.REFRESH_TOKEN_SECRET, function (err) {
+      if (err) return res.status(401).json({ code: 401, status: "failed" });
 
-        var accessToken = jwt.sign(
-          {
-            userId: data[0].dataValues.id,
-            name: data[0].dataValues.name,
-            username: data[0].dataValues.username,
-            role: data[0].dataValues.role,
-          },
-          process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: "15s" }
-        );
+      var accessToken = jwt.sign(
+        {
+          userId: data[0].dataValues.id,
+          name: data[0].dataValues.name,
+          username: data[0].dataValues.username,
+          role: data[0].dataValues.role,
+        },
+        globals.ACCESS_TOKEN_SECRET,
+        { expiresIn: "15s" }
+      );
 
-        res.status(200).json({
-          code: 200,
-          status: "success",
-          data: {
-            userId: data[0].dataValues.id,
-            name: data[0].dataValues.name,
-            username: data[0].dataValues.username,
-            role: data[0].dataValues.role,
-            token: accessToken,
-          },
-        });
-      }
-    );
+      res.status(200).json({
+        code: 200,
+        status: "success",
+        data: {
+          userId: data[0].dataValues.id,
+          name: data[0].dataValues.name,
+          username: data[0].dataValues.username,
+          role: data[0].dataValues.role,
+          token: accessToken,
+        },
+      });
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

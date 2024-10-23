@@ -1,5 +1,16 @@
 {
+  "env": {
+    "node": true,
+    "es6": false
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": 12
+  },
   "rules": {
-    "import/no-commonjs": "off"
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "no-unreachable": "warn",
+    "no-process-env": "off"
   }
 }
