@@ -45,6 +45,7 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({
       label: (
         <>
           <span
+            role="button"
             onClick={() => {
               dispatch(LogoutUser(localStorage.getItem("token")));
             }}
@@ -79,7 +80,13 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({
               </p>
             }
             content={<Menu items={items} />}>
-            <Avatar icon={<UserOutlined />} />
+            {verify.data.avatarImg === "" ? (
+              <Avatar icon={<UserOutlined />} />
+            ) : (
+              <Avatar
+                src={`http://localhost:5000/uploads/avatars/${verify.data.avatarImg}`}
+              />
+            )}
           </Popover>
         )}
       </Flex>

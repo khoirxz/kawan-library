@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Space, Table, Button, Flex } from "antd";
+import { Space, Table, Button, Flex, Breadcrumb } from "antd";
 import type { TableProps } from "antd";
 import { Link, useParams } from "react-router-dom";
 import dayjs from "dayjs";
@@ -116,6 +116,20 @@ const CertificateListPage: React.FC = () => {
   return (
     <AdminLayout>
       <div>
+        <Breadcrumb
+          items={[
+            {
+              title: <Link to="/admin/users">Daftar User</Link>,
+            },
+            {
+              title: (
+                <Link to={`/admin/portfolio/${id}`}>
+                  Sertifikat {user?.name}
+                </Link>
+              ),
+            },
+          ]}
+        />
         <Flex justify="space-between" align="center">
           <div>
             <h3>{user?.name}</h3>

@@ -51,6 +51,7 @@ const UserListPage: React.FC = () => {
   } = useAppSelector((state) => state.authState);
 
   useEffect(() => {
+    const source = axios.CancelToken.source();
     const getUsers = async (): Promise<ListUsersProps[]> => {
       try {
         setIsLoading(true);
@@ -58,6 +59,7 @@ const UserListPage: React.FC = () => {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
+          cancelToken: source.token,
         });
 
         if (response.status === 200) {
@@ -74,7 +76,11 @@ const UserListPage: React.FC = () => {
 
         setIsLoading(false);
       } catch (error) {
-        throw error;
+        if (axios.isCancel(error)) {
+          console.log("Request canceled:", error.message);
+        } else {
+          console.error("Error fetching data:", error);
+        }
       }
       return []; // Add this return statement
     };
@@ -83,7 +89,8 @@ const UserListPage: React.FC = () => {
 
     // clean up
     return () => {
-      setData([]);
+      source.cancel("Request canceled by the user");
+      setIsLoading(false);
     };
   }, []);
 
@@ -130,6 +137,13 @@ const UserListPage: React.FC = () => {
                 <>
                   <Card title="Menu" className="grid-menu">
                     <Row>
+                      <Col xs={24} sm={12} md={8}>
+                        <Card.Grid style={{ width: "100%", height: "100%" }}>
+                          <Link to={`/admin/decree/${record.id}`}>
+                            <Button type="text">Profil</Button>
+                          </Link>
+                        </Card.Grid>
+                      </Col>
                       <Col xs={24} sm={12} md={8}>
                         <Card.Grid style={{ width: "100%", height: "100%" }}>
                           <Link to={`/admin/decree/${record.id}`}>

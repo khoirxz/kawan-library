@@ -16,6 +16,7 @@ interface initialStateProps {
         name: string;
         username: string;
         role: string;
+        avatarImg: string;
         token: string;
       };
     };
@@ -53,6 +54,7 @@ const initialState: initialStateProps = {
         name: "",
         username: "",
         role: "",
+        avatarImg: "",
         token: "",
       },
     },

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Space, Table, Button, Flex, Typography } from "antd";
+import { Space, Table, Button, Flex, Typography, Breadcrumb } from "antd";
 import type { TableProps } from "antd";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
@@ -51,17 +51,19 @@ const DecreeListPage = () => {
   const [user, setUser] = useState<UserProps>();
   const [decreeList, setDecreeList] = useState<ListDecreeProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
+  const token = localStorage.getItem("token");
   const { id } = useParams();
 
   useEffect(() => {
+    const source = axios.CancelToken.source();
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const response = await axios.get(`${baseAPI.dev}/users/${id}`, {
           headers: {
-            Authorization: `${localStorage.getItem("token")}`,
+            Authorization: token,
           },
+          cancelToken: source.token,
         });
 
         if (response.status === 200) {
@@ -70,25 +72,34 @@ const DecreeListPage = () => {
 
         setIsLoading(false);
       } catch (error) {
-        console.log(error);
+        if (axios.isCancel(error)) {
+          console.log("Request canceled:", error.message);
+        } else {
+          console.error("Error fetching data:", error);
+        }
       }
     };
 
-    fetchData();
+    if (token !== null) {
+      fetchData();
+    }
 
     return () => {
+      source.cancel("Request canceled.");
       setIsLoading(false);
     };
-  }, [id]);
+  }, [id, token]);
 
   useEffect(() => {
+    const source = axios.CancelToken.source();
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const response = await axios.get(`${baseAPI.dev}/decrees/user/${id}`, {
           headers: {
-            Authorization: `${localStorage.getItem("token")}`,
+            Authorization: token,
           },
+          cancelToken: source.token,
         });
 
         if (response.status === 200) {
@@ -113,20 +124,37 @@ const DecreeListPage = () => {
           setIsLoading(false);
         }
       } catch (error) {
-        console.log(error);
+        if (axios.isCancel(error)) {
+          console.log("Request canceled:", error.message);
+        } else {
+          console.error("Error fetching data:", error);
+        }
       }
     };
 
-    fetchData();
+    if (token !== null) {
+      fetchData();
+    }
 
     return () => {
+      source.cancel("Request canceled.");
       setIsLoading(false);
     };
-  }, [id]);
+  }, [id, token]);
 
   return (
     <AdminLayout>
       <div>
+        <Breadcrumb
+          items={[
+            {
+              title: <Link to="/admin/users">Daftar User</Link>,
+            },
+            {
+              title: <Link to={`/admin/decree/${id}`}>SK {user?.name}</Link>,
+            },
+          ]}
+        />
         <Flex justify="space-between" align="center">
           <div>
             <h3>{user?.name}</h3>

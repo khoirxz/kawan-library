@@ -5,9 +5,8 @@ import { ConfigProvider } from "antd";
 
 import LoginPage from "./pages/auth/login.page";
 import SignupPage from "./pages/auth/signup.page";
-import ProtectedRoute from "./utils/protectedRoute";
 
-export const createRouteConfig = (routes: MenuProps) => {
+export const createRouteConfig = (routes?: MenuProps) => {
   const routeList: {
     path: string;
     element: React.ReactNode;

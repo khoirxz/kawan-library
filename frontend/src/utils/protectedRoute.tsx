@@ -24,33 +24,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }, [navigate]);
 
   useEffect(() => {
-    if (verify.code !== 0 && verify.code !== 200 && !token) {
-      localStorage.clear();
-      dispatch(resetVerify());
-      navigate("/", {
-        replace: true,
-        state: { verify: false, showMessage: true },
-      });
-    } else if (verify.code === 200) {
-      setLoadingPage(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verify]);
-
-  useEffect(() => {
-    if (logout.code === 200) {
-      localStorage.clear();
-      dispatch(resetVerify());
-      navigate("/", {
-        replace: true,
-        state: { logout: true },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logout, verify]);
-
-  useEffect(() => {
     if (msg) {
+      console.log("hit protected route");
       messageApi.open({
         type: isError ? "error" : "success",
         content: msg,
@@ -61,6 +36,38 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [msg, isError]);
 
+  useEffect(() => {
+    //! new PROBLEM
+    // jika logout berarti verifikasi akan memberikan respon selain 200,
+    // mengakibatkan kode dibawah ini akan dijalankan
+    if (verify.code !== 200 && verify.code !== 0) {
+      localStorage.clear();
+      dispatch(resetVerify());
+      navigate("/?unauthorized", {
+        replace: true,
+        state: { verify: false, showMessage: true },
+      });
+    } else if (verify.code === 200) {
+      setLoadingPage(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, verify]);
+
+  useEffect(() => {
+    if (logout.code === 200) {
+      setLoadingPage(true);
+      localStorage.clear();
+      dispatch(resetVerify());
+      setTimeout(() => {
+        navigate("/?logout", {
+          replace: true,
+          state: { logout: true },
+        });
+      }, 3000);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logout, verify]);
+
   return (
     <>
       {contextHolder}
@@ -69,24 +76,31 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           style={{
             width: "100%",
             height: "100vh",
-            background: "#9c9c9ca3",
+            background: "rgba(156, 156, 156, 0.3)",
             position: "absolute",
             zIndex: 999,
-          }}
-          className="loading-page">
-          <Spin />
+          }}>
+          <div style={{ position: "absolute", top: "50%", left: "50%" }}>
+            <Spin spinning />
+          </div>
         </div>
       ) : loadingPage ? (
         <div
           style={{
             width: "100%",
             height: "100vh",
-            background: "#9c9c9ca3",
+            background: "rgba(156, 156, 156, 0.3)",
             position: "absolute",
             zIndex: 999,
-          }}
-          className="loading-page">
-          <Spin />
+          }}>
+          <div style={{ position: "absolute", top: "50%", left: "50%" }}>
+            <Spin spinning={loadingPage} />
+          </div>
+          {logout.code === 200 ? (
+            <p style={{ textAlign: "center" }}>Logout Successfully</p>
+          ) : (
+            <p style={{ textAlign: "center" }}>Loading...</p>
+          )}
         </div>
       ) : (
         <>{children}</>

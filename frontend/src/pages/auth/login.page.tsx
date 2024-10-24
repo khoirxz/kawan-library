@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { FormProps } from "antd";
-import { Button, Flex, Form, Input, Typography, message, Spin } from "antd";
+import { Button, Flex, Form, Input, Typography, Spin, Alert } from "antd";
 import axios from "axios";
 import { baseAPI } from "../../api";
 import { useAppDispatch, useAppSelector } from "../../app/store";
@@ -16,23 +16,19 @@ const LoginPage: React.FC = () => {
     password?: string;
   };
   const {
-    main: { login, isLoading, message: msg },
+    main: { login, isLoading, message: msg, isError },
   } = useAppSelector((state) => state.authState);
   const navigate = useNavigate();
-  const [messageApi, contextHolder] = message.useMessage();
   const [loadingPage, setLoadingPage] = useState<boolean>(true);
   const location = useLocation();
   const token = localStorage.getItem("token");
 
   // check if user already logged in
   useEffect(() => {
-    const source = axios.CancelToken.source();
-
     const checkLogin = async () => {
       try {
         const response = await axios.get(`${baseAPI.dev}/auth/verify/`, {
           timeout: 6000,
-          cancelToken: source.token,
         });
 
         if (response.status === 200) {
@@ -42,20 +38,20 @@ const LoginPage: React.FC = () => {
           });
         }
       } catch (error) {
+        setLoadingPage(false);
         // disable for production
         // console.error("Verification failed:", error);
-      } finally {
-        setLoadingPage(false);
       }
     };
 
-    if (token || !location.state?.logout || !location.state?.verify) {
-      checkLogin();
+    if (token === null) {
+      setLoadingPage(false);
+    } else {
+      if (!location.state?.logout) {
+        checkLogin();
+      }
     }
 
-    return () => {
-      source.cancel();
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -69,16 +65,6 @@ const LoginPage: React.FC = () => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [login]);
-
-  useEffect(() => {
-    if (msg) {
-      messageApi.open({
-        type: "error",
-        content: msg,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [msg]);
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     // console.log("Success:", values);
@@ -97,17 +83,16 @@ const LoginPage: React.FC = () => {
     console.log("Failed:", errorInfo);
   };
 
-  console.log(location);
+  if (loadingPage) {
+    return (
+      <div className={styles.loadingContainer}>
+        <Spin spinning={loadingPage} />
+      </div>
+    );
+  }
 
   return (
     <>
-      {contextHolder}
-      {loadingPage ? (
-        <div className={styles.loadingContainer}>
-          <Spin spinning={loadingPage} />
-        </div>
-      ) : null}
-
       <Flex
         justify="center"
         align="center"
@@ -122,6 +107,15 @@ const LoginPage: React.FC = () => {
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           autoComplete="off">
+          {msg ? (
+            <Alert
+              message={msg}
+              type={isError ? "error" : "success"}
+              showIcon
+              style={{ marginBottom: 20 }}
+            />
+          ) : null}
+
           <Typography.Title level={3}>Login</Typography.Title>
           <Form.Item<FieldType>
             label="Username"
