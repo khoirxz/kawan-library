@@ -9,9 +9,10 @@ import DecreeListPage from "./pages/admin/decrees/list.page";
 import DecreeFormPage from "./pages/admin/decrees/form.page";
 import CertificateListPage from "./pages/admin/certificates/list.page";
 import CertificateFormPage from "./pages/admin/certificates/form.page";
+import ProfileFormPage from "./pages/admin/profile/form.page";
 
 import HomePage from "./pages/user/home.page";
-import ProfilePage from "./pages/user/profile";
+import ProfilePage from "./pages/user/profile/show.page";
 import UserDecreeListPage from "./pages/user/decrees/list.page";
 import UserCertificationListPage from "./pages/user/certificates/list.page";
 import PortfolioPage from "./pages/user/portofolio";
@@ -200,10 +201,24 @@ export const routes: MenuProps = [
     icon: <UserOutlined />,
     parent: "2",
   },
+  {
+    key: "14",
+    path: "/admin/profile/form/:id",
+    element: (
+      <ProtectedRoute>
+        <ProfileFormPage />
+      </ProtectedRoute>
+    ),
+    parent: "2",
+    name: "Admin Profile From page",
+    show: false,
+    id: "admin-profile-form",
+    icon: <UserOutlined />,
+  },
   //! USER ROUTES
   //! START HERE
   {
-    key: "14",
+    key: "15",
     path: "/home",
     element: (
       <ProtectedRoute>
@@ -216,7 +231,7 @@ export const routes: MenuProps = [
     icon: <UserOutlined />,
   },
   {
-    key: "15",
+    key: "16",
     path: "/profile/:id",
     element: (
       <ProtectedRoute>
@@ -229,7 +244,7 @@ export const routes: MenuProps = [
     icon: <UserOutlined />,
   },
   {
-    key: "16",
+    key: "17",
     path: "/decree",
     element: (
       <ProtectedRoute>
@@ -242,7 +257,7 @@ export const routes: MenuProps = [
     icon: <UserOutlined />,
   },
   {
-    key: "17",
+    key: "18",
     path: "/certificate",
     element: (
       <ProtectedRoute>
@@ -255,7 +270,7 @@ export const routes: MenuProps = [
     icon: <UserOutlined />,
   },
   {
-    key: "18",
+    key: "19",
     path: "/portfolio",
     element: (
       <ProtectedRoute>
@@ -265,6 +280,19 @@ export const routes: MenuProps = [
     name: "Portfolio User page",
     show: false,
     id: "portfolio",
+    icon: <UserOutlined />,
+  },
+  {
+    key: "20",
+    path: "/profile/",
+    element: (
+      <ProtectedRoute>
+        <ProfilePage />
+      </ProtectedRoute>
+    ),
+    name: "Profile page",
+    show: false,
+    id: "profile",
     icon: <UserOutlined />,
   },
 ];

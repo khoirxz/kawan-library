@@ -139,7 +139,7 @@ const UserListPage: React.FC = () => {
                     <Row>
                       <Col xs={24} sm={12} md={8}>
                         <Card.Grid style={{ width: "100%", height: "100%" }}>
-                          <Link to={`/admin/decree/${record.id}`}>
+                          <Link to={`/admin/profile/form/${record.id}`}>
                             <Button type="text">Profil</Button>
                           </Link>
                         </Card.Grid>

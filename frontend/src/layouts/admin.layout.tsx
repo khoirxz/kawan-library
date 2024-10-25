@@ -6,6 +6,17 @@ import HeaderComponent from "../components/admin/header.component";
 
 const { Content, Footer, Sider } = Layout;
 
+const sideStyle: React.CSSProperties = {
+  overflow: "auto",
+  height: "100vh",
+  position: "fixed",
+  insetInlineStart: 0,
+  top: 0,
+  bottom: 0,
+  scrollbarWidth: "thin",
+  scrollbarGutter: "stable",
+};
+
 const AdminLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const {
@@ -32,15 +43,13 @@ const AdminLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
         onCollapse={(collapsed, type) => {
           console.log(collapsed, type);
         }}
-        style={{
-          minHeight: "100vh",
-        }}>
+        style={sideStyle}>
         <div className="demo-logo-vertical" />
         <SidebarComponent />
       </Sider>
-      <Layout>
+      <Layout style={{ marginInlineStart: collapsed ? 0 : 200 }}>
         <HeaderComponent collapsed={collapsed} setCollapsed={setCollapsed} />
-        <Content style={{ margin: "24px 16px 0" }}>
+        <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
           <div
             style={{
               padding: 24,
