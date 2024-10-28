@@ -53,10 +53,10 @@ var signup = async function (req, res) {
         username: username,
         password: password,
         role: "user",
-        verified: false,
+        verified: true,
       },
       {
-        fields: ["name", "username", "role"],
+        fields: ["name", "username", "role", "verified", "password"],
       }
     );
     res.status(201).json({
@@ -65,7 +65,11 @@ var signup = async function (req, res) {
       data: data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      code: 500,
+      status: "failed",
+      message: error.message,
+    });
   }
 };
 
