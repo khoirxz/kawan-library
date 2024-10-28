@@ -9,6 +9,7 @@ import {
   Skeleton,
 } from "antd";
 import type { MenuProps } from "antd";
+import { useNavigate } from "react-router-dom";
 import { MenuUnfoldOutlined, UserOutlined } from "@ant-design/icons";
 import { useAppSelector, useAppDispatch } from "../../app/store";
 import { LogoutUser } from "../../features/AuthSlices";
@@ -34,6 +35,7 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({
   const {
     main: { isLoading, verify },
   } = useAppSelector((state) => state.authState);
+  const navigate = useNavigate();
 
   const items: MenuItem[] = [
     {
@@ -69,26 +71,36 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({
           onClick={() => setCollapsed(!collapsed)}
           icon={<MenuUnfoldOutlined />}
         />
-        {isLoading ? (
-          <Skeleton />
-        ) : (
-          <Popover
-            placement="bottomRight"
-            title={
-              <p style={{ padding: "0 16px" }}>
-                {verify?.data?.name?.substring(0, 6)}
-              </p>
-            }
-            content={<Menu items={items} />}>
-            {verify.data.avatarImg === "" ? (
-              <Avatar icon={<UserOutlined />} />
-            ) : (
-              <Avatar
-                src={`http://localhost:5000/uploads/avatars/${verify.data.avatarImg}`}
-              />
-            )}
-          </Popover>
-        )}
+        <Flex align="center" gap={20}>
+          <Button
+            shape="round"
+            type="primary"
+            role="link"
+            onClick={() => navigate("/home")}>
+            Home
+          </Button>
+          {isLoading ? (
+            <Skeleton />
+          ) : (
+            <Popover
+              placement="bottomRight"
+              title={
+                <p style={{ padding: "0 16px" }}>
+                  {verify?.data?.name?.substring(0, 6)}
+                </p>
+              }
+              content={<Menu items={items} />}>
+              {verify.data.avatarImg === "" ||
+              verify.data.avatarImg === null ? (
+                <Avatar icon={<UserOutlined />} />
+              ) : (
+                <Avatar
+                  src={`http://localhost:5000/uploads/avatars/${verify.data.avatarImg}`}
+                />
+              )}
+            </Popover>
+          )}
+        </Flex>
       </Flex>
     </Header>
   );

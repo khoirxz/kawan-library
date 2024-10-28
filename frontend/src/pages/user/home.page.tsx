@@ -24,7 +24,6 @@ const HomePage: React.FC = () => {
     },
   } = useAppSelector((state) => state.authState);
 
-  console.log(data.name);
   return (
     <UserLayout>
       <Row>

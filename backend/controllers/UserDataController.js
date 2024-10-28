@@ -15,9 +15,9 @@ var getUserDataById = async function (req, res) {
         where: { user_id: req.params.id },
       });
       if (data.length === 0) {
-        return res.status(404).json({
-          code: 404,
-          status: "error",
+        return res.status(204).json({
+          code: 204,
+          status: "success",
           message: "User data not found",
         });
       }
@@ -26,9 +26,9 @@ var getUserDataById = async function (req, res) {
         where: { user_id: req.decoded.userId },
       });
       if (data.length === 0) {
-        return res.status(404).json({
-          code: 404,
-          status: "error",
+        return res.status(204).json({
+          code: 204,
+          status: "success",
           message: "User data not found",
         });
       }

@@ -22,6 +22,7 @@ var getUsersById = async function (req, res) {
   try {
     var data = await UsersModel.findAll({
       where: { id: req.params.id },
+      attributes: ["id", "name", "role", "username", "avatarImg", "phone"],
     });
     res.status(200).json({
       code: 200,
