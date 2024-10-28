@@ -17,11 +17,15 @@ var UserData = db.define("user_data", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  subdistrict: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   city: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  state: {
+  province: {
     type: DataTypes.STRING,
     allowNull: false,
   },

@@ -1,6 +1,12 @@
 var Joi = require("joi");
 var UserDataModel = require("../model/UserDataModel");
 
+/**
+ * Get user data by id
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Promise} - promise that resolves to an object with a status code, status message, and data (if any)
+ */
 var getUserDataById = async function (req, res) {
   try {
     var data;
@@ -42,10 +48,30 @@ var getUserDataById = async function (req, res) {
   }
 };
 
+/**
+ * Create user data if it does not already exist.
+ *
+ * This function receives a request object containing user details and checks if
+ * the data already exists in the database. If it does, it returns a conflict error.
+ * Otherwise, it validates the input using Joi schema and creates new user data in
+ * the database. The response includes a status code, status message, and the created data.
+ *
+ * @param {Object} req - The request object containing user data in the body.
+ * @param {Object} res - The response object to send the status and data.
+ * @returns {Promise} - Resolves to a JSON response indicating success or error.
+ */
 var createUserData = async function (req, res) {
   try {
-    var { user_id, address, city, state, country, postal_code, email } =
-      req.body;
+    var {
+      user_id,
+      address,
+      subdistrict,
+      city,
+      province,
+      country,
+      postal_code,
+      email,
+    } = req.body;
 
     // cek jika data sudah ada
     var data = await UserDataModel.findAll({
@@ -62,8 +88,9 @@ var createUserData = async function (req, res) {
     var schema = Joi.object({
       user_id: Joi.number().required(),
       address: Joi.string().required(),
+      subdistrict: Joi.string().required(),
       city: Joi.string().required(),
-      state: Joi.string().required(),
+      province: Joi.string().required(),
       country: Joi.string().required(),
       postal_code: Joi.string().required(),
       email: Joi.string().required(),
@@ -82,8 +109,9 @@ var createUserData = async function (req, res) {
       data = await UserDataModel.create({
         user_id: user_id,
         address: address,
+        subdistrict: subdistrict,
         city: city,
-        state: state,
+        province: province,
         country: country,
         postal_code: postal_code,
         email: email,
@@ -105,8 +133,9 @@ var createUserData = async function (req, res) {
       data = await UserDataModel.create({
         user_id: req.decoded.userId,
         address: address,
+        subdistrict: subdistrict,
         city: city,
-        state: state,
+        province: province,
         country: country,
         postal_code: postal_code,
         email: email,
@@ -125,14 +154,23 @@ var createUserData = async function (req, res) {
 
 var updateUserData = async function (req, res) {
   try {
-    var { user_id, address, city, state, country, postal_code, email } =
-      req.body;
+    var {
+      user_id,
+      address,
+      subdistrict,
+      city,
+      province,
+      country,
+      postal_code,
+      email,
+    } = req.body;
 
     var schema = Joi.object({
       user_id: Joi.number().required(),
       address: Joi.string().required(),
+      subdistrict: Joi.string().required(),
       city: Joi.string().required(),
-      state: Joi.string().required(),
+      province: Joi.string().required(),
       country: Joi.string().required(),
       postal_code: Joi.string().required(),
       email: Joi.string().required(),
@@ -164,8 +202,9 @@ var updateUserData = async function (req, res) {
       data = await UserDataModel.update(
         {
           address: address,
+          subdistrict: subdistrict,
           city: city,
-          state: state,
+          province: province,
           country: country,
           postal_code: postal_code,
           email: email,
@@ -185,8 +224,9 @@ var updateUserData = async function (req, res) {
         data = await UserDataModel.update(
           {
             address: address,
+            subdistrict: subdistrict,
             city: city,
-            state: state,
+            province: province,
             country: country,
             postal_code: postal_code,
             email: email,

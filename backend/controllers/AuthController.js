@@ -52,7 +52,7 @@ var signup = async function (req, res) {
         name: name,
         username: username,
         password: password,
-        role: "admin",
+        role: "user",
         verified: false,
       },
       {
@@ -242,6 +242,7 @@ var verifyUser = async function (req, res) {
           name: data[0].dataValues.name,
           username: data[0].dataValues.username,
           role: data[0].dataValues.role,
+          avatarImg: data[0].dataValues.avatarImg,
           token: accessToken,
         },
       });
