@@ -140,7 +140,7 @@ const PortfolioPage: React.FC = () => {
                   ) : (
                     <Avatar
                       size={80}
-                      src={`http://localhost:5000/uploads/avatars/${data.avatarImg}`}
+                      src={`${baseAPI.dev}/uploads/avatars/${data.avatarImg}`}
                     />
                   )}
                 </div>

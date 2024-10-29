@@ -49,9 +49,7 @@ const columns: TableProps<ListDecreeProps>["columns"] = [
           style={{ cursor: "pointer" }}
           icon={<ExportOutlined />}
           onClick={() =>
-            window.open(
-              `http://localhost:5000/uploads/decrees/${record.file_path}`
-            )
+            window.open(`${baseAPI.dev}/uploads/decrees/${record.file_path}`)
           }>
           lihat file
         </Tag>
@@ -151,7 +149,7 @@ const UserDecreeListPage: React.FC = () => {
                           color="green"
                           onClick={() =>
                             window.open(
-                              `http://localhost:5000/uploads/decrees/${record.file_path}`
+                              `${baseAPI.dev}/uploads/decrees/${record.file_path}`
                             )
                           }>
                           Lihat File

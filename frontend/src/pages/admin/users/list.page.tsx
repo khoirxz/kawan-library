@@ -1,5 +1,17 @@
 import { useEffect, useState } from "react";
-import { Space, Table, Button, Flex, Card, Spin, Row, Col, Modal } from "antd";
+import {
+  Space,
+  Table,
+  Button,
+  Flex,
+  Card,
+  Spin,
+  Row,
+  Col,
+  Modal,
+  Input,
+  Select,
+} from "antd";
 import { PlusSquareTwoTone } from "@ant-design/icons";
 import type { TableProps } from "antd";
 import { Link } from "react-router-dom";
@@ -127,6 +139,13 @@ const UserListPage: React.FC = () => {
               </Button>
             </Link>
           </div>
+        </Flex>
+        <Flex style={{ marginBottom: "20px" }} gap={10}>
+          <Input.Search placeholder="Cari nama" style={{ width: "30%" }} />
+          <Select placeholder="Pilih role" allowClear>
+            <Select.Option value="admin">Admin</Select.Option>
+            <Select.Option value="user">User</Select.Option>
+          </Select>
         </Flex>
         <Table<ListUsersProps>
           columns={columns}

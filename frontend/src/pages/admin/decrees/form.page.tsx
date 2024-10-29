@@ -195,7 +195,7 @@ const DecreeFormPage: React.FC = () => {
               ) : (
                 <Avatar
                   size={48}
-                  src={`http://localhost:5000/uploads/avatars/${userData.avatarImg}`}
+                  src={`${baseAPI.dev}/uploads/avatars/${userData.avatarImg}`}
                 />
               )}
 
@@ -227,7 +227,7 @@ const DecreeFormPage: React.FC = () => {
                     icon={<DownloadOutlined />}
                     onClick={() => {
                       window.open(
-                        `http://localhost:5000/uploads/decrees/${fileDecree}`,
+                        `${baseAPI.dev}/uploads/decrees/${fileDecree}`,
                         "_blank"
                       );
                     }}>
@@ -240,7 +240,7 @@ const DecreeFormPage: React.FC = () => {
                   <iframe
                     style={{ width: "100%", height: "100%" }}
                     title="Decree"
-                    src={`http://localhost:5000/uploads/decrees/${fileDecree}`}
+                    src={`${baseAPI.dev}/uploads/decrees/${fileDecree}`}
                   />
                 )}
               </Card>

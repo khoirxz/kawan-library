@@ -150,7 +150,7 @@ const ProfileFormPage: React.FC = () => {
                     <Avatar
                       style={{ marginBottom: 10 }}
                       size={{ sm: 80, xl: 100, xxl: 160 }}
-                      src={`http://localhost:5000/uploads/avatars/${userData.avatarImg}`}
+                      src={`${baseAPI.dev}/uploads/avatars/${userData.avatarImg}`}
                     />
                   ) : (
                     <Avatar

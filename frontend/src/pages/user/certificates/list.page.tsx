@@ -44,7 +44,7 @@ const columns: TableProps<ListCertificationsProps>["columns"] = [
           icon={<ExportOutlined />}
           onClick={() =>
             window.open(
-              `http://localhost:5000/uploads/certificates/${record.file_path}`
+              `${baseAPI.dev}/uploads/certificates/${record.file_path}`
             )
           }>
           lihat file

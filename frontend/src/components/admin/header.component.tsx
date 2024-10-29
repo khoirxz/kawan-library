@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { MenuUnfoldOutlined, UserOutlined } from "@ant-design/icons";
 import { useAppSelector, useAppDispatch } from "../../app/store";
 import { LogoutUser } from "../../features/AuthSlices";
+import { baseAPI } from "../../api";
 
 const { Header } = Layout;
 
@@ -95,7 +96,7 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({
                 <Avatar icon={<UserOutlined />} />
               ) : (
                 <Avatar
-                  src={`http://localhost:5000/uploads/avatars/${verify.data.avatarImg}`}
+                  src={`${baseAPI.dev}/uploads/avatars/${verify.data.avatarImg}`}
                 />
               )}
             </Popover>

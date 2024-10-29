@@ -181,7 +181,7 @@ const CertificateFormPage: React.FC = () => {
               ) : (
                 <Avatar
                   size={48}
-                  src={`http://localhost:5000/uploads/avatars/${userData.avatarImg}`}
+                  src={`${baseAPI.dev}/uploads/avatars/${userData.avatarImg}`}
                 />
               )}
 
@@ -213,7 +213,7 @@ const CertificateFormPage: React.FC = () => {
                     icon={<DownloadOutlined />}
                     onClick={() => {
                       window.open(
-                        `http://localhost:5000/uploads/certificates/${fileCertificate}`,
+                        `${baseAPI.dev}/uploads/certificates/${fileCertificate}`,
                         "_blank"
                       );
                     }}>
@@ -226,7 +226,7 @@ const CertificateFormPage: React.FC = () => {
                   <iframe
                     style={{ width: "100%", height: "100%" }}
                     title="Decree"
-                    src={`http://localhost:5000/uploads/certificates/${fileCertificate}`}
+                    src={`${baseAPI.dev}/uploads/certificates/${fileCertificate}`}
                   />
                 )}
               </Card>

@@ -3,6 +3,7 @@ import { UserOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { useAppDispatch, useAppSelector } from "../../app/store";
 import { LogoutUser } from "../../features/AuthSlices";
+import { baseAPI } from "../../api";
 
 const { Header } = Layout;
 
@@ -62,7 +63,7 @@ const HeaderUserComponent: React.FC = () => {
                   <Avatar icon={<UserOutlined />} />
                 ) : (
                   <Avatar
-                    src={`http://localhost:5000/uploads/avatars/${verify.data.avatarImg}`}
+                    src={`${baseAPI.dev}/uploads/avatars/${verify.data.avatarImg}`}
                   />
                 )}
               </Popover>

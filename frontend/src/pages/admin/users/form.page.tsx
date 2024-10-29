@@ -101,7 +101,7 @@ const UserFormPage: React.FC = () => {
         });
       }
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         if (id) {
           messageApi.open({
             type: "success",
@@ -143,8 +143,8 @@ const UserFormPage: React.FC = () => {
             style={{
               padding: 5,
             }}>
-            <h1>{id ? "Edit" : "Add"} Pegawai atau user</h1>
-            <p>Masukan detail tentang Pegawai atau user di bidang berikut</p>
+            <h1>{id ? "Edit" : "Tambah"} user</h1>
+            <p>Masukan detail tentang user di bidang berikut</p>
           </div>
         </Col>
         <Col xs={24} md={12}>
@@ -160,7 +160,7 @@ const UserFormPage: React.FC = () => {
                 ) : (
                   <Avatar
                     size={64}
-                    src={`http://localhost:5000/uploads/avatars/${avatarUrl}`}
+                    src={`${baseAPI.dev}/uploads/avatars/${avatarUrl}`}
                   />
                 )}
               </div>

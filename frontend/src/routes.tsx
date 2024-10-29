@@ -2,7 +2,7 @@ import { MenuProps } from "./utils/menu";
 import ProtectedRoute, { AdminOnly } from "./utils/protectedRoute";
 import { UserOutlined, DashboardOutlined } from "@ant-design/icons";
 
-import DashboardPage from "./pages/admin/dashboard.page";
+import DashboardPage from "./pages/admin/dashboard";
 import UserListPage from "./pages/admin/users/list.page";
 import UserFormPage from "./pages/admin/users/form.page";
 import DecreeListPage from "./pages/admin/decrees/list.page";

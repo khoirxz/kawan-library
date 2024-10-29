@@ -48,8 +48,8 @@ const router = createBrowserRouter(
       element: <SignupPage />,
       id: "signup",
     },
-  ]
-  // { basename: "/library" }
+  ],
+  { basename: "/library" }
 );
 
 const App: React.FC = () => {
