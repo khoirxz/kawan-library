@@ -6,7 +6,7 @@ var UsersModel = require("../model/UsersModel");
 var getUsers = async function (req, res) {
   try {
     var data = await UsersModel.findAll({
-      attributes: ["id", "name", "role", "username", "avatarImg", "phone"],
+      attributes: ["id", "name", "role", "username", "avatarImg"],
     });
     res.status(200).json({
       code: 200,
@@ -22,7 +22,7 @@ var getUsersById = async function (req, res) {
   try {
     var data = await UsersModel.findAll({
       where: { id: req.params.id },
-      attributes: ["id", "name", "role", "username", "avatarImg", "phone"],
+      attributes: ["id", "name", "role", "username", "avatarImg"],
     });
     res.status(200).json({
       code: 200,
@@ -36,12 +36,11 @@ var getUsersById = async function (req, res) {
 
 var createUser = async function (req, res) {
   try {
-    var { name, username, phone, password, role } = req.body;
+    var { name, username, password, role } = req.body;
 
     var schema = Joi.object({
       name: Joi.string().required().min(3),
       username: Joi.string().required().min(4),
-      phone: Joi.string().required(),
       password: Joi.string().required(),
       role: Joi.string().required(),
     });
@@ -73,7 +72,6 @@ var createUser = async function (req, res) {
     data = await UsersModel.create({
       name: name,
       username: username,
-      phone: phone,
       password: password,
       role: role,
       verified: true,
@@ -91,7 +89,7 @@ var createUser = async function (req, res) {
 
 var updateUser = async function (req, res) {
   try {
-    var { name, username, role, phone, password } = req.body;
+    var { name, username, role, password } = req.body;
 
     // check if user exist
     var data = await UsersModel.findAll({
@@ -108,7 +106,6 @@ var updateUser = async function (req, res) {
     var schema = Joi.object({
       name: Joi.string().min(3),
       username: Joi.string().min(4),
-      phone: Joi.string(),
       password: Joi.string(),
       role: Joi.string().required(),
     });
@@ -132,7 +129,6 @@ var updateUser = async function (req, res) {
         name: name,
         username: username,
         role: role,
-        phone: phone,
         password: password,
       },
       {

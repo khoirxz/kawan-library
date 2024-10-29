@@ -20,6 +20,8 @@ var DecreesRoute = require("./routes/DecreesRoute.js");
 var CertificationsRoute = require("./routes/CertificationsRoute.js");
 // routes user data
 var UserDataRoute = require("./routes/UserDataRoute.js");
+// routes job history
+var JobHistoryRoute = require("./routes/JobHistoryRoute.js");
 
 // init express
 var app = express();
@@ -63,6 +65,7 @@ app.use("/api.library", UsersRoute);
 app.use("/api.library/decrees/", DecreesRoute);
 app.use("/api.library/certifications/", CertificationsRoute);
 app.use("/api.library/userdata/", UserDataRoute);
+app.use("/api.library/jobhistory/", JobHistoryRoute);
 
 // async to db
 (function () {

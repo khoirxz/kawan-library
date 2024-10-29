@@ -29,10 +29,6 @@ var Users = db.define("users", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  phone: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
   password: {
     type: DataTypes.STRING,
     allowNull: false,

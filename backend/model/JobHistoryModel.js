@@ -3,7 +3,7 @@ var db = require("../config/database");
 
 var { DataTypes } = Sequelize;
 
-var UserData = db.define("user_data", {
+var JobHistory = db.define("job_history", {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -13,38 +13,34 @@ var UserData = db.define("user_data", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  address: {
+  company_name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  subdistrict: {
+  position: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  city: {
+  start_date: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  end_date: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  job_description: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  province: {
+  location: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  country: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  postal_code: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  phone: {
-    type: DataTypes.STRING,
+  is_current: {
+    type: DataTypes.BOOLEAN,
     allowNull: false,
   },
 });
 
-module.exports = UserData;
+module.exports = JobHistory;

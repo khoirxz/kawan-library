@@ -71,6 +71,7 @@ var createUserData = async function (req, res) {
       country,
       postal_code,
       email,
+      phone,
     } = req.body;
 
     // cek jika data sudah ada
@@ -93,7 +94,8 @@ var createUserData = async function (req, res) {
       province: Joi.string().required(),
       country: Joi.string().required(),
       postal_code: Joi.string().required(),
-      email: Joi.string().required(),
+      email: Joi.string().email().required(),
+      phone: Joi.string().required(),
     });
 
     var { error } = schema.validate(req.body);
@@ -115,6 +117,7 @@ var createUserData = async function (req, res) {
         country: country,
         postal_code: postal_code,
         email: email,
+        phone: phone,
       });
     } else {
       // cek jika data sudah ada
@@ -139,6 +142,7 @@ var createUserData = async function (req, res) {
         country: country,
         postal_code: postal_code,
         email: email,
+        phone: phone,
       });
     }
 
@@ -163,6 +167,7 @@ var updateUserData = async function (req, res) {
       country,
       postal_code,
       email,
+      phone,
     } = req.body;
 
     var schema = Joi.object({
@@ -173,7 +178,8 @@ var updateUserData = async function (req, res) {
       province: Joi.string().required(),
       country: Joi.string().required(),
       postal_code: Joi.string().required(),
-      email: Joi.string().required(),
+      email: Joi.string().email().required(),
+      phone: Joi.string().required(),
     });
 
     var { error } = schema.validate(req.body);
@@ -208,6 +214,7 @@ var updateUserData = async function (req, res) {
           country: country,
           postal_code: postal_code,
           email: email,
+          phone: phone,
         },
         {
           where: { user_id: user_id },
@@ -230,6 +237,7 @@ var updateUserData = async function (req, res) {
             country: country,
             postal_code: postal_code,
             email: email,
+            phone: phone,
           },
           {
             where: { user_id: user_id },
