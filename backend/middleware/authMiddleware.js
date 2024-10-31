@@ -1,9 +1,9 @@
-var jwt = require("jsonwebtoken");
-var UserModel = require("../model/UsersModel");
-var { globals } = require("../config/config");
+const jwt = require("jsonwebtoken");
+const UserModel = require("../model/UsersModel");
+const { globals } = require("../config/config");
 
-async function authMiddleware(req, res, next) {
-  var token = req.headers["authorization"];
+const authMiddleware = (req, res, next) => {
+  const token = req.headers["authorization"];
   if (!token) {
     return res.status(401).json({
       status: "failed",
@@ -18,7 +18,7 @@ async function authMiddleware(req, res, next) {
         message: "Failed to authenticate.",
       });
     } else {
-      var user = await UserModel.findOne({
+      const user = await UserModel.findOne({
         where: { id: decoded.userId },
       });
 
@@ -33,9 +33,9 @@ async function authMiddleware(req, res, next) {
       next();
     }
   });
-}
+};
 
-function adminRoleMiddleware(req, res, next) {
+const adminRoleMiddleware = (req, res, next) => {
   if (req.decoded.role === "admin") {
     next();
   } else {
@@ -44,7 +44,7 @@ function adminRoleMiddleware(req, res, next) {
       message: "Unauthorized access.",
     });
   }
-}
+};
 
 module.exports = {
   authMiddleware,

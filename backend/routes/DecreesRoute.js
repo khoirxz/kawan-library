@@ -1,9 +1,9 @@
-var express = require("express");
-var multer = require("multer");
-var path = require("path");
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
 
 // controllers decrees
-var {
+const {
   getAllDecreesByIdUser,
   getDecreeById,
   createDecree,
@@ -12,14 +12,14 @@ var {
   searchDecrees,
   getAllDecrees,
 } = require("../controllers/DecreesController.js");
-var {
+const {
   authMiddleware,
   adminRoleMiddleware,
 } = require("../middleware/authMiddleware.js");
 
-var router = express.Router();
+const router = express.Router();
 
-var storage = multer.diskStorage({
+const storage = multer.diskStorage({
   mimeTypes: ["application/pdf"],
   destination: function (req, file, cb) {
     cb(null, "public/uploads/decrees");
@@ -30,7 +30,7 @@ var storage = multer.diskStorage({
   },
 });
 
-var upload = multer({ storage: storage, limits: { fileSize: 2000000 } });
+const upload = multer({ storage: storage, limits: { fileSize: 2000000 } });
 
 router.get("/search/:id", authMiddleware, searchDecrees);
 router.get("/", authMiddleware, getAllDecrees);

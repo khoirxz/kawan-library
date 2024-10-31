@@ -1,16 +1,17 @@
-var { Sequelize } = require("sequelize");
-var db = require("../config/database");
+const Squelize = require("sequelize");
+const db = require("../config/database");
 
-var { DataTypes } = Sequelize;
+const DataTypes = Squelize.DataTypes;
 
-var UserData = db.define("user_data", {
+const UserData = db.define("user_data", {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
   user_id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     allowNull: false,
   },
   address: {

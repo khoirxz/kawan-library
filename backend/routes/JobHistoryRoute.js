@@ -1,16 +1,16 @@
-var express = require("express");
+const express = require("express");
 
 // controllers job history
-var {
+const {
   getUserJobHistory,
   getUserJobHistoryById,
   createUserJobHistory,
   updateUserJobHistory,
   deleteUserJobHistory,
 } = require("../controllers/JobHistoryController.js");
-var { authMiddleware } = require("../middleware/authMiddleware.js");
+const { authMiddleware } = require("../middleware/authMiddleware.js");
 
-var router = express.Router();
+const router = express.Router();
 
 router.get("/", authMiddleware, getUserJobHistory);
 router.get("/:id", authMiddleware, getUserJobHistory);

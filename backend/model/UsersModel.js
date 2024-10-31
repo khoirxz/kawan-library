@@ -1,13 +1,13 @@
-var { Sequelize } = require("sequelize");
-var db = require("../config/database");
+const Sequelize = require("sequelize");
+const db = require("../config/database");
 
-var { DataTypes } = Sequelize;
+const DataTypes = Sequelize.DataTypes;
 
-var Users = db.define("users", {
+const Users = db.define("users", {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.CHAR(36),
     primaryKey: true,
-    autoIncrement: true,
+    defaultValue: Sequelize.UUIDV4,
   },
   name: {
     type: DataTypes.STRING,
@@ -34,7 +34,7 @@ var Users = db.define("users", {
     allowNull: false,
   },
   refreshToken: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT("long"),
     allowNull: true,
   },
 });

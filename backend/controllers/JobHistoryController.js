@@ -1,12 +1,13 @@
-var Joi = require("joi");
-var JobHistoryModel = require("../model/JobHistoryModel");
-var UsersModel = require("../model/UsersModel");
+const Joi = require("joi");
+const JobHistoryModel = require("../model/JobHistoryModel");
+const UsersModel = require("../model/UsersModel");
+const responseHandler = require("../helpers/responseHandler");
 
-var getUserJobHistory = async function (req, res) {
+const getUserJobHistory = async function (req, res) {
   try {
-    var { user_id } = req.params;
+    const { user_id } = req.params;
 
-    var data;
+    let data;
     // cek jika admin
     if (req.decoded.role === "admin") {
       data = await JobHistoryModel.findAll({
@@ -19,45 +20,39 @@ var getUserJobHistory = async function (req, res) {
       });
     }
 
-    return res.status(200).json({
-      code: 200,
-      status: "success",
+    return responseHandler(res, 200, {
+      message: "Success get user job history",
       data: data,
     });
-  } catch (err) {
-    return res.status(500).json({
-      code: 500,
-      status: "error",
-      message: err.message,
+  } catch (error) {
+    return responseHandler(res, 500, {
+      message: error.message,
     });
   }
 };
 
-var getUserJobHistoryById = async function (req, res) {
+const getUserJobHistoryById = async function (req, res) {
   try {
-    var { id } = req.params;
+    const { id } = req.params;
 
-    var data = await JobHistoryModel.findAll({
+    const data = await JobHistoryModel.findAll({
       where: { id: id },
     });
 
-    return res.status(200).json({
-      code: 200,
-      status: "success",
+    return responseHandler(res, 200, {
+      message: "Success get user job history",
       data: data,
     });
-  } catch (err) {
-    return res.status(500).json({
-      code: 500,
-      status: "error",
-      message: err.message,
+  } catch (error) {
+    return responseHandler(res, 500, {
+      message: error.message,
     });
   }
 };
 
-var createUserJobHistory = async function (req, res) {
+const createUserJobHistory = async function (req, res) {
   try {
-    var {
+    const {
       user_id,
       company_name,
       position,
@@ -68,7 +63,7 @@ var createUserJobHistory = async function (req, res) {
       is_current,
     } = req.body;
 
-    var schema = Joi.object({
+    const schema = Joi.object({
       user_id: Joi.number().required(),
       company_name: Joi.string().required(),
       position: Joi.string().required(),
@@ -79,7 +74,7 @@ var createUserJobHistory = async function (req, res) {
       is_current: Joi.boolean().required(),
     });
 
-    var { error } = schema.validate(req.body);
+    const { error } = schema.validate(req.body);
     if (error) {
       return res.status(400).json({
         code: 400,
@@ -89,7 +84,7 @@ var createUserJobHistory = async function (req, res) {
     }
 
     // check if user exist
-    var user = await UsersModel.findAll({
+    const user = await UsersModel.findAll({
       where: { id: user_id },
     });
 
@@ -101,7 +96,7 @@ var createUserJobHistory = async function (req, res) {
       });
     }
 
-    var data;
+    let data;
 
     if (req.decoded.role === "admin") {
       data = await JobHistoryModel.create({
@@ -127,24 +122,21 @@ var createUserJobHistory = async function (req, res) {
       });
     }
 
-    return res.status(200).json({
-      code: 200,
-      status: "success",
+    return responseHandler(res, 201, {
+      message: "Success create user job history",
       data: data,
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
+    return responseHandler(res, 500, {
       message: error.message,
     });
   }
 };
 
-var updateUserJobHistory = async function (req, res) {
+const updateUserJobHistory = async function (req, res) {
   try {
-    var { id } = req.params;
-    var {
+    const { id } = req.params;
+    const {
       user_id,
       company_name,
       position,
@@ -155,7 +147,7 @@ var updateUserJobHistory = async function (req, res) {
       is_current,
     } = req.body;
 
-    var schema = Joi.object({
+    const schema = Joi.object({
       user_id: Joi.number().required(),
       company_name: Joi.string().required(),
       position: Joi.string().required(),
@@ -166,7 +158,7 @@ var updateUserJobHistory = async function (req, res) {
       is_current: Joi.boolean().required(),
     });
 
-    var { error } = schema.validate(req.body);
+    const { error } = schema.validate(req.body);
     if (error) {
       return res.status(400).json({
         code: 400,
@@ -176,7 +168,7 @@ var updateUserJobHistory = async function (req, res) {
     }
 
     // check if user exist
-    var user = await UsersModel.findAll({
+    const user = await UsersModel.findAll({
       where: { id: user_id },
     });
 
@@ -188,7 +180,7 @@ var updateUserJobHistory = async function (req, res) {
       });
     }
 
-    var data;
+    let data;
     if (req.decoded.role === "admin") {
       data = await JobHistoryModel.update(
         {
@@ -223,31 +215,27 @@ var updateUserJobHistory = async function (req, res) {
       );
     }
 
-    return res.status(200).json({
-      code: 200,
-      status: "success",
+    return responseHandler(res, 200, {
+      message: "Success update user job history",
       data: data,
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
+    return responseHandler(res, 500, {
       message: error.message,
     });
   }
 };
 
-var deleteUserJobHistory = async function (req, res) {
+const deleteUserJobHistory = async function (req, res) {
   try {
-    var { id } = req.params;
-    var data;
+    const { id } = req.params;
 
     // cek jika data sudah ada
-    data = await JobHistoryModel.findAll({
+    const oldData = await JobHistoryModel.findAll({
       where: { id: id },
     });
 
-    if (!data) {
+    if (!oldData) {
       return res.status(404).json({
         code: 404,
         status: "failed",
@@ -255,8 +243,9 @@ var deleteUserJobHistory = async function (req, res) {
       });
     }
 
+    let data;
     if (req.decoded.role !== "admin") {
-      var userJobHistory = await JobHistoryModel.findOne({
+      const userJobHistory = await JobHistoryModel.findOne({
         where: { id: id, user_id: req.decoded.userId },
       });
 
@@ -277,15 +266,12 @@ var deleteUserJobHistory = async function (req, res) {
       });
     }
 
-    return res.status(200).json({
-      code: 200,
-      status: "success",
+    return responseHandler(res, 200, {
+      message: "Success delete user job history",
       data: data,
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
+    responseHandler(res, 500, {
       message: error.message,
     });
   }

@@ -1,9 +1,9 @@
-var express = require("express");
-var multer = require("multer");
-var path = require("path");
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
 
 // controllers certifications
-var {
+const {
   getCertificationsByIdUser,
   getCertificateById,
   createCertificate,
@@ -12,14 +12,14 @@ var {
   searchCertificate,
   getAllCertificates,
 } = require("../controllers/CertificationsController.js");
-var {
+const {
   authMiddleware,
   adminRoleMiddleware,
 } = require("../middleware/authMiddleware.js");
 
-var router = express.Router();
+const router = express.Router();
 
-var storage = multer.diskStorage({
+const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "public/uploads/certificates");
   },
@@ -28,7 +28,7 @@ var storage = multer.diskStorage({
   },
 });
 
-var upload = multer({
+const upload = multer({
   storage: storage,
   limits: {
     fileSize: 2000000,

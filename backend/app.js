@@ -1,30 +1,32 @@
-var express = require("express");
-var cors = require("cors");
-var dotenv = require("dotenv").config();
-var cookieParser = require("cookie-parser");
-var { globals } = require("./config/config.js");
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv").config();
+const cookieParser = require("cookie-parser");
+const { globals } = require("./config/config.js");
 
 if (dotenv.error) {
   console.log(dotenv.error);
 }
 
-var db = require("./config/database");
+const db = require("./config/database");
 
 // routes auth
-var AuthRoute = require("./routes/AuthRoute.js");
+const AuthRoute = require("./routes/AuthRoute.js");
 // routes users
-var UsersRoute = require("./routes/UsersRoute.js");
+const UsersRoute = require("./routes/UsersRoute.js");
 // routes decrees
-var DecreesRoute = require("./routes/DecreesRoute.js");
+const DecreesRoute = require("./routes/DecreesRoute.js");
 // routes certifications
-var CertificationsRoute = require("./routes/CertificationsRoute.js");
+const CertificationsRoute = require("./routes/CertificationsRoute.js");
 // routes user data
-var UserDataRoute = require("./routes/UserDataRoute.js");
+const UserDataRoute = require("./routes/UserDataRoute.js");
 // routes job history
-var JobHistoryRoute = require("./routes/JobHistoryRoute.js");
+const JobHistoryRoute = require("./routes/JobHistoryRoute.js");
+// routes decree category
+const DecreeCategoryRoute = require("./routes/DecreeCategoryRoute.js");
 
 // init express
-var app = express();
+const app = express();
 
 // intialize middleware
 app.use(
@@ -41,17 +43,20 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
+// access to http://localhost:5000/api.library/uploads/avatars
+// access to http://localhost:5000/api.library/uploads/decrees
+// access to http://localhost:5000/api.library/uploads/certificates
+app.use("/api.library/", express.static("public"));
 
 // routes
-app.get("/api.library", function (req, res) {
+app.get("/api.library", (req, res) => {
   db.authenticate()
-    .then(function () {
+    .then(() => {
       res
         .status(200)
         .json({ version: "1.0.0", database: "mysql", status: "connected" });
     })
-    .catch(function () {
+    .catch(() => {
       res.status(500).json({
         version: "1.0.0",
         database: "mysql",
@@ -61,18 +66,17 @@ app.get("/api.library", function (req, res) {
 });
 
 app.use("/api.library/auth/", AuthRoute);
-app.use("/api.library", UsersRoute);
+app.use("/api.library/users/", UsersRoute);
 app.use("/api.library/decrees/", DecreesRoute);
 app.use("/api.library/certifications/", CertificationsRoute);
 app.use("/api.library/userdata/", UserDataRoute);
 app.use("/api.library/jobhistory/", JobHistoryRoute);
+app.use("/api.library/decreecategory/", DecreeCategoryRoute);
 
 // async to db
-(function () {
-  db.sync();
-})();
+(() => db.sync())();
 
-app.listen(globals.PORT, function () {
+app.listen(globals.PORT, () => {
   console.log(
     "Example app listening on port http://localhost:5000/api.library"
   );

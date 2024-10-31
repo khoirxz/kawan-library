@@ -1,12 +1,12 @@
-var Joi = require("joi");
-var fs = require("fs");
-var Op = require("sequelize").Op;
-var DecreesModel = require("../model/DecreesModel");
+const Joi = require("joi");
+const fs = require("fs");
+const Op = require("sequelize").Op;
+const DecreesModel = require("../model/DecreesModel");
 
 // same as getAllDecrees
-var getAllDecreesByIdUser = async function (req, res) {
+const getAllDecreesByIdUser = async (req, res) => {
   try {
-    var data = await DecreesModel.findAll({
+    const data = await DecreesModel.findAll({
       where: { user_id: req.params.id },
     });
 
@@ -24,9 +24,9 @@ var getAllDecreesByIdUser = async function (req, res) {
   }
 };
 
-var getDecreeById = async function (req, res) {
+const getDecreeById = async (req, res) => {
   try {
-    var data = await DecreesModel.findOne({
+    const data = await DecreesModel.findOne({
       where: { id: req.params.id },
     });
 
@@ -52,9 +52,9 @@ var getDecreeById = async function (req, res) {
   }
 };
 
-var createDecree = async function (req, res) {
+const createDecree = async (req, res) => {
   try {
-    var {
+    const {
       user_id,
       title,
       description,
@@ -72,7 +72,7 @@ var createDecree = async function (req, res) {
       });
     }
 
-    var schema = Joi.object({
+    const schema = Joi.object({
       user_id: Joi.number().required(),
       title: Joi.string().required(),
       description: Joi.string().required(),
@@ -82,7 +82,7 @@ var createDecree = async function (req, res) {
       expired_date: Joi.date().allow(null),
     });
 
-    var { error } = schema.validate(req.body);
+    const { error } = schema.validate(req.body);
     if (error) {
       return res.status(400).json({
         code: 400,
@@ -91,7 +91,7 @@ var createDecree = async function (req, res) {
       });
     }
 
-    var data = await DecreesModel.create({
+    const data = await DecreesModel.create({
       user_id,
       title,
       description,
@@ -116,13 +116,13 @@ var createDecree = async function (req, res) {
   }
 };
 
-var updateDecreeById = async function (req, res) {
+const updateDecreeById = async (req, res) => {
   try {
-    var oldData = await DecreesModel.findOne({
+    const oldData = await DecreesModel.findOne({
       where: { id: req.params.id },
     });
 
-    var {
+    const {
       user_id,
       title,
       description,
@@ -132,7 +132,7 @@ var updateDecreeById = async function (req, res) {
       expired_date,
     } = req.body;
 
-    var schema = Joi.object({
+    const schema = Joi.object({
       user_id: Joi.number().required(),
       title: Joi.string().required(),
       description: Joi.string().required(),
@@ -142,7 +142,7 @@ var updateDecreeById = async function (req, res) {
       expired_date: Joi.date().allow(null),
     });
 
-    var { error } = schema.validate(req.body);
+    const { error } = schema.validate(req.body);
     if (error) {
       return res.status(400).json({
         code: 400,
@@ -151,7 +151,7 @@ var updateDecreeById = async function (req, res) {
       });
     }
 
-    var data;
+    let data;
     // check if file exist,
     if (req.file) {
       await DecreesModel.update(
@@ -207,9 +207,9 @@ var updateDecreeById = async function (req, res) {
   }
 };
 
-var deleteDecreeById = async function (req, res) {
+const deleteDecreeById = async (req, res) => {
   try {
-    var data = await DecreesModel.findOne({
+    const data = await DecreesModel.findOne({
       where: { id: req.params.id },
     });
 
@@ -242,9 +242,9 @@ var deleteDecreeById = async function (req, res) {
 };
 
 // search decrees by name and userID
-var searchDecrees = async function (req, res) {
+const searchDecrees = async (req, res) => {
   try {
-    var data = await DecreesModel.findAll({
+    const data = await DecreesModel.findAll({
       where: {
         [Op.or]: [
           { title: { [Op.like]: `%${req.query.search}%` } },
@@ -270,9 +270,9 @@ var searchDecrees = async function (req, res) {
 
 // fungsi ini digunakan untuk menampilkan semua decrees
 // dari id user yang didapatkan dari req.decoded.id (middleware/auth.js)
-var getAllDecrees = async function (req, res) {
+const getAllDecrees = async (req, res) => {
   try {
-    var data = await DecreesModel.findAll({
+    const data = await DecreesModel.findAll({
       where: { user_id: req.decoded.userId },
     });
 

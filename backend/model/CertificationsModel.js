@@ -1,30 +1,32 @@
-var { Sequelize } = require("sequelize");
-var db = require("../config/database");
+const Sequelize = require("sequelize");
+const db = require("../config/database");
 
-var Certifications = db.define("certifications", {
+const DataTypes = Sequelize.DataTypes;
+
+const Certifications = db.define("certifications", {
   id: {
-    type: Sequelize.CHAR(36),
+    type: DataTypes.CHAR(36),
     primaryKey: true,
-    defaultValue: Sequelize.UUIDV4,
+    defaultValue: DataTypes.UUIDV4,
   },
   user_id: {
-    type: Sequelize.INTEGER,
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   name: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   description: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   date: {
-    type: Sequelize.DATE,
+    type: DataTypes.DATE,
     allowNull: false,
   },
   file_path: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false,
   },
 });

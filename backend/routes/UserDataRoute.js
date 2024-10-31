@@ -1,14 +1,14 @@
-var express = require("express");
+const express = require("express");
 
 // controllers user data
-var {
+const {
   getUserDataById,
   createUserData,
   updateUserData,
 } = require("../controllers/UserDataController.js");
-var { authMiddleware } = require("../middleware/authMiddleware.js");
+const { authMiddleware } = require("../middleware/authMiddleware.js");
 
-var router = express.Router();
+const router = express.Router();
 
 router.get("/:id", authMiddleware, getUserDataById);
 router.post("/", authMiddleware, createUserData);

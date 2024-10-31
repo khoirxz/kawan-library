@@ -1,13 +1,13 @@
-var UsersModel = require("../model/UsersModel");
-var Joi = require("joi");
-var argon2 = require("argon2");
-var jwt = require("jsonwebtoken");
-var { globals } = require("../config/config");
+const UsersModel = require("../model/UsersModel");
+const Joi = require("joi");
+const argon2 = require("argon2");
+const jwt = require("jsonwebtoken");
+const { globals } = require("../config/config");
 
-var signup = async function (req, res) {
+const signup = async (req, res) => {
   try {
-    var { name, username, password } = req.body;
-    var schema = Joi.object({
+    const { name, username, password } = req.body;
+    const schema = Joi.object({
       name: Joi.string().required().min(3),
       username: Joi.string().required().min(4).alphanum(),
       password: Joi.string().required(),
@@ -20,7 +20,7 @@ var signup = async function (req, res) {
         }),
     }).with("password", "confirmPassword");
 
-    var { error } = schema.validate(req.body);
+    const { error } = schema.validate(req.body);
 
     if (error) {
       return res.status(400).json({
@@ -30,8 +30,9 @@ var signup = async function (req, res) {
       });
     }
 
+    let data;
     // check if username exist in users table
-    var data = await UsersModel.findAll({
+    data = await UsersModel.findAll({
       where: { username: username },
     });
 
@@ -44,14 +45,14 @@ var signup = async function (req, res) {
     }
 
     // encrypt password
-    password = await argon2.hash(password);
+    const encryptedPassword = await argon2.hash(password);
 
     // create user
     data = await UsersModel.create(
       {
         name: name,
         username: username,
-        password: password,
+        password: encryptedPassword,
         role: "user",
         verified: true,
       },
@@ -73,15 +74,15 @@ var signup = async function (req, res) {
   }
 };
 
-var login = async function (req, res) {
+const login = async (req, res) => {
   try {
-    var { username, password } = req.body;
-    var schema = Joi.object({
+    const { username, password } = req.body;
+    const schema = Joi.object({
       username: Joi.string().required().min(4).alphanum(),
       password: Joi.string().required(),
     });
 
-    var { error } = schema.validate(req.body);
+    const { error } = schema.validate(req.body);
 
     if (error) {
       return res.status(400).json({
@@ -92,7 +93,7 @@ var login = async function (req, res) {
     }
 
     // check if username exist in users table
-    var data = await UsersModel.findAll({
+    const data = await UsersModel.findAll({
       where: { username: username },
     });
 
@@ -105,7 +106,7 @@ var login = async function (req, res) {
     }
 
     // check if password match
-    var match = await argon2.verify(data[0].dataValues.password, password);
+    const match = await argon2.verify(data[0].dataValues.password, password);
     if (!match) {
       return res.status(401).json({
         code: 401,
@@ -115,11 +116,11 @@ var login = async function (req, res) {
     }
 
     // generate token
-    var userId = data[0].dataValues.id;
-    var name = data[0].dataValues.name;
-    var newUsername = data[0].dataValues.username;
-    var role = data[0].dataValues.role;
-    var accessToken = jwt.sign(
+    const userId = data[0].dataValues.id;
+    const name = data[0].dataValues.name;
+    const newUsername = data[0].dataValues.username;
+    const role = data[0].dataValues.role;
+    const accessToken = jwt.sign(
       {
         userId: userId,
         name: name,
@@ -130,7 +131,7 @@ var login = async function (req, res) {
       { expiresIn: "1d" }
     );
 
-    var refreshToken = jwt.sign(
+    const refreshToken = jwt.sign(
       {
         userId: userId,
         name: name,
@@ -160,9 +161,9 @@ var login = async function (req, res) {
   }
 };
 
-var logout = async function (req, res) {
+const logout = async function (req, res) {
   try {
-    var refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
       return res.status(401).json({
@@ -172,7 +173,7 @@ var logout = async function (req, res) {
       });
     }
 
-    var data = await UsersModel.findAll({
+    const data = await UsersModel.findAll({
       where: { refreshToken: refreshToken },
     });
 
@@ -200,9 +201,9 @@ var logout = async function (req, res) {
   }
 };
 
-var verifyUser = async function (req, res) {
+const verifyUser = async function (req, res) {
   try {
-    var refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
       return res.status(401).json({
@@ -212,7 +213,7 @@ var verifyUser = async function (req, res) {
       });
     }
 
-    var data = await UsersModel.findAll({
+    const data = await UsersModel.findAll({
       where: { refreshToken: refreshToken },
     });
 
@@ -227,7 +228,7 @@ var verifyUser = async function (req, res) {
     jwt.verify(refreshToken, globals.REFRESH_TOKEN_SECRET, function (err) {
       if (err) return res.status(401).json({ code: 401, status: "failed" });
 
-      var accessToken = jwt.sign(
+      const accessToken = jwt.sign(
         {
           userId: data[0].dataValues.id,
           name: data[0].dataValues.name,

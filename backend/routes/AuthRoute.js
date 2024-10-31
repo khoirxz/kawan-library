@@ -1,14 +1,14 @@
-var express = require("express");
+const express = require("express");
 
 // controllers auth
-var {
+const {
   signup,
   login,
   logout,
   verifyUser,
 } = require("../controllers/AuthController.js");
 
-var router = express.Router();
+const router = express.Router();
 
 router.post("/signup", signup);
 router.post("/login", login);

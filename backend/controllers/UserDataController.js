@@ -1,5 +1,6 @@
-var Joi = require("joi");
-var UserDataModel = require("../model/UserDataModel");
+const Joi = require("joi");
+const UserDataModel = require("../model/UserDataModel");
+const responseHandler = require("../helpers/responseHandler");
 
 /**
  * Get user data by id
@@ -7,14 +8,15 @@ var UserDataModel = require("../model/UserDataModel");
  * @param {Object} res - response object
  * @returns {Promise} - promise that resolves to an object with a status code, status message, and data (if any)
  */
-var getUserDataById = async function (req, res) {
+const getUserDataById = async (req, res) => {
   try {
-    var data;
+    let data;
     if (req.decoded.role === "admin") {
-      data = await UserDataModel.findAll({
+      const oldData = await UserDataModel.findAll({
         where: { user_id: req.params.id },
       });
-      if (data.length === 0) {
+
+      if (oldData.length === 0) {
         return res.status(204).json({
           code: 204,
           status: "success",
@@ -25,44 +27,28 @@ var getUserDataById = async function (req, res) {
       data = await UserDataModel.findAll({
         where: { user_id: req.decoded.userId },
       });
+
       if (data.length === 0) {
-        return res.status(204).json({
-          code: 204,
-          status: "success",
+        return responseHandler(res, 204, {
           message: "User data not found",
         });
       }
     }
 
-    res.status(200).json({
-      code: 200,
-      status: "success",
-      data,
+    responseHandler(res, 200, {
+      message: "Success get user data",
+      data: data,
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "error",
+    responseHandler(res, 500, {
       message: error.message,
     });
   }
 };
 
-/**
- * Create user data if it does not already exist.
- *
- * This function receives a request object containing user details and checks if
- * the data already exists in the database. If it does, it returns a conflict error.
- * Otherwise, it validates the input using Joi schema and creates new user data in
- * the database. The response includes a status code, status message, and the created data.
- *
- * @param {Object} req - The request object containing user data in the body.
- * @param {Object} res - The response object to send the status and data.
- * @returns {Promise} - Resolves to a JSON response indicating success or error.
- */
-var createUserData = async function (req, res) {
+const createUserData = async (req, res) => {
   try {
-    var {
+    const {
       user_id,
       address,
       subdistrict,
@@ -75,10 +61,10 @@ var createUserData = async function (req, res) {
     } = req.body;
 
     // cek jika data sudah ada
-    var data = await UserDataModel.findAll({
+    const oldData = await UserDataModel.findAll({
       where: { user_id: user_id },
     });
-    if (data.length > 0) {
+    if (oldData.length > 0) {
       return res.status(409).json({
         code: 409,
         status: "error",
@@ -86,7 +72,7 @@ var createUserData = async function (req, res) {
       });
     }
 
-    var schema = Joi.object({
+    const schema = Joi.object({
       user_id: Joi.number().required(),
       address: Joi.string().required(),
       subdistrict: Joi.string().required(),
@@ -98,7 +84,7 @@ var createUserData = async function (req, res) {
       phone: Joi.string().required(),
     });
 
-    var { error } = schema.validate(req.body);
+    const { error } = schema.validate(req.body);
     if (error) {
       return res.status(400).json({
         code: 400,
@@ -107,6 +93,7 @@ var createUserData = async function (req, res) {
       });
     }
 
+    let data;
     if (req.decoded.role === "admin") {
       data = await UserDataModel.create({
         user_id: user_id,
@@ -146,9 +133,8 @@ var createUserData = async function (req, res) {
       });
     }
 
-    res.status(200).json({
-      code: 200,
-      status: "success",
+    responseHandler(res, 201, {
+      message: "Success create user data",
       data: data,
     });
   } catch (error) {
@@ -156,9 +142,9 @@ var createUserData = async function (req, res) {
   }
 };
 
-var updateUserData = async function (req, res) {
+const updateUserData = async (req, res) => {
   try {
-    var {
+    const {
       user_id,
       address,
       subdistrict,
@@ -170,7 +156,7 @@ var updateUserData = async function (req, res) {
       phone,
     } = req.body;
 
-    var schema = Joi.object({
+    const schema = Joi.object({
       user_id: Joi.number().required(),
       address: Joi.string().required(),
       subdistrict: Joi.string().required(),
@@ -182,28 +168,24 @@ var updateUserData = async function (req, res) {
       phone: Joi.string().required(),
     });
 
-    var { error } = schema.validate(req.body);
+    const { error } = schema.validate(req.body);
     if (error) {
-      return res.status(400).json({
-        code: 400,
-        status: "error",
+      return responseHandler(res, 400, {
         message: error.message,
       });
     }
 
     // check if data exist
-    var oldData = await UserDataModel.findAll({
+    const oldData = await UserDataModel.findAll({
       where: { user_id: user_id },
     });
     if (oldData.length == 0) {
-      return res.status(404).json({
-        code: 404,
-        status: "error",
+      return responseHandler(res, 404, {
         message: "Data not found",
       });
     }
 
-    var data;
+    let data;
     if (req.decoded.role === "admin") {
       data = await UserDataModel.update(
         {
@@ -222,10 +204,8 @@ var updateUserData = async function (req, res) {
       );
     } else {
       if (req.decoded.userId != user_id) {
-        return res.status(403).json({
-          code: 403,
-          status: "error",
-          message: "Forbidden",
+        return responseHandler(res, 403, {
+          message: "Forbidden, you don't have permission",
         });
       } else {
         data = await UserDataModel.update(
@@ -246,13 +226,14 @@ var updateUserData = async function (req, res) {
       }
     }
 
-    res.status(200).json({
-      code: 200,
-      status: "success",
+    responseHandler(res, 200, {
+      message: "Data updated successfully",
       data: data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    responseHandler(res, 500, {
+      message: error.message,
+    });
   }
 };
 

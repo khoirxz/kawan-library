@@ -1,16 +1,17 @@
-var { Sequelize } = require("sequelize");
-var db = require("../config/database");
+const Sequelize = require("sequelize");
+const db = require("../config/database");
 
-var { DataTypes } = Sequelize;
+const DataTypes = Sequelize.DataTypes;
 
-var JobHistory = db.define("job_history", {
+const JobHistory = db.define("job_history", {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
   user_id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     allowNull: false,
   },
   company_name: {

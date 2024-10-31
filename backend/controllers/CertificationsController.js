@@ -1,11 +1,11 @@
-var Joi = require("joi");
-var fs = require("fs");
-var Op = require("sequelize").Op;
-var CertificationsModel = require("../model/CertificationsModel");
+const Joi = require("joi");
+const fs = require("fs");
+const Op = require("sequelize").Op;
+const CertificationsModel = require("../model/CertificationsModel");
 
-var getCertificationsByIdUser = async function (req, res) {
+const getCertificationsByIdUser = async (req, res) => {
   try {
-    var data = await CertificationsModel.findAll({
+    const data = await CertificationsModel.findAll({
       where: { user_id: req.params.id },
     });
     res.status(200).json({
@@ -18,9 +18,9 @@ var getCertificationsByIdUser = async function (req, res) {
   }
 };
 
-var getCertificateById = async function (req, res) {
+const getCertificateById = async (req, res) => {
   try {
-    var data = await CertificationsModel.findOne({
+    const data = await CertificationsModel.findOne({
       where: { id: req.params.id },
     });
 
@@ -42,9 +42,9 @@ var getCertificateById = async function (req, res) {
   }
 };
 
-var createCertificate = async function (req, res) {
+const createCertificate = async (req, res) => {
   try {
-    var { user_id, name, description, date } = req.body;
+    const { user_id, name, description, date } = req.body;
 
     if (!req.file) {
       return res.status(400).json({
@@ -54,14 +54,14 @@ var createCertificate = async function (req, res) {
       });
     }
 
-    var schema = Joi.object({
+    const schema = Joi.object({
       user_id: Joi.number().required(),
       name: Joi.string().required(),
       description: Joi.string().required(),
       date: Joi.date().required(),
     });
 
-    var { error } = schema.validate(req.body);
+    const { error } = schema.validate(req.body);
 
     if (error) {
       return res.status(400).json({
@@ -71,7 +71,7 @@ var createCertificate = async function (req, res) {
       });
     }
 
-    var data = await CertificationsModel.create({
+    const data = await CertificationsModel.create({
       user_id: user_id,
       name: name,
       description: description,
@@ -93,9 +93,9 @@ var createCertificate = async function (req, res) {
   }
 };
 
-var updateCertificateById = async function (req, res) {
+const updateCertificateById = async (req, res) => {
   try {
-    var oldData = await CertificationsModel.findOne({
+    const oldData = await CertificationsModel.findOne({
       where: { id: req.params.id },
     });
 
@@ -107,16 +107,16 @@ var updateCertificateById = async function (req, res) {
       });
     }
 
-    var { user_id, name, description, date } = req.body;
+    const { user_id, name, description, date } = req.body;
 
-    var schema = Joi.object({
+    const schema = Joi.object({
       user_id: Joi.number().required(),
       name: Joi.string().required(),
       description: Joi.string().required(),
       date: Joi.date().required(),
     });
 
-    var { error } = schema.validate(req.body);
+    const { error } = schema.validate(req.body);
 
     if (error) {
       return res.status(400).json({
@@ -126,7 +126,7 @@ var updateCertificateById = async function (req, res) {
       });
     }
 
-    var data;
+    let data;
     // check if file exist
     if (req.file) {
       await CertificationsModel.update(
@@ -175,9 +175,9 @@ var updateCertificateById = async function (req, res) {
   }
 };
 
-var deleteCertificateById = async function (req, res) {
+const deleteCertificateById = async (req, res) => {
   try {
-    var data = await CertificationsModel.findOne({
+    const data = await CertificationsModel.findOne({
       where: { id: req.params.id },
     });
 
@@ -216,9 +216,9 @@ var deleteCertificateById = async function (req, res) {
  * @param {String} req.query.search - Search query
  * @returns {Object} - Response object, containing status code and data
  */
-var searchCertificate = async function (req, res) {
+const searchCertificate = async (req, res) => {
   try {
-    var data = await CertificationsModel.findAll({
+    const data = await CertificationsModel.findAll({
       where: {
         [Op.or]: [
           { name: { [Op.like]: `%${req.query.search}%` } },
@@ -242,9 +242,9 @@ var searchCertificate = async function (req, res) {
   }
 };
 
-var getAllCertificates = async function (req, res) {
+const getAllCertificates = async (req, res) => {
   try {
-    var data = await CertificationsModel.findAll({
+    const data = await CertificationsModel.findAll({
       where: { user_id: req.decoded.userId },
     });
 

@@ -1,42 +1,49 @@
-var { Sequelize } = require("sequelize");
-var db = require("../config/database");
+const Sequelize = require("sequelize");
+const db = require("../config/database");
 
-var Decrees = db.define("decrees", {
+const DataTypes = Sequelize.DataTypes;
+
+const Decrees = db.define("decrees", {
   id: {
-    type: Sequelize.CHAR(36),
+    type: DataTypes.CHAR(36),
     primaryKey: true,
-    defaultValue: Sequelize.UUIDV4,
+    defaultValue: DataTypes.UUIDV4,
   },
   user_id: {
-    type: Sequelize.INTEGER,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    allowNull: false,
+  },
+  category_id: {
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   title: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   description: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   category: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   status: {
-    type: Sequelize.ENUM("draft", "approved", "canceled"),
+    type: DataTypes.ENUM("draft", "approved", "canceled"),
     allowNull: false,
   },
   effective_date: {
-    type: Sequelize.DATE,
+    type: DataTypes.DATE,
     allowNull: false,
   },
   expired_date: {
-    type: Sequelize.DATE,
+    type: DataTypes.DATE,
     allowNull: true,
   },
   file_path: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: true,
   },
 });
