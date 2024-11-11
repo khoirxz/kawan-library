@@ -12,11 +12,11 @@ const {
   uploadAvatar,
   getAvatarById,
   deleteAvatar,
-} = require("../controllers/UsersController.js");
+} = require("../../controllers/user/UsersController.js");
 const {
   authMiddleware,
   adminRoleMiddleware,
-} = require("../middleware/authMiddleware.js");
+} = require("../../middleware/authMiddleware.js");
 
 const router = express.Router();
 
@@ -40,12 +40,12 @@ router.delete("/:id", authMiddleware, adminRoleMiddleware, deleteUser);
 
 // upload avatar
 router.post(
-  "/users/avatar/:id",
+  "/avatar/:id",
   authMiddleware,
   upload.single("avatar"),
   uploadAvatar
 );
-router.get("/users/avatar/:id", authMiddleware, getAvatarById);
-router.delete("/users/avatar/:id", authMiddleware, deleteAvatar);
+router.get("/avatar/:id", authMiddleware, getAvatarById);
+router.delete("/avatar/:id", authMiddleware, deleteAvatar);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const Squelize = require("sequelize");
-const db = require("../config/database");
+const db = require("../../config/database");
 
 const DataTypes = Squelize.DataTypes;
 
@@ -10,40 +10,36 @@ const UserData = db.define("user_data", {
     autoIncrement: true,
   },
   user_id: {
-    type: DataTypes.UUID,
+    type: DataTypes.CHAR,
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
+    references: {
+      model: "users",
+      key: "id",
+    },
   },
-  address: {
+  firstName: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  subdistrict: {
+  lastName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  dateBirth: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  gender: {
+    type: DataTypes.ENUM("male", "female"),
+    allowNull: false,
+  },
+  religion: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  city: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  province: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  country: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  postal_code: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  phone: {
-    type: DataTypes.STRING,
+  maritalStatus: {
+    type: DataTypes.ENUM("single", "married"),
     allowNull: false,
   },
 });

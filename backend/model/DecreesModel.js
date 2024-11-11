@@ -10,23 +10,27 @@ const Decrees = db.define("decrees", {
     defaultValue: DataTypes.UUIDV4,
   },
   user_id: {
-    type: DataTypes.UUID,
+    type: DataTypes.CHAR,
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
+    references: {
+      model: "users",
+      key: "id",
+    },
   },
   category_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    references: {
+      model: "decrees_categories",
+      key: "id",
+    },
   },
   title: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   description: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  category: {
     type: DataTypes.STRING,
     allowNull: false,
   },

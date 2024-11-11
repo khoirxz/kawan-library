@@ -1,20 +1,20 @@
 const jwt = require("jsonwebtoken");
-const UserModel = require("../model/UsersModel");
+const UserModel = require("../model/user/UsersModel");
 const { globals } = require("../config/config");
+const responseHandler = require("../helpers/responseHandler");
 
 const authMiddleware = (req, res, next) => {
-  const token = req.headers["authorization"];
+  const token = req.cookies.token;
   if (!token) {
-    return res.status(401).json({
-      status: "failed",
-      message: "Please login first.",
+    return responseHandler(res, 401, {
+      message: "Failed to authenticate.",
     });
   }
+
   // check if token is valid
-  jwt.verify(token, globals.ACCESS_TOKEN_SECRET, async function (err, decoded) {
+  jwt.verify(token, globals.ACCESS_TOKEN_SECRET, async (err, decoded) => {
     if (err) {
-      return res.status(401).json({
-        status: "failed",
+      return responseHandler(res, 401, {
         message: "Failed to authenticate.",
       });
     } else {
@@ -22,9 +22,8 @@ const authMiddleware = (req, res, next) => {
         where: { id: decoded.userId },
       });
 
-      if (!user.dataValues.refreshToken) {
-        return res.status(401).json({
-          status: "failed",
+      if (!user.dataValues.token) {
+        return responseHandler(res, 401, {
           message: "Failed to authenticate.",
         });
       }
@@ -39,9 +38,8 @@ const adminRoleMiddleware = (req, res, next) => {
   if (req.decoded.role === "admin") {
     next();
   } else {
-    return res.status(401).json({
-      status: "failed",
-      message: "Unauthorized access.",
+    return responseHandler(res, 403, {
+      message: "Forbidden, you don't have permission",
     });
   }
 };

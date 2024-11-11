@@ -1,14 +1,14 @@
-const UsersModel = require("../model/UsersModel");
+const UsersModel = require("../model/user/UsersModel");
 const Joi = require("joi");
 const argon2 = require("argon2");
 const jwt = require("jsonwebtoken");
 const { globals } = require("../config/config");
+const responseHandler = require("../helpers/responseHandler");
 
 const signup = async (req, res) => {
   try {
-    const { name, username, password } = req.body;
+    const { username, password } = req.body;
     const schema = Joi.object({
-      name: Joi.string().required().min(3),
       username: Joi.string().required().min(4).alphanum(),
       password: Joi.string().required(),
       confirmPassword: Joi.any()
@@ -50,14 +50,13 @@ const signup = async (req, res) => {
     // create user
     data = await UsersModel.create(
       {
-        name: name,
         username: username,
         password: encryptedPassword,
         role: "user",
         verified: true,
       },
       {
-        fields: ["name", "username", "role", "verified", "password"],
+        fields: ["username", "role", "verified", "password"],
       }
     );
     res.status(201).json({
@@ -117,36 +116,21 @@ const login = async (req, res) => {
 
     // generate token
     const userId = data[0].dataValues.id;
-    const name = data[0].dataValues.name;
     const newUsername = data[0].dataValues.username;
     const role = data[0].dataValues.role;
-    const accessToken = jwt.sign(
+
+    const token = jwt.sign(
       {
         userId: userId,
-        name: name,
         username: newUsername,
         role: role,
       },
       globals.ACCESS_TOKEN_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    const refreshToken = jwt.sign(
-      {
-        userId: userId,
-        name: name,
-        username: newUsername,
-        role: role,
-      },
-      globals.REFRESH_TOKEN_SECRET,
       { expiresIn: "1h" }
     );
 
-    await UsersModel.update(
-      { refreshToken: refreshToken },
-      { where: { id: userId } }
-    );
-    res.cookie("refreshToken", refreshToken, {
+    await UsersModel.update({ token: token }, { where: { id: userId } });
+    res.cookie("token", token, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
@@ -154,18 +138,18 @@ const login = async (req, res) => {
     res.status(200).json({
       code: 200,
       status: "success",
-      token: accessToken,
+      token: token,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    responseHandler(res, 500, { message: error.message });
   }
 };
 
 const logout = async function (req, res) {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const token = req.cookies.token;
 
-    if (!refreshToken) {
+    if (!token) {
       return res.status(401).json({
         code: 401,
         status: "error",
@@ -174,7 +158,7 @@ const logout = async function (req, res) {
     }
 
     const data = await UsersModel.findAll({
-      where: { refreshToken: refreshToken },
+      where: { token: token },
     });
 
     if (data.length === 0) {
@@ -186,10 +170,10 @@ const logout = async function (req, res) {
     }
 
     await UsersModel.update(
-      { refreshToken: null },
+      { token: null },
       { where: { id: data[0].dataValues.id } }
     );
-    res.clearCookie("refreshToken");
+    res.clearCookie("token");
 
     res.status(200).json({
       code: 200,
@@ -203,9 +187,9 @@ const logout = async function (req, res) {
 
 const verifyUser = async function (req, res) {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const token = req.cookies.token;
 
-    if (!refreshToken) {
+    if (!token) {
       return res.status(401).json({
         code: 401,
         status: "error",
@@ -214,7 +198,7 @@ const verifyUser = async function (req, res) {
     }
 
     const data = await UsersModel.findAll({
-      where: { refreshToken: refreshToken },
+      where: { token: token },
     });
 
     if (data.length === 0) {
@@ -225,30 +209,18 @@ const verifyUser = async function (req, res) {
       });
     }
 
-    jwt.verify(refreshToken, globals.REFRESH_TOKEN_SECRET, function (err) {
+    jwt.verify(token, globals.ACCESS_TOKEN_SECRET, function (err) {
       if (err) return res.status(401).json({ code: 401, status: "failed" });
-
-      const accessToken = jwt.sign(
-        {
-          userId: data[0].dataValues.id,
-          name: data[0].dataValues.name,
-          username: data[0].dataValues.username,
-          role: data[0].dataValues.role,
-        },
-        globals.ACCESS_TOKEN_SECRET,
-        { expiresIn: "15s" }
-      );
 
       res.status(200).json({
         code: 200,
         status: "success",
         data: {
           userId: data[0].dataValues.id,
-          name: data[0].dataValues.name,
           username: data[0].dataValues.username,
           role: data[0].dataValues.role,
           avatarImg: data[0].dataValues.avatarImg,
-          token: accessToken,
+          token: data[0].dataValues.token,
         },
       });
     });

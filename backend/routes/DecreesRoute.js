@@ -4,13 +4,12 @@ const path = require("path");
 
 // controllers decrees
 const {
-  getAllDecreesByIdUser,
+  getAllDecrees,
   getDecreeById,
   createDecree,
   updateDecreeById,
   deleteDecreeById,
   searchDecrees,
-  getAllDecrees,
 } = require("../controllers/DecreesController.js");
 const {
   authMiddleware,
@@ -33,9 +32,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage, limits: { fileSize: 2000000 } });
 
 router.get("/search/:id", authMiddleware, searchDecrees);
-router.get("/", authMiddleware, getAllDecrees);
 
-router.get("/user/:id", authMiddleware, getAllDecreesByIdUser);
+router.get("/", authMiddleware, getAllDecrees);
 router.get("/:id", authMiddleware, getDecreeById);
 router.post(
   "/",

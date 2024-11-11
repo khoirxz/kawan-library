@@ -1,6 +1,6 @@
 const Joi = require("joi");
 const JobHistoryModel = require("../model/JobHistoryModel");
-const UsersModel = require("../model/UsersModel");
+const UsersModel = require("../model/user/UsersModel");
 const responseHandler = require("../helpers/responseHandler");
 
 const getUserJobHistory = async function (req, res) {

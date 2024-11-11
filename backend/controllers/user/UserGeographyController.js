@@ -1,22 +1,22 @@
 const Joi = require("joi");
-const UserDataModel = require("../model/UserDataModel");
-const responseHandler = require("../helpers/responseHandler");
+const UserGeographyModel = require("../../model/user/UserGeographyModel");
+const responseHandler = require("../../helpers/responseHandler");
 
 /**
- * Get user data by id
+ * Get user geography by id
  * @param {Object} req - request object
  * @param {Object} res - response object
  * @returns {Promise} - promise that resolves to an object with a status code, status message, and data (if any)
  */
-const getUserDataById = async (req, res) => {
+const getById = async (req, res) => {
   try {
     let data;
     if (req.decoded.role === "admin") {
-      const oldData = await UserDataModel.findAll({
+      data = await UserGeographyModel.findAll({
         where: { user_id: req.params.id },
       });
 
-      if (oldData.length === 0) {
+      if (data.length === 0) {
         return res.status(204).json({
           code: 204,
           status: "success",
@@ -24,7 +24,7 @@ const getUserDataById = async (req, res) => {
         });
       }
     } else {
-      data = await UserDataModel.findAll({
+      data = await UserGeographyModel.findAll({
         where: { user_id: req.decoded.userId },
       });
 
@@ -46,7 +46,7 @@ const getUserDataById = async (req, res) => {
   }
 };
 
-const createUserData = async (req, res) => {
+const create = async (req, res) => {
   try {
     const {
       user_id,
@@ -61,7 +61,7 @@ const createUserData = async (req, res) => {
     } = req.body;
 
     // cek jika data sudah ada
-    const oldData = await UserDataModel.findAll({
+    const oldData = await UserGeographyModel.findAll({
       where: { user_id: user_id },
     });
     if (oldData.length > 0) {
@@ -73,7 +73,7 @@ const createUserData = async (req, res) => {
     }
 
     const schema = Joi.object({
-      user_id: Joi.number().required(),
+      user_id: Joi.string().required(),
       address: Joi.string().required(),
       subdistrict: Joi.string().required(),
       city: Joi.string().required(),
@@ -95,7 +95,7 @@ const createUserData = async (req, res) => {
 
     let data;
     if (req.decoded.role === "admin") {
-      data = await UserDataModel.create({
+      data = await UserGeographyModel.create({
         user_id: user_id,
         address: address,
         subdistrict: subdistrict,
@@ -108,7 +108,7 @@ const createUserData = async (req, res) => {
       });
     } else {
       // cek jika data sudah ada
-      data = await UserDataModel.findAll({
+      data = await UserGeographyModel.findAll({
         where: { user_id: req.decoded.userId },
       });
 
@@ -120,7 +120,7 @@ const createUserData = async (req, res) => {
         });
       }
 
-      data = await UserDataModel.create({
+      data = await UserGeographyModel.create({
         user_id: req.decoded.userId,
         address: address,
         subdistrict: subdistrict,
@@ -142,7 +142,7 @@ const createUserData = async (req, res) => {
   }
 };
 
-const updateUserData = async (req, res) => {
+const update = async (req, res) => {
   try {
     const {
       user_id,
@@ -157,7 +157,7 @@ const updateUserData = async (req, res) => {
     } = req.body;
 
     const schema = Joi.object({
-      user_id: Joi.number().required(),
+      user_id: Joi.string().required(),
       address: Joi.string().required(),
       subdistrict: Joi.string().required(),
       city: Joi.string().required(),
@@ -176,7 +176,7 @@ const updateUserData = async (req, res) => {
     }
 
     // check if data exist
-    const oldData = await UserDataModel.findAll({
+    const oldData = await UserGeographyModel.findAll({
       where: { user_id: user_id },
     });
     if (oldData.length == 0) {
@@ -187,7 +187,7 @@ const updateUserData = async (req, res) => {
 
     let data;
     if (req.decoded.role === "admin") {
-      data = await UserDataModel.update(
+      data = await UserGeographyModel.update(
         {
           address: address,
           subdistrict: subdistrict,
@@ -208,7 +208,7 @@ const updateUserData = async (req, res) => {
           message: "Forbidden, you don't have permission",
         });
       } else {
-        data = await UserDataModel.update(
+        data = await UserGeographyModel.update(
           {
             address: address,
             subdistrict: subdistrict,
@@ -238,7 +238,7 @@ const updateUserData = async (req, res) => {
 };
 
 module.exports = {
-  getUserDataById,
-  createUserData,
-  updateUserData,
+  getById,
+  create,
+  update,
 };

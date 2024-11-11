@@ -1,5 +1,5 @@
 const Sequelize = require("sequelize");
-const db = require("../config/database");
+const db = require("../../config/database");
 
 const DataTypes = Sequelize.DataTypes;
 
@@ -7,11 +7,7 @@ const Users = db.define("users", {
   id: {
     type: DataTypes.CHAR(36),
     primaryKey: true,
-    defaultValue: Sequelize.UUIDV4,
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    defaultValue: DataTypes.UUIDV4,
   },
   role: {
     type: DataTypes.ENUM("admin", "user"),
@@ -33,7 +29,7 @@ const Users = db.define("users", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  refreshToken: {
+  token: {
     type: DataTypes.TEXT("long"),
     allowNull: true,
   },

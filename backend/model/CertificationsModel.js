@@ -10,8 +10,12 @@ const Certifications = db.define("certifications", {
     defaultValue: DataTypes.UUIDV4,
   },
   user_id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.CHAR,
     allowNull: false,
+    references: {
+      model: "users",
+      key: "id",
+    },
   },
   name: {
     type: DataTypes.STRING,

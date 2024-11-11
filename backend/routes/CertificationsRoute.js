@@ -4,13 +4,12 @@ const path = require("path");
 
 // controllers certifications
 const {
-  getCertificationsByIdUser,
+  getAllCertificates,
   getCertificateById,
   createCertificate,
   updateCertificateById,
   deleteCertificateById,
   searchCertificate,
-  getAllCertificates,
 } = require("../controllers/CertificationsController.js");
 const {
   authMiddleware,
@@ -36,9 +35,8 @@ const upload = multer({
 });
 
 router.get("/search/:id", authMiddleware, searchCertificate);
-router.get("/", authMiddleware, getAllCertificates);
 
-router.get("/user/:id", authMiddleware, getCertificationsByIdUser);
+router.get("/", authMiddleware, getAllCertificates);
 router.get("/:id", authMiddleware, getCertificateById);
 router.post(
   "/",

@@ -2,23 +2,47 @@ const Joi = require("joi");
 const fs = require("fs");
 const Op = require("sequelize").Op;
 const DecreesModel = require("../model/DecreesModel");
+const responseHandler = require("../helpers/responseHandler");
 
 // same as getAllDecrees
-const getAllDecreesByIdUser = async (req, res) => {
+const getAllDecrees = async (req, res) => {
   try {
-    const data = await DecreesModel.findAll({
-      where: { user_id: req.params.id },
-    });
+    let data;
+    const searchQuery = req.query.search;
 
-    return res.status(200).json({
-      code: 200,
-      status: "success",
+    if (req.decoded.role === "admin") {
+      const whereClause = searchQuery
+        ? {
+            [Op.or]: [
+              { title: { [Op.like]: `%${searchQuery}%` } },
+              { description: { [Op.like]: `%${searchQuery}%` } },
+            ],
+          }
+        : {};
+      data = await DecreesModel.findAll({
+        where: whereClause,
+      });
+    } else {
+      const whereClause = searchQuery
+        ? {
+            [Op.or]: [
+              { title: { [Op.like]: `%${searchQuery}%` } },
+              { description: { [Op.like]: `%${searchQuery}%` } },
+            ],
+            user_id: req.decoded.userId,
+          }
+        : { user_id: req.decoded.userId };
+      data = await DecreesModel.findAll({
+        where: whereClause,
+      });
+    }
+
+    responseHandler(res, 200, {
+      message: "Success get all decrees",
       data: data,
     });
   } catch (error) {
-    return res.status(500).json({
-      code: 500,
-      status: "failed",
+    responseHandler(res, 500, {
       message: error.message,
     });
   }
@@ -56,9 +80,9 @@ const createDecree = async (req, res) => {
   try {
     const {
       user_id,
+      category_id,
       title,
       description,
-      category,
       status,
       effective_date,
       expired_date,
@@ -73,10 +97,10 @@ const createDecree = async (req, res) => {
     }
 
     const schema = Joi.object({
-      user_id: Joi.number().required(),
+      user_id: Joi.string().required(),
+      category_id: Joi.number().required(),
       title: Joi.string().required(),
       description: Joi.string().required(),
-      category: Joi.string().required(),
       status: Joi.string().required(),
       effective_date: Joi.date().required(),
       expired_date: Joi.date().allow(null),
@@ -95,7 +119,7 @@ const createDecree = async (req, res) => {
       user_id,
       title,
       description,
-      category,
+      category_id,
       status,
       effective_date,
       expired_date: expired_date || null,
@@ -268,34 +292,11 @@ const searchDecrees = async (req, res) => {
   }
 };
 
-// fungsi ini digunakan untuk menampilkan semua decrees
-// dari id user yang didapatkan dari req.decoded.id (middleware/auth.js)
-const getAllDecrees = async (req, res) => {
-  try {
-    const data = await DecreesModel.findAll({
-      where: { user_id: req.decoded.userId },
-    });
-
-    return res.status(200).json({
-      code: 200,
-      status: "success",
-      data: data,
-    });
-  } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
-      message: error.message,
-    });
-  }
-};
-
 module.exports = {
-  getAllDecreesByIdUser,
+  getAllDecrees,
   getDecreeById,
   createDecree,
   updateDecreeById,
   deleteDecreeById,
   searchDecrees,
-  getAllDecrees,
 };

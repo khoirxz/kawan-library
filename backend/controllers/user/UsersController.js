@@ -1,8 +1,8 @@
 const Joi = require("joi");
 const argon2 = require("argon2");
 const fs = require("fs");
-const UsersModel = require("../model/UsersModel");
-const responseHandler = require("../helpers/responseHandler");
+const UsersModel = require("../../model/user/UsersModel");
+const responseHandler = require("../../helpers/responseHandler");
 
 const getUsers = async (req, res) => {
   try {
@@ -194,6 +194,7 @@ const uploadAvatar = async (req, res) => {
     });
 
     if (oldData.length == 0) {
+      fs.unlinkSync("public/uploads/avatars/" + req.file.filename);
       return res.status(404).json({
         code: 404,
         status: "failed",
@@ -212,7 +213,7 @@ const uploadAvatar = async (req, res) => {
 
     //  if old avatar exist
     if (oldData[0].avatarImg) {
-      fs.unlinkSync("public/uploads/avatars/" + data[0].avatarImg);
+      fs.unlinkSync("public/uploads/avatars/" + oldData[0].avatarImg);
     }
 
     // update avatar
@@ -226,6 +227,7 @@ const uploadAvatar = async (req, res) => {
       data,
     });
   } catch (error) {
+    fs.unlinkSync("public/uploads/avatars/" + req.file.filename);
     res.status(500).json({ message: error.message });
   }
 };

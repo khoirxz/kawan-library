@@ -1,4 +1,4 @@
-const express = require("express");
+let express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv").config();
 const cookieParser = require("cookie-parser");
@@ -13,13 +13,19 @@ const db = require("./config/database");
 // routes auth
 const AuthRoute = require("./routes/AuthRoute.js");
 // routes users
-const UsersRoute = require("./routes/UsersRoute.js");
+const UsersRoute = require("./routes/user/UsersRoute.js");
 // routes decrees
 const DecreesRoute = require("./routes/DecreesRoute.js");
 // routes certifications
 const CertificationsRoute = require("./routes/CertificationsRoute.js");
-// routes user data
-const UserDataRoute = require("./routes/UserDataRoute.js");
+// routes User Data
+const UserDataRoute = require("./routes/user/UserDataRoute.js");
+// routes User Contact
+const UserContact = require("./routes/user/UserContactRoute.js");
+// routes User data employe
+const UserDataEmployeRoute = require("./routes/user/UserDataEmployeRoute.js");
+// routes Geography data
+const UserGeographyRoute = require("./routes/user/UserGeographyRoute.js");
 // routes job history
 const JobHistoryRoute = require("./routes/JobHistoryRoute.js");
 // routes decree category
@@ -40,6 +46,7 @@ app.use(
   })
 );
 
+app.disable("x-powered-by");
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -66,12 +73,16 @@ app.get("/api.library", (req, res) => {
 });
 
 app.use("/api.library/auth/", AuthRoute);
+app.use("/api.library/decreecategory/", DecreeCategoryRoute);
+// routes berasosiasi dengan data user
 app.use("/api.library/users/", UsersRoute);
 app.use("/api.library/decrees/", DecreesRoute);
 app.use("/api.library/certifications/", CertificationsRoute);
-app.use("/api.library/userdata/", UserDataRoute);
-app.use("/api.library/jobhistory/", JobHistoryRoute);
-app.use("/api.library/decreecategory/", DecreeCategoryRoute);
+app.use("/api.library/user/data/", UserDataRoute);
+app.use("/api.library/user/contact/", UserContact);
+app.use("/api.library/user/data/employe/", UserDataEmployeRoute);
+app.use("/api.library/user/geography/", UserGeographyRoute);
+app.use("/api.library/job/history/", JobHistoryRoute);
 
 // async to db
 (() => db.sync())();

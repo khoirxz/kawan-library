@@ -2,19 +2,39 @@ const Joi = require("joi");
 const fs = require("fs");
 const Op = require("sequelize").Op;
 const CertificationsModel = require("../model/CertificationsModel");
+const responseHandler = require("../helpers/responseHandler");
 
-const getCertificationsByIdUser = async (req, res) => {
+const getAllCertificates = async (req, res) => {
   try {
-    const data = await CertificationsModel.findAll({
-      where: { user_id: req.params.id },
-    });
-    res.status(200).json({
-      code: 200,
-      status: "success",
+    let data;
+    if (req.decoded.role === "admin") {
+      const searchQuery = req.query.search;
+      const whereClause = searchQuery
+        ? {
+            [Op.or]: [
+              { name: { [Op.like]: `%${searchQuery}%` } },
+              { description: { [Op.like]: `%${searchQuery}%` } },
+            ],
+          }
+        : {};
+
+      data = await CertificationsModel.findAll({
+        where: whereClause,
+      });
+    } else {
+      data = await CertificationsModel.findAll({
+        where: { user_id: req.decoded.userId },
+      });
+    }
+
+    responseHandler(res, 200, {
+      message: "Success get all decrees",
       data: data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    responseHandler(res, 500, {
+      message: error.message,
+    });
   }
 };
 
@@ -242,32 +262,11 @@ const searchCertificate = async (req, res) => {
   }
 };
 
-const getAllCertificates = async (req, res) => {
-  try {
-    const data = await CertificationsModel.findAll({
-      where: { user_id: req.decoded.userId },
-    });
-
-    return res.status(200).json({
-      code: 200,
-      status: "success",
-      data: data,
-    });
-  } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
-      message: error.message,
-    });
-  }
-};
-
 module.exports = {
-  getCertificationsByIdUser,
+  getAllCertificates,
   getCertificateById,
   createCertificate,
   updateCertificateById,
   deleteCertificateById,
   searchCertificate,
-  getAllCertificates,
 };

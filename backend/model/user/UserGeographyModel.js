@@ -1,9 +1,9 @@
-const Sequelize = require("sequelize");
-const db = require("../config/database");
+const Squelize = require("sequelize");
+const db = require("../../config/database");
 
-const DataTypes = Sequelize.DataTypes;
+const DataTypes = Squelize.DataTypes;
 
-const JobHistory = db.define("job_history", {
+const UserGeography = db.define("user_geography", {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -18,34 +18,30 @@ const JobHistory = db.define("job_history", {
       key: "id",
     },
   },
-  company_name: {
+  address: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  position: {
+  subdistrict: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  start_date: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  end_date: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  job_description: {
+  city: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  location: {
+  province: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  is_current: {
-    type: DataTypes.BOOLEAN,
+  country: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  postal_code: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
 });
 
-module.exports = JobHistory;
+module.exports = UserGeography;

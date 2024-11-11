@@ -19,7 +19,7 @@ const getDecreeCategoryById = async (req, res) => {
   const id = req.params.id;
   try {
     const data = await DecreeCategoryModel.findOne({
-      where: id,
+      where: { id: id },
     });
 
     responseHandler(res, 200, {
