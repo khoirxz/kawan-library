@@ -66,12 +66,12 @@ const create = async (req, res) => {
 
   const schema = Joi.object({
     user_id: Joi.string().required(),
-    supervisor_id: Joi.string().required(),
+    supervisor_id: Joi.string().allow("", null),
     position: Joi.string().required(),
-    status: Joi.date().required(),
-    salary: Joi.string().required(),
-    start_date: Joi.string().required(),
-    end_date: Joi.string().allow(null).required(),
+    status: Joi.string().required(),
+    salary: Joi.number().required(),
+    start_date: Joi.date().required(),
+    end_date: Joi.date().allow(null).required(),
   });
 
   const { error } = schema.validate(req.body);
@@ -95,7 +95,7 @@ const create = async (req, res) => {
 
     const data = await UserDataEmployeModel.create({
       user_id: user_id,
-      supervisor: supervisor_id,
+      supervisor: supervisor_id ? supervisor_id : null,
       position: position,
       status: status,
       salary: salary,
@@ -127,12 +127,12 @@ const update = async (req, res) => {
 
   const schema = Joi.object({
     user_id: Joi.string().required(),
-    supervisor_id: Joi.string().required(),
+    supervisor_id: Joi.string().allow("", null),
     position: Joi.string().required(),
-    status: Joi.date().required(),
-    salary: Joi.string().required(),
-    start_date: Joi.string().required(),
-    end_date: Joi.string().allow(null).required(),
+    status: Joi.string().required(),
+    salary: Joi.number().required(),
+    start_date: Joi.date().required(),
+    end_date: Joi.date().allow(null).required(),
   });
 
   const { error } = schema.validate(req.body);
@@ -147,7 +147,7 @@ const update = async (req, res) => {
     const data = await UserDataEmployeModel.update(
       {
         user_id: user_id,
-        supervisor: supervisor_id,
+        supervisor: supervisor_id ? supervisor_id : null,
         position: position,
         status: status,
         salary: salary,

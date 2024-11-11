@@ -98,8 +98,8 @@ const create = async (req, res) => {
     if (req.decoded.role === "admin") {
       data = await UserDataModel.create({
         user_id: user_id,
-        first_name: first_name,
-        last_name: last_name,
+        firstName: first_name,
+        lastName: last_name,
         dateBirth: dateBirth,
         gender: gender,
         religion: religion,
@@ -108,8 +108,8 @@ const create = async (req, res) => {
     } else {
       data = await UserDataModel.create({
         user_id: req.decoded.userId,
-        first_name: first_name,
-        last_name: last_name,
+        firstName: first_name,
+        lastName: last_name,
         dateBirth: dateBirth,
         gender: gender,
         religion: religion,

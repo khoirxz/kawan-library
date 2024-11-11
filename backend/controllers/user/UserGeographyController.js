@@ -56,8 +56,6 @@ const create = async (req, res) => {
       province,
       country,
       postal_code,
-      email,
-      phone,
     } = req.body;
 
     // cek jika data sudah ada
@@ -80,8 +78,6 @@ const create = async (req, res) => {
       province: Joi.string().required(),
       country: Joi.string().required(),
       postal_code: Joi.string().required(),
-      email: Joi.string().email().required(),
-      phone: Joi.string().required(),
     });
 
     const { error } = schema.validate(req.body);
@@ -103,8 +99,6 @@ const create = async (req, res) => {
         province: province,
         country: country,
         postal_code: postal_code,
-        email: email,
-        phone: phone,
       });
     } else {
       // cek jika data sudah ada
@@ -128,8 +122,6 @@ const create = async (req, res) => {
         province: province,
         country: country,
         postal_code: postal_code,
-        email: email,
-        phone: phone,
       });
     }
 
@@ -152,8 +144,6 @@ const update = async (req, res) => {
       province,
       country,
       postal_code,
-      email,
-      phone,
     } = req.body;
 
     const schema = Joi.object({
@@ -164,8 +154,6 @@ const update = async (req, res) => {
       province: Joi.string().required(),
       country: Joi.string().required(),
       postal_code: Joi.string().required(),
-      email: Joi.string().email().required(),
-      phone: Joi.string().required(),
     });
 
     const { error } = schema.validate(req.body);
@@ -195,8 +183,6 @@ const update = async (req, res) => {
           province: province,
           country: country,
           postal_code: postal_code,
-          email: email,
-          phone: phone,
         },
         {
           where: { user_id: user_id },
@@ -216,8 +202,6 @@ const update = async (req, res) => {
             province: province,
             country: country,
             postal_code: postal_code,
-            email: email,
-            phone: phone,
           },
           {
             where: { user_id: user_id },
