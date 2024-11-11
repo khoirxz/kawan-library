@@ -49,7 +49,7 @@ app.use(
 app.disable("x-powered-by");
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // access to http://localhost:5000/api.library/uploads/avatars
 // access to http://localhost:5000/api.library/uploads/decrees
 // access to http://localhost:5000/api.library/uploads/certificates

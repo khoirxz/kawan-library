@@ -1,4 +1,3 @@
-const Joi = require("joi");
 const JobHistoryModel = require("../model/JobHistoryModel");
 const UsersModel = require("../model/user/UsersModel");
 const responseHandler = require("../helpers/responseHandler");
@@ -63,26 +62,6 @@ const createUserJobHistory = async function (req, res) {
       is_current,
     } = req.body;
 
-    const schema = Joi.object({
-      user_id: Joi.number().required(),
-      company_name: Joi.string().required(),
-      position: Joi.string().required(),
-      start_date: Joi.date().required(),
-      end_date: Joi.date().allow(null),
-      job_description: Joi.string().required(),
-      location: Joi.string().required(),
-      is_current: Joi.boolean().required(),
-    });
-
-    const { error } = schema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        code: 400,
-        status: "failed",
-        message: error.message,
-      });
-    }
-
     // check if user exist
     const user = await UsersModel.findAll({
       where: { id: user_id },
@@ -146,26 +125,6 @@ const updateUserJobHistory = async function (req, res) {
       location,
       is_current,
     } = req.body;
-
-    const schema = Joi.object({
-      user_id: Joi.number().required(),
-      company_name: Joi.string().required(),
-      position: Joi.string().required(),
-      start_date: Joi.date().required(),
-      end_date: Joi.date().allow(null),
-      job_description: Joi.string().required(),
-      location: Joi.string().required(),
-      is_current: Joi.boolean().required(),
-    });
-
-    const { error } = schema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        code: 400,
-        status: "failed",
-        message: error.message,
-      });
-    }
 
     // check if user exist
     const user = await UsersModel.findAll({
