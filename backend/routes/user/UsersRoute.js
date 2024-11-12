@@ -1,6 +1,8 @@
 const express = require("express");
 const multer = require("multer");
+const Joi = require("joi");
 const path = require("path");
+const responseHandler = require("../../helpers/responseHandler");
 
 // controllers user
 const {
@@ -30,12 +32,30 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage, limits: { fileSize: 2000000 } });
+const upload = multer({ storage: storage, limits: { fileSize: 8000000 } });
+
+const filterInput = (req, res, next) => {
+  const schema = Joi.object({
+    username: Joi.string().required().min(4),
+    password: Joi.string().required(),
+    role: Joi.string().required(),
+    verified: Joi.boolean().required(),
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return responseHandler(res, 400, {
+      message: error.message,
+    });
+  }
+
+  next();
+};
 
 router.get("/", authMiddleware, adminRoleMiddleware, getUsers);
 router.get("/:id", authMiddleware, adminRoleMiddleware, getUsersById);
-router.post("/", authMiddleware, adminRoleMiddleware, createUser);
-router.put("/:id", authMiddleware, updateUser);
+router.post("/", authMiddleware, adminRoleMiddleware, filterInput, createUser);
+router.put("/:id", authMiddleware, filterInput, updateUser);
 router.delete("/:id", authMiddleware, adminRoleMiddleware, deleteUser);
 
 // upload avatar

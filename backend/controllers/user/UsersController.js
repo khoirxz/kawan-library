@@ -1,4 +1,3 @@
-const Joi = require("joi");
 const argon2 = require("argon2");
 const fs = require("fs");
 const UsersModel = require("../../model/user/UsersModel");
@@ -7,7 +6,7 @@ const responseHandler = require("../../helpers/responseHandler");
 const getUsers = async (req, res) => {
   try {
     const data = await UsersModel.findAll({
-      attributes: ["id", "name", "role", "username", "avatarImg"],
+      attributes: ["id", "role", "username", "avatarImg"],
     });
 
     responseHandler(res, 200, {
@@ -25,7 +24,7 @@ const getUsersById = async (req, res) => {
   try {
     const data = await UsersModel.findAll({
       where: { id: req.params.id },
-      attributes: ["id", "name", "role", "username", "avatarImg"],
+      attributes: ["id", "role", "username", "avatarImg"],
     });
 
     responseHandler(res, 200, {
@@ -41,21 +40,7 @@ const getUsersById = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { name, username, password, role } = req.body;
-
-    const schema = Joi.object({
-      name: Joi.string().required().min(3),
-      username: Joi.string().required().min(4),
-      password: Joi.string().required(),
-      role: Joi.string().required(),
-    });
-
-    const { error } = schema.validate(req.body);
-    if (error) {
-      return responseHandler(res, 400, {
-        message: error.message,
-      });
-    }
+    const { username, password, role, verified } = req.body;
 
     // encrypt password
     const encryptedPassword = await argon2.hash(password);
@@ -72,11 +57,10 @@ const createUser = async (req, res) => {
     }
 
     const data = await UsersModel.create({
-      name: name,
       username: username,
       password: encryptedPassword,
       role: role,
-      verified: true,
+      verified: verified,
     });
 
     responseHandler(res, 201, {
@@ -92,7 +76,7 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { name, username, role, password } = req.body;
+    const { username, role, password, verified } = req.body;
 
     // check if user exist
     const oldData = await UsersModel.findAll({
@@ -104,19 +88,19 @@ const updateUser = async (req, res) => {
       });
     }
 
-    const schema = Joi.object({
-      name: Joi.string().min(3),
-      username: Joi.string().min(4),
-      password: Joi.string(),
-      role: Joi.string().required(),
-    });
-    const { error } = schema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        code: 400,
-        status: "failed",
-        message: error.message,
+    // check if username exist
+    if (username) {
+      const userexist = await UsersModel.findAll({
+        where: { username: username },
       });
+      if (userexist.length > 0) {
+        // check if user.id not equal to req.params.id
+        if (userexist[0].id != req.params.id) {
+          return responseHandler(res, 400, {
+            message: "Username already exist",
+          });
+        }
+      }
     }
 
     // encrypt password
@@ -128,10 +112,10 @@ const updateUser = async (req, res) => {
     // update user
     await UsersModel.update(
       {
-        name: name,
         username: username,
         role: role,
         password: newPassword,
+        verified: verified,
       },
       {
         where: { id: req.params.id },
