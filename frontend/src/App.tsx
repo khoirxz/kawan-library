@@ -1,68 +1,49 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { routes as route } from "./routes";
-import { MenuProps } from "./utils/menu";
-import { ConfigProvider } from "antd";
 
-import LoginPage from "./pages/auth/login.page";
-import SignupPage from "./pages/auth/signup.page";
-
-export const createRouteConfig = (routes?: MenuProps) => {
-  const routeList: {
-    path: string;
-    element: React.ReactNode;
-    id: string;
-  }[] = [];
-
-  route.forEach((route) => {
-    routeList.push({
-      path: route.path,
-      element: route.element,
-      id: route.key,
-    });
-
-    if (route.children) {
-      route.children.forEach((child) => {
-        routeList.push({
-          path: child.path,
-          element: child.element,
-          id: child.key,
-        });
-      });
-    }
-  });
-
-  // filter if path === "" dont show
-  return routeList.filter((route) => route.path !== "");
-};
+import LoginPage from "@/pages/auth";
+import DashboardPage from "@/pages/admin/dashboard";
+import UserListPage from "./pages/admin/users";
+import UserFormPage from "./pages/admin/users/form";
 
 const router = createBrowserRouter(
   [
-    ...createRouteConfig(route),
     {
       path: "/",
       element: <LoginPage />,
-      id: "login",
     },
     {
-      path: "/signup",
-      element: <SignupPage />,
-      id: "signup",
+      path: "/admin/dashboard",
+      element: <DashboardPage />,
+    },
+    {
+      path: "/admin/list",
+      element: <UserListPage />,
+    },
+    {
+      path: "/admin/form",
+      element: <UserFormPage />,
     },
   ],
-  { basename: "/library" }
+  {
+    future: {
+      v7_fetcherPersist: true,
+      v7_normalizeFormMethod: true,
+      v7_partialHydration: true,
+      v7_relativeSplatPath: true,
+      v7_skipActionErrorRevalidation: true,
+    },
+  }
 );
 
-const App: React.FC = () => {
+function App() {
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          fontFamily: "Inter",
-        },
-      }}>
-      <RouterProvider router={router} />
-    </ConfigProvider>
+    <RouterProvider
+      router={router}
+      future={{
+        v7_startTransition: true,
+      }}
+    />
   );
-};
+}
 
 export default App;

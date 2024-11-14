@@ -1,23 +1,13 @@
-import { Col, Row } from "antd";
-import AdminLayout from "../../../layouts/admin.layout";
-import CardUser from "./partials/cardUser";
+import { Box, Text } from "@chakra-ui/react";
+import LayoutAdmin from "@/layouts/admin.layout";
 
 const DashboardPage: React.FC = () => {
   return (
-    <AdminLayout>
-      <h1>Dashboard</h1>
-
-      <Row>
-        <Col xs={24} md={18}>
-          <Row gutter={[16, 16]}>
-            <Col xs={24} sm={6}>
-              <CardUser />
-            </Col>
-          </Row>
-        </Col>
-        <Col xs={24} md={6}></Col>
-      </Row>
-    </AdminLayout>
+    <LayoutAdmin>
+      <Box px={5} pt={"28"}>
+        <Text textStyle="3xl">Dashboard</Text>
+      </Box>
+    </LayoutAdmin>
   );
 };
 

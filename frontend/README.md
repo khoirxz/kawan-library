@@ -1,59 +1,50 @@
-# KAWAN LIBRARY FRONTEND
+# React + TypeScript + Vite
 
-aplikasi yang berfungsi sebagai library frontend dari pt. bpr kawan
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Table of Contents
+Currently, two official plugins are available:
 
-- [Install](#install)
-- [Usage](#usage)
-- [Deploy](#deploy)
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Install
+## Expanding the ESLint configuration
 
-Untuk proses instalasi, silahkan clone pada repositori ini kemudian lakukan installasi dengan menggunakan perintah berikut :
+If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-```bash
-npm install
-```
+- Configure the top-level `parserOptions` property like this:
 
-## Usage
-
-Jika ingin memulai aplikasi, silahkan jalankan perintah berikut :
-
-```bash
-npm start
-```
-
-## Deploy
-
-Deploy aplikasi pada cloud hosting dengan menggunakan perintah berikut :
-
-```bash
-npm run deploy
-```
-
-catatan : pengguna hosting/cpanel harus mengganti base url pada react-router-dom dan homepage package.json.
-
-contoh pada package.json :
-
-```json
-"homepage": "https://bprkawan.co.id/library/"
-```
-
-contoh pada react-router-dom :
-
-```jsx
-const router = createBrowserRouter(
-  [
-    {
-      path: "/",
-      element: <App />,
+```js
+export default tseslint.config({
+  languageOptions: {
+    // other options...
+    parserOptions: {
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      tsconfigRootDir: import.meta.dirname,
     },
-  ],
-  {
-    basename: "https://bprkawan.co.id/library/",
-  }
-);
+  },
+})
 ```
 
-pada konfigurasi tersebut saya menggunakan createBrowserRouter yang tersedia pada react-router-dom v6^, anda bisa sesuaikan dengan versi yang anda gunakan.
+- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
+- Optionally add `...tseslint.configs.stylisticTypeChecked`
+- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+
+```js
+// eslint.config.js
+import react from 'eslint-plugin-react'
+
+export default tseslint.config({
+  // Set the react version
+  settings: { react: { version: '18.3' } },
+  plugins: {
+    // Add the react plugin
+    react,
+  },
+  rules: {
+    // other rules...
+    // Enable its recommended rules
+    ...react.configs.recommended.rules,
+    ...react.configs['jsx-runtime'].rules,
+  },
+})
+```

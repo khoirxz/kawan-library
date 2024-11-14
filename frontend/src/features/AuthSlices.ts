@@ -1,6 +1,36 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { baseAPI } from "../api";
+
+interface RejectValue {
+  status: string;
+  code: number;
+  message: string;
+}
+
+interface VerifyProps {
+  code: number;
+  status: string;
+  data: {
+    userId: string;
+    username: string;
+    role: string;
+    avatarImg: string;
+    token: string;
+  };
+}
+
+interface LoginProps {
+  code: number;
+  status: string;
+  token: string;
+}
+
+interface LogoutProps {
+  code: number;
+  status: string;
+  message: string;
+}
 
 interface initialStateProps {
   main: {
@@ -8,28 +38,9 @@ interface initialStateProps {
     isError: boolean;
     isSuccess: boolean;
     message: string | null;
-    verify: {
-      code: number;
-      status: string;
-      data: {
-        userId: number;
-        name: string;
-        username: string;
-        role: string;
-        avatarImg: string;
-        token: string;
-      };
-    };
-    login: {
-      code: number;
-      status: string;
-      token: string;
-    };
-    logout: {
-      code: number;
-      status: string;
-      message: string;
-    };
+    verify: VerifyProps;
+    login?: LoginProps;
+    logout: LogoutProps;
   };
 }
 
@@ -50,8 +61,8 @@ const initialState: initialStateProps = {
       code: 0,
       status: "",
       data: {
-        userId: 0,
-        name: "",
+        userId: "",
+
         username: "",
         role: "",
         avatarImg: "",
@@ -68,39 +79,67 @@ const initialState: initialStateProps = {
 };
 
 export const LoginUser = createAsyncThunk<
-  any,
+  {
+    code: number;
+    status: string;
+    token: string;
+  },
   {
     username: string | undefined;
     password: string | undefined | null;
   },
   {
-    rejectValue: {
-      status: string;
-      code: number;
-      message: string;
-    };
+    rejectValue: RejectValue;
   }
 >("auth/login", async (data, thunkAPI) => {
   try {
-    const response = await axios.post(`${baseAPI.dev}/auth/login`, data, {
+    const response = await axios.post<{
+      code: number;
+      status: string;
+      token: string;
+    }>(`${baseAPI.dev}/auth/login`, data, {
       timeout: 6000,
     });
     return response.data;
-  } catch (error: any) {
-    if (error.status === "ERR_CONNECTION_REFUSED") {
+  } catch (error) {
+    const axiosError = error as AxiosError;
+
+    if (
+      axiosError.code === "ECONNABORTED" ||
+      axiosError.message === "Network Error"
+    ) {
       return thunkAPI.rejectWithValue({
-        message: error.message,
+        message: axiosError.message,
         status: "ERR_CONNECTION_REFUSED",
         code: 404,
       });
     }
-    return thunkAPI.rejectWithValue(error.response.data);
+
+    if (axiosError.response && axiosError.response.data) {
+      return thunkAPI.rejectWithValue(axiosError.response.data as RejectValue);
+    }
+
+    return thunkAPI.rejectWithValue({
+      message: "An unexpected error occurred",
+      status: "UNKNOWN",
+      code: 500,
+    });
   }
 });
 
 export const VerifyToken = createAsyncThunk<
-  any,
-  any,
+  {
+    code: number;
+    status: string;
+    data: {
+      userId: string;
+      username: string;
+      role: string;
+      avatarImg: string;
+      token: string;
+    };
+  },
+  void,
   {
     rejectValue: {
       status: string;
@@ -108,27 +147,41 @@ export const VerifyToken = createAsyncThunk<
       message: string;
     };
   }
->("auth/verify", async (data, thunkAPI) => {
+>("auth/verify", async (_, thunkAPI) => {
   try {
     const response = await axios.get(`${baseAPI.dev}/auth/verify/`, {
       timeout: 6000,
     });
     return response.data;
-  } catch (error: any) {
-    if (error.status === "ERR_CONNECTION_REFUSED") {
+  } catch (error) {
+    const axiosError = error as AxiosError;
+
+    if (
+      axiosError.code === "ECONNABORTED" ||
+      axiosError.message === "Network Error"
+    ) {
       return thunkAPI.rejectWithValue({
-        message: error.message,
+        message: axiosError.message,
         status: "ERR_CONNECTION_REFUSED",
         code: 404,
       });
     }
-    return thunkAPI.rejectWithValue(error.response.data);
+
+    if (axiosError.response && axiosError.response.data) {
+      return thunkAPI.rejectWithValue(axiosError.response.data as RejectValue);
+    }
+
+    return thunkAPI.rejectWithValue({
+      message: "An unexpected error occurred",
+      status: "UNKNOWN",
+      code: 500,
+    });
   }
 });
 
 export const LogoutUser = createAsyncThunk<
-  any,
-  any,
+  LogoutProps,
+  void,
   {
     rejectValue: {
       status: string;
@@ -136,24 +189,35 @@ export const LogoutUser = createAsyncThunk<
       message: string;
     };
   }
->("auth/logout", async (token: string, thunkAPI) => {
+>("auth/logout", async (_, thunkAPI) => {
   try {
     const response = await axios.delete(`${baseAPI.dev}/auth/logout/`, {
       timeout: 6000,
-      headers: {
-        Authorization: token,
-      },
     });
     return response.data;
-  } catch (error: any) {
-    if (error.status === "ERR_CONNECTION_REFUSED") {
+  } catch (error) {
+    const axiosError = error as AxiosError;
+
+    if (
+      axiosError.code === "ECONNABORTED" ||
+      axiosError.message === "Network Error"
+    ) {
       return thunkAPI.rejectWithValue({
-        message: error.message,
+        message: axiosError.message,
         status: "ERR_CONNECTION_REFUSED",
         code: 404,
       });
     }
-    return thunkAPI.rejectWithValue(error.response.data);
+
+    if (axiosError.response && axiosError.response.data) {
+      return thunkAPI.rejectWithValue(axiosError.response.data as RejectValue);
+    }
+
+    return thunkAPI.rejectWithValue({
+      message: "An unexpected error occurred",
+      status: "UNKNOWN",
+      code: 500,
+    });
   }
 });
 
@@ -161,7 +225,7 @@ export const AuthSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    resetAll: (state) => initialState,
+    resetAll: () => initialState,
     resetLogin: (state) => {
       state.main.login = initialState.main.login;
     },
@@ -177,51 +241,76 @@ export const AuthSlice = createSlice({
       .addCase(LoginUser.pending, (state) => {
         state.main.isLoading = true;
       })
-      .addCase(LoginUser.fulfilled, (state, action: PayloadAction<any>) => {
-        state.main.isLoading = false;
-        state.main.isSuccess = true;
-        state.main.message = action.payload.message;
-        state.main.login = action.payload;
-      })
-      .addCase(LoginUser.rejected, (state, action: PayloadAction<any>) => {
-        state.main.isLoading = false;
-        state.main.isError = true;
-        state.main.message = action.payload.message;
-        state.main.login = action.payload;
-      });
+      .addCase(
+        LoginUser.fulfilled,
+        (
+          state,
+          action: PayloadAction<{
+            code: number;
+            status: string;
+            token: string;
+          }>
+        ) => {
+          state.main.isLoading = false;
+          state.main.isSuccess = true;
+          state.main.message = "success";
+          state.main.login = action.payload;
+        }
+      )
+      .addCase(
+        LoginUser.rejected,
+        (state, action: PayloadAction<RejectValue | undefined>) => {
+          state.main.isLoading = false;
+          state.main.isError = true;
+          state.main.message = action?.payload?.message || "error";
+        }
+      );
 
     builder
       .addCase(VerifyToken.pending, (state) => {
         state.main.isLoading = true;
       })
-      .addCase(VerifyToken.fulfilled, (state, action: PayloadAction<any>) => {
-        state.main.isLoading = false;
-        state.main.isSuccess = true;
-        state.main.verify = action.payload;
-        state.main.message = null;
-      })
-      .addCase(VerifyToken.rejected, (state, action: PayloadAction<any>) => {
-        state.main.isLoading = false;
-        state.main.isError = true;
-        state.main.message = action.payload.message;
-        state.main.verify = action.payload;
-      });
+      .addCase(
+        VerifyToken.fulfilled,
+        (state, action: PayloadAction<VerifyProps>) => {
+          state.main.isLoading = false;
+          state.main.isSuccess = true;
+          state.main.verify = action.payload;
+          state.main.message = "success";
+        }
+      )
+      .addCase(
+        VerifyToken.rejected,
+        (state, action: PayloadAction<RejectValue | undefined>) => {
+          state.main.isLoading = false;
+          state.main.isError = true;
+          state.main.message = action?.payload?.message || "error";
+          state.main.verify = initialState.main.verify;
+        }
+      );
 
     builder
       .addCase(LogoutUser.pending, (state) => {
         state.main.isLoading = true;
       })
-      .addCase(LogoutUser.fulfilled, (state, action: PayloadAction<any>) => {
-        state.main.isLoading = false;
-        state.main.isSuccess = true;
-        state.main.logout = action.payload;
-        state.main.message = action.payload.message;
-      })
-      .addCase(LogoutUser.rejected, (state, action: PayloadAction<any>) => {
-        state.main.isLoading = false;
-        state.main.isError = true;
-        state.main.logout = action.payload;
-      });
+      .addCase(
+        LogoutUser.fulfilled,
+        (state, action: PayloadAction<LogoutProps>) => {
+          state.main.isLoading = false;
+          state.main.isSuccess = true;
+          state.main.logout = action.payload;
+          state.main.message = action.payload.message || "success";
+        }
+      )
+      .addCase(
+        LogoutUser.rejected,
+        (state, action: PayloadAction<RejectValue | undefined>) => {
+          state.main.isLoading = false;
+          state.main.isError = true;
+          state.main.logout = initialState.main.logout;
+          state.main.message = action?.payload?.message || "error";
+        }
+      );
   },
 });
 

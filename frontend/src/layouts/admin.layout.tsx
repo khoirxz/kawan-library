@@ -1,71 +1,53 @@
-import { ReactNode, useEffect, useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Box } from "@chakra-ui/react";
 
-import { Layout, theme } from "antd";
-import SidebarComponent from "../components/admin/sidebar.componen";
-import HeaderComponent from "../components/admin/header.component";
+import NavBar from "@/components/custom/NavBar";
+import { DrawerBackdrop, DrawerRoot } from "@/components/ui/drawer";
+import SideBar from "@/components/custom/SideBar";
 
-const { Content, Footer, Sider } = Layout;
+const height = 90;
 
-const sideStyle: React.CSSProperties = {
-  overflow: "auto",
-  height: "100vh",
-  position: "fixed",
-  insetInlineStart: 0,
-  top: 0,
-  bottom: 0,
-  scrollbarWidth: "thin",
-  scrollbarGutter: "stable",
-};
+const LayoutAdmin: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [navWidth, setNavWidth] = useState<number>(0);
+  const [contentWidth, setContentWidth] = useState<number>(0);
 
-const AdminLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [collapsed, setCollapsed] = useState<boolean>(false);
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // if width is less than 768px, set collapsed to true
-    if (window.innerWidth < 768) {
-      setCollapsed(true);
+    const observer = new ResizeObserver((entries) => {
+      if (entries[0]) {
+        setContentWidth(entries[0].contentRect.width);
+      }
+    });
+    if (ref.current) {
+      observer.observe(ref.current);
     }
+    return () => {
+      if (ref.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        observer.unobserve(ref.current);
+      }
+    };
   }, []);
 
+  console.log(ref.current?.offsetWidth);
   return (
-    <Layout>
-      <Sider
-        trigger={null}
-        collapsed={collapsed}
-        breakpoint="lg"
-        collapsedWidth="0"
-        onBreakpoint={(broken) => {
-          console.log(broken);
-        }}
-        onCollapse={(collapsed, type) => {
-          console.log(collapsed, type);
-        }}
-        style={sideStyle}>
-        <div className="demo-logo-vertical" />
-        <SidebarComponent />
-      </Sider>
-      <Layout style={{ marginInlineStart: collapsed ? 0 : 200 }}>
-        <HeaderComponent collapsed={collapsed} setCollapsed={setCollapsed} />
-        <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
-          <div
-            style={{
-              padding: 24,
-              minHeight: 360,
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
-            }}>
-            {children}
-          </div>
-        </Content>
-        <Footer style={{ textAlign: "center" }}>
-          BPR KAWAN ©{new Date().getFullYear()}
-        </Footer>
-      </Layout>
-    </Layout>
+    <Box fontFamily="Outfit" _light={{ bg: "#fcfcfc" }}>
+      <DrawerRoot placement="start">
+        <DrawerBackdrop />
+
+        <Box w="full" position={"relative"}>
+          <SideBar setNavWidth={setNavWidth} />
+          <Box ml={navWidth} flex={1} position={"relative"}>
+            {ref.current?.offsetWidth !== undefined ? (
+              <NavBar height={height} navWidth={contentWidth} />
+            ) : null}
+            <Box ref={ref}>{children}</Box>
+          </Box>
+        </Box>
+      </DrawerRoot>
+    </Box>
   );
 };
 
-export default AdminLayout;
+export default LayoutAdmin;
