@@ -1,13 +1,14 @@
-import { Box, Text } from "@chakra-ui/react";
-import LayoutAdmin from "@/layouts/admin.layout";
+import { AdminLayout } from "@/layouts/admin";
 
 const DashboardPage: React.FC = () => {
   return (
-    <LayoutAdmin>
-      <Box px={5} pt={"28"}>
-        <Text textStyle="3xl">Dashboard</Text>
-      </Box>
-    </LayoutAdmin>
+    <AdminLayout>
+      <div className="p-6">
+        <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500">
+          Hello World
+        </h1>
+      </div>
+    </AdminLayout>
   );
 };
 

@@ -1,112 +1,49 @@
-import { useState } from "react";
-import { Box, Flex, Stack, Text, Input, Tabs } from "@chakra-ui/react";
-import { useForm } from "react-hook-form";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { TriangleAlert } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
-import { ColorModeButton } from "@/components/ui/color-mode";
-import { Field } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
-import { PasswordInput } from "@/components/ui/password-input";
+import Login from "@/pages/auth/partials/Login";
+import SignUp from "@/pages/auth/partials/SignUp";
 
-type formLoginProps = {
-  username: string;
-  password: string;
-};
+import { useAppSelector } from "@/app/store";
+import useAuth from "@/pages/auth/partials/hook/useAuth";
 
-type formRegisterProps = {
-  username: string;
-  password: string;
-  confirmPassword: string;
-};
+const AuthPage: React.FC = () => {
+  const {
+    main: { message, isError },
+  } = useAppSelector((state) => state.authState);
+  const { isLoading } = useAuth();
 
-const LoginPage: React.FC = () => {
   return (
-    <Box fontFamily="Outfit">
-      <Flex justifyContent="flex-end" position="absolute" right={"7"} top={"7"}>
-        <ColorModeButton />
-      </Flex>
-
-      <Stack maxW={"md"} mx="auto" pt={"36"} width="full">
-        <Tabs.Root variant="enclosed" maxW="md" fitted defaultValue={"tab-1"}>
-          <Tabs.List>
-            <Tabs.Trigger value="tab-1">Login</Tabs.Trigger>
-            <Tabs.Trigger value="tab-2">Register</Tabs.Trigger>
-          </Tabs.List>
-          <Tabs.Content value="tab-1">
+    <div className="flex h-screen w-full items-center justify-center px-4">
+      {isError ? (
+        <div className="absolute z-10 top-10 max-w-screen-sm px-3">
+          <Alert variant={isError ? "destructive" : "default"}>
+            <TriangleAlert className="h-4 w-4" />
+            <AlertTitle>Peringatan</AlertTitle>
+            <AlertDescription>{message}</AlertDescription>
+          </Alert>
+        </div>
+      ) : null}
+      {!isLoading ? (
+        <Tabs defaultValue="login" className="w-[400px]">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+          <TabsContent value="login">
             <Login />
-          </Tabs.Content>
-          <Tabs.Content value="tab-2">
-            <Register />
-          </Tabs.Content>
-        </Tabs.Root>
-      </Stack>
-    </Box>
+          </TabsContent>
+          <TabsContent value="signup">
+            <SignUp />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <Progress value={100} className="max-w-screen-sm" />
+      )}
+    </div>
   );
 };
 
-const Login = () => {
-  const { register, handleSubmit } = useForm();
-  const [data, setData] = useState<formLoginProps>({} as formLoginProps);
-
-  console.log(data);
-  return (
-    <Stack
-      as="form"
-      onSubmit={handleSubmit((data) =>
-        setData({ username: data.username, password: data.password })
-      )}>
-      <Text textStyle="3xl" mb={6}>
-        Login
-      </Text>
-      <Stack gap={4}>
-        <Field label="Username" required>
-          <Input {...register("username")} type="text" placeholder="Username" />
-        </Field>
-        <Field label="Password" required>
-          <PasswordInput {...register("password")} placeholder="Password" />
-        </Field>
-
-        <Button type="submit">Login</Button>
-      </Stack>
-    </Stack>
-  );
-};
-
-const Register = () => {
-  const { register, handleSubmit } = useForm();
-  const [data, setData] = useState<formRegisterProps>({} as formRegisterProps);
-
-  console.log(data);
-  return (
-    <Stack
-      as="form"
-      onSubmit={handleSubmit((data) =>
-        setData({
-          username: data.username,
-          password: data.password,
-          confirmPassword: data.confirmPassword,
-        })
-      )}>
-      <Text textStyle="3xl" mb={6}>
-        Register
-      </Text>
-      <Stack gap={4}>
-        <Field label="Username" required>
-          <Input {...register("username")} type="text" placeholder="Username" />
-        </Field>
-        <Field label="Password" required>
-          <PasswordInput {...register("password")} placeholder="Password" />
-        </Field>
-        <Field label="Konfirmasi Password" required>
-          <PasswordInput
-            {...register("confirmPassword")}
-            placeholder="Masukan Password lagi"
-          />
-        </Field>
-
-        <Button type="submit">Register</Button>
-      </Stack>
-    </Stack>
-  );
-};
-
-export default LoginPage;
+export default AuthPage;
