@@ -1,58 +1,92 @@
 import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { ColumnDef } from "@tanstack/react-table";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenuButton,
-  SidebarMenu,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { BadgeCheck, Shield, EllipsisVertical, User } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ResponsiveTable, ActionButton } from "@/components/responsive-table";
+import { BadgeCheck } from "lucide-react";
 
 import { baseAPI } from "@/api";
 import { AdminLayout } from "@/layouts/admin";
-import { useAppSelector } from "@/app/store";
+import { userProp } from "@/types/user";
+import { cn } from "@/lib/utils";
 
-type userListProps = {
-  id: string;
-  role: string;
-  username: string;
-  avatarImg: string | null;
-  verified: boolean;
-};
+const columns: ColumnDef<userProp>[] = [
+  {
+    accessorKey: "username",
+    header: "Username",
+    cell: ({ row }) => (
+      <Link to={`/user/profile/${row.original.id}`}>
+        <div className="p-2">
+          <p className="font-semibold hover:underline">
+            {row.original.username}
+          </p>
+          <p className="text-gray-500">
+            {row.original.user_data ? (
+              `${row.original.user_data.firstName || ""} ${
+                row.original.user_data.lastName || ""
+              }`
+            ) : (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild className="inline">
+                    <p>No Data</p>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>User belum melengkapi data</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </p>
+        </div>
+      </Link>
+    ),
+  },
+  {
+    accessorKey: "role",
+    header: "Role",
+    cell: ({ row }) => (
+      <Badge
+        variant="outline"
+        className={
+          row.original.role === "admin"
+            ? cn("text-indigo-700 border-indigo-500")
+            : cn("text-cyan-700 border-cyan-500")
+        }>
+        {row.original.role}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "verified",
+    header: "Verified",
+    cell: ({ row }) => (
+      <Badge
+        variant="outline"
+        className={row.original.verified ? "text-blue-700" : "text-red-700"}>
+        {row.original.verified ? (
+          <BadgeCheck width={15} className="mr-2" />
+        ) : null}
+        {row.original.verified ? "Ya" : "Tidak"}
+      </Badge>
+    ),
+  },
+];
 
 const UserListPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [listUser, setListUser] = useState<userListProps[]>([]);
+  const [listUser, setListUser] = useState<userProp[]>([]);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -61,7 +95,7 @@ const UserListPage: React.FC = () => {
           code: number | null;
           status: string | null;
           message: string | null;
-          data: userListProps[];
+          data: userProp[];
         }>(`${baseAPI.dev}/users`);
 
         setIsLoading(false);
@@ -98,161 +132,32 @@ const UserListPage: React.FC = () => {
           {isLoading ? (
             <Progress value={100} />
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">Nama</TableHead>
-                  <TableHead>Verified</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {listUser.map((user) => (
-                  <TableItem
-                    key={user.id}
-                    {...user}
-                    setIsLoading={setIsLoading}
-                  />
-                ))}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-auto">
+              <div className="inline-block min-w-full align-middle w-[200px]">
+                <ResponsiveTable
+                  columns={[
+                    ...columns,
+                    {
+                      id: "action",
+                      header: "Action",
+                      cell: ({ row }) => (
+                        <ActionButton
+                          id={row.original.id}
+                          setIsLoading={setIsLoading}
+                          linkAction={`/admin/user/form`}
+                          linkDelete={`user`}
+                        />
+                      ),
+                    },
+                  ]}
+                  data={listUser}
+                />
+              </div>
+            </div>
           )}
         </div>
       </div>
     </AdminLayout>
-  );
-};
-
-const TableItem: React.FC<{
-  username: string;
-  verified: boolean;
-  role: string;
-  id: string;
-  setIsLoading: (value: boolean) => void;
-}> = ({ username, verified, role, id, setIsLoading }) => {
-  const navigate = useNavigate();
-  const [openAlert, setOpenAlert] = useState<boolean>(false);
-  const {
-    main: {
-      verify: {
-        data: { userId },
-      },
-    },
-  } = useAppSelector((state) => state.authState);
-
-  const handleDelete = async (id: string) => {
-    try {
-      await axios.delete<{
-        code: number;
-        status: string;
-        message: string;
-        data: number;
-      }>(`${baseAPI.dev}/users/${id}`);
-
-      setOpenAlert(false);
-      setIsLoading(true);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  return (
-    <TableRow>
-      <TableCell className="font-medium hover:underline">
-        <Link to={`/profile/${id}`}>{username}</Link>
-      </TableCell>
-      <TableCell>
-        {verified ? (
-          <Badge
-            className="py-1 border-blue-500 text-blue-500"
-            variant="outline">
-            <BadgeCheck className="mr-2 w-4 h-4 text-blue-500" />
-            <span>Aktif</span>
-          </Badge>
-        ) : (
-          <Badge
-            className="py-1 border-gray-500 text-gray-500"
-            variant="outline">
-            <span>Nonaktif</span>
-          </Badge>
-        )}
-      </TableCell>
-      <TableCell>
-        {role === "admin" ? (
-          <Badge
-            className="py-1 border-purple-500 text-purple-500"
-            variant="outline">
-            <Shield className="mr-2 w-4 h-4 text-purple-500" />
-            {role}
-          </Badge>
-        ) : (
-          <Badge
-            className="py-1 border-blue-500 text-blue-500"
-            variant="outline">
-            <User className="mr-2 w-4 h-4 text-blue-500" />
-            {role}
-          </Badge>
-        )}
-      </TableCell>
-      <TableCell className="flex justify-end">
-        <Popover>
-          <PopoverTrigger className="p-2 flex items-center rounded-sm border">
-            <span>
-              <EllipsisVertical className="w-4 h-4" />
-            </span>
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-40 overflow-hidden rounded-lg p-0"
-            align="end">
-            <Sidebar collapsible="none" className="bg-transparent">
-              <SidebarContent>
-                <SidebarGroup className="border-b last:border-none">
-                  <SidebarGroupContent className="gap-0">
-                    <SidebarMenu>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton
-                          onClick={() => navigate(`/admin/user/form/${id}`)}>
-                          <span>Edit</span>
-                        </SidebarMenuButton>
-
-                        {id !== userId ? (
-                          <SidebarMenuButton
-                            onClick={() => setOpenAlert((prev) => !prev)}>
-                            <span className="text-red-500">Hapus</span>
-                          </SidebarMenuButton>
-                        ) : null}
-                      </SidebarMenuItem>
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              </SidebarContent>
-            </Sidebar>
-          </PopoverContent>
-        </Popover>
-
-        <Dialog open={openAlert} onOpenChange={setOpenAlert}>
-          <DialogContent className="rounded-md">
-            <DialogHeader>
-              <DialogTitle className="text-left">Peringatan</DialogTitle>
-              <DialogDescription className="text-left">
-                Apakah anda yakin ingin menghapus.?
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="flex justify-end gap-2 flex-row">
-              <Button variant="destructive" onClick={() => handleDelete(id)}>
-                Hapus
-              </Button>
-              <Button
-                onClick={() => setOpenAlert((prev) => !prev)}
-                variant="outline">
-                Kembali
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </TableCell>
-    </TableRow>
   );
 };
 

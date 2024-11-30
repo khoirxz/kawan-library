@@ -1,4 +1,11 @@
-import { ChevronDown, Home, Settings, User, FileText } from "lucide-react";
+import {
+  ChevronDown,
+  Home,
+  Settings,
+  User,
+  FileText,
+  ScrollText,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -102,6 +109,35 @@ export function AppSidebar() {
                         <SidebarMenuSubButton role="menu" asChild>
                           <Link to="/admin/decree/category/list">
                             Daftar Kategori
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <ScrollText />
+                      Sertifikat
+                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton role="menu" asChild>
+                          <Link to="/admin/certificate/list">
+                            Daftar Sertifikat
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton role="menu" asChild>
+                          <Link to="/admin/certificate/form">
+                            Form Sertifikat
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>

@@ -10,6 +10,9 @@ import DecreeListPage from "@/pages/admin/decree";
 import DecreeFormPage from "@/pages/admin/decree/form";
 import DecreeCategoryListPage from "@/pages/admin/decree/pages/category";
 import DecreeCategoryFormPage from "@/pages/admin/decree/pages/category/form";
+import CertificateListPage from "@/pages/admin/certificates";
+import CertificateFormPage from "@/pages/admin/certificates/form";
+import ProfilePage from "@/pages/user/profile";
 
 const router = createBrowserRouter(
   [
@@ -94,6 +97,38 @@ const router = createBrowserRouter(
       element: (
         <AuthRouter>
           <DecreeCategoryFormPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/admin/certificate/list",
+      element: (
+        <AuthRouter>
+          <CertificateListPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/admin/certificate/form",
+      element: (
+        <AuthRouter>
+          <CertificateFormPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/admin/certificate/form/:id",
+      element: (
+        <AuthRouter>
+          <CertificateFormPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/user/profile/:id",
+      element: (
+        <AuthRouter>
+          <ProfilePage />
         </AuthRouter>
       ),
     },

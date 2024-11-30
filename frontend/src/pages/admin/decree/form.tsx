@@ -46,6 +46,7 @@ import { UserSelectionModal } from "@/components/user-selection-modal";
 import { AdminLayout } from "@/layouts/admin";
 import useDecree from "./decreeHook";
 import { baseAPI } from "@/api";
+import { userProp } from "@/types/user";
 
 const formSchema = z.object({
   user_id: z.string().optional().nullable(),
@@ -57,17 +58,9 @@ const formSchema = z.object({
   expired_date: z.date(),
 });
 
-interface FormUser {
-  id: string;
-  role: string;
-  username: string;
-  avatarImg: string | null;
-  verified: boolean;
-}
-
 const DecreeFormPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedUser, setSelectedUser] = useState<FormUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<userProp | null>(null);
   const [decreeFile, setDecreeFile] = useState<File | null>(null);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -93,13 +86,7 @@ const DecreeFormPage: React.FC = () => {
           status: string;
           data: {
             id: string;
-            user: {
-              id: string;
-              role: string;
-              username: string;
-              avatarImg: string | null;
-              verified: boolean;
-            } | null;
+            user: userProp | null;
             category_id: number;
             title: string;
             description: string;
@@ -191,7 +178,7 @@ const DecreeFormPage: React.FC = () => {
     }
   };
 
-  const handleUserSelect = (user: FormUser) => {
+  const handleUserSelect = (user: userProp) => {
     form.setValue("user_id", user.id);
     setSelectedUser(user);
     setIsModalOpen(false);
@@ -201,7 +188,6 @@ const DecreeFormPage: React.FC = () => {
     setSelectedUser(null);
   };
 
-  console.log(users);
   return (
     <AdminLayout>
       <div className="p-4 lg:p-6">

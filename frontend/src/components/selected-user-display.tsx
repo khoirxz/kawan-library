@@ -1,16 +1,9 @@
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface User {
-  id: string;
-  role: string;
-  username: string;
-  avatarImg: string | null;
-  verified: boolean;
-}
+import { userProp } from "@/types/user";
 
 interface SelectedUserDisplayProps {
-  user: User;
+  user: userProp;
   onRemove: () => void;
 }
 

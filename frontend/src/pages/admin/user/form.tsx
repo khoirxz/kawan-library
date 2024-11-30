@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,44 +23,51 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
+import { NotificationDialog } from "@/components/notification-dialog";
+
+import { Context } from "@/context";
 import { AdminLayout } from "@/layouts/admin";
+import { userProp } from "@/types/user";
 
 import { baseAPI } from "@/api";
 
 const formSchema = z.object({
   username: z.string().min(2).max(20),
   password: z.string().max(20).optional(),
-  role: z.enum(["user", "admin"]),
+  role: z.enum(["user", "admin", "0"]),
   verified: z.boolean().default(false),
 });
 
 const UserFormPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
       password: "",
-      role: "user",
+      role: "0",
       verified: false,
     },
   });
   const { id } = useParams<{ id: string }>();
+  const {
+    modalAlert,
+    setModalAlert,
+    setModalAlertData,
+    modalAlertData,
+    resetSate,
+  } = useContext(Context);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getUserById = async () => {
       try {
+        setIsLoading(true);
         const response = await axios.get<{
           code: number;
           status: string;
           message: string;
-          data: [
-            {
-              id: string;
-              role: "user" | "admin";
-              username: string;
-              verified: boolean;
-            }
-          ];
+          data: userProp[];
         }>(`${baseAPI.dev}/users/${id}`);
 
         form.setValue("username", response.data.data[0].username);
@@ -68,13 +75,23 @@ const UserFormPage: React.FC = () => {
         form.setValue("verified", response.data.data[0].verified);
       } catch (error) {
         console.log(error);
+        setModalAlert(true);
+        setModalAlertData({
+          title: "Gagal",
+          description: "Gagal mengambil data",
+          status: "error",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     if (id) {
       getUserById();
+    } else {
+      form.reset();
     }
-  }, []);
+  }, [id]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
@@ -84,36 +101,32 @@ const UserFormPage: React.FC = () => {
           code: number;
           status: string;
           message: string;
-          data: {
-            id: string;
-            username: string;
-            password: string;
-            role: string;
-            verified: boolean;
-            updatedAt: string;
-            createdAt: string;
-          };
+          data: userProp;
         }>(`${baseAPI.dev}/users`, data);
       } else {
         response = await axios.put<{
           code: number;
           status: string;
           message: string;
-          data: {
-            id: string;
-            username: string;
-            password: string;
-            role: string;
-            verified: boolean;
-            updatedAt: string;
-            createdAt: string;
-          };
+          data: userProp;
         }>(`${baseAPI.dev}/users/${id}`, data);
       }
 
-      console.log(response);
+      if (response.data.code === 200) {
+        setModalAlert(true);
+        setModalAlertData({
+          title: "Berhasil",
+          description: response.data.message,
+          status: "success",
+        });
+      }
     } catch (error) {
-      console.log(error);
+      setModalAlert(true);
+      setModalAlertData({
+        title: "Gagal",
+        description: "Data gagal disimpan",
+        status: "error",
+      });
     }
   };
 
@@ -164,29 +177,60 @@ const UserFormPage: React.FC = () => {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="user">User</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {id ? (
+                !isLoading ? (
+                  <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value ? field.value : "0"}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Pilih role" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="0">Pilih role</SelectItem>
+                            <SelectItem value="user">User</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : null
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="0">Pilih role</SelectItem>
+                          <SelectItem value="user">User</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
               <FormField
                 control={form.control}
                 name="password"
@@ -208,6 +252,18 @@ const UserFormPage: React.FC = () => {
             </form>
           </Form>
         </div>
+
+        <NotificationDialog
+          isOpen={modalAlert}
+          onClose={() => {
+            setModalAlert(false);
+            resetSate();
+            navigate("/admin/user/list", { replace: true });
+          }}
+          message={modalAlertData.description}
+          title={modalAlertData.title}
+          type={modalAlertData.status}
+        />
       </div>
     </AdminLayout>
   );

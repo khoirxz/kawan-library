@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { baseAPI } from "@/api";
+import { userProp } from "@/types/user";
 
 type categoryListProps = {
   id: number;
@@ -8,14 +9,6 @@ type categoryListProps = {
   description: string;
   createdAt: string;
   updatedAt: string;
-};
-
-type userListProps = {
-  id: string;
-  role: string;
-  username: string;
-  avatarImg: string | null;
-  verified: boolean;
 };
 
 const useDecree = () => {
@@ -26,7 +19,7 @@ const useDecree = () => {
       value: number;
     }[]
   >([]);
-  const [users, setUsers] = useState<userListProps[]>([]);
+  const [users, setUsers] = useState<userProp[]>([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -60,7 +53,7 @@ const useDecree = () => {
           code: number | null;
           status: string | null;
           message: string | null;
-          data: userListProps[];
+          data: userProp[];
         }>(`${baseAPI.dev}/users/`);
 
         setUsers(data.data);

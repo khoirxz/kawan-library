@@ -8,20 +8,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-interface User {
-  id: string;
-  role: string;
-  username: string;
-  avatarImg: string | null;
-  verified: boolean;
-}
+import { userProp } from "@/types/user";
 
 interface UserSelectionModalProps {
-  users: User[];
+  users: userProp[];
   isOpen: boolean;
   onClose: () => void;
-  onSelectUser: (user: User) => void;
+  onSelectUser: (user: userProp) => void;
 }
 
 export function UserSelectionModal({
