@@ -4,7 +4,7 @@ export interface userProp {
   username: string;
   avatarImg?: string | null;
   verified: boolean;
-  user_data: userDataProps | null;
+  user_data?: userDataProps | null;
   updatedAt?: string;
   createdAt?: string;
 }

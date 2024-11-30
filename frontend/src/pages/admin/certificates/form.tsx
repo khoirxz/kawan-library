@@ -153,7 +153,7 @@ const CertificateFormPage: React.FC = () => {
             {id ? "Edit SK" : "Tambah SK"}
           </h1>
           <Button asChild>
-            <Link to="/admin/decree/list">Kembali</Link>
+            <Link to="/admin/certificate/list">Kembali</Link>
           </Button>
         </div>
 

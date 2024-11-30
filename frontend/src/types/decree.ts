@@ -13,6 +13,7 @@ export interface decreeListProps {
   effective_date: string;
   expired_date: string;
   file_path: string;
+  data: userProp | null;
   createdAt: string;
   updatedAt: string;
 }

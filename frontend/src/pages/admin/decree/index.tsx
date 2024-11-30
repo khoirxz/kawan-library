@@ -1,36 +1,14 @@
 import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import { ColumnDef } from "@tanstack/react-table";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenuButton,
-  SidebarMenu,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Eye, EllipsisVertical } from "lucide-react";
-import { ResponsiveTable } from "@/components/responsive-table";
+import { Badge } from "@/components/ui/badge";
+import { ResponsiveTable, ActionButton } from "@/components/responsive-table";
 
 import { baseAPI } from "@/api";
 import { AdminLayout } from "@/layouts/admin";
@@ -40,10 +18,31 @@ const columns: ColumnDef<decreeListProps>[] = [
   {
     accessorKey: "title",
     header: "Judul",
+    cell: ({ row }) => (
+      <div>
+        <p>{row.original.category.name}</p>
+        {row.original.user ? (
+          <p>{row.original.user?.user_data?.firstName}</p>
+        ) : null}
+        <p>{row.original.title}</p>
+      </div>
+    ),
   },
   {
     accessorKey: "status",
     header: "Status",
+    cell: ({ row }) => (
+      <Badge
+        className={
+          row.original.status === "draft"
+            ? "bg-yellow-500 hover:bg-yellow-600"
+            : row.original.status === "approved"
+            ? "bg-green-500 hover:bg-green-600"
+            : "bg-red-500 hover:bg-red-600"
+        }>
+        {row.original.status}
+      </Badge>
+    ),
   },
   {
     id: "effective_date",
@@ -70,6 +69,9 @@ const columns: ColumnDef<decreeListProps>[] = [
   {
     accessorKey: "createdAt",
     header: "Dibuat pada",
+    cell: ({ row }) => (
+      <div>{dayjs(row.original.createdAt).format("DD-MMMM-YYYY")}</div>
+    ),
   },
 ];
 
@@ -129,12 +131,14 @@ const DecreeListPage: React.FC = () => {
                     {
                       id: "action",
                       header: "Action",
-
                       cell: ({ row }) => (
                         <ActionButton
                           file_path={row.original.file_path}
                           id={row.original.id}
                           setIsLoading={setIsLoading}
+                          linkAction="/admin/decree/form"
+                          linkDelete="decrees"
+                          linkView="decrees"
                         />
                       ),
                     },
@@ -147,99 +151,6 @@ const DecreeListPage: React.FC = () => {
         </div>
       </div>
     </AdminLayout>
-  );
-};
-
-const ActionButton: React.FC<{
-  file_path: string;
-  id: string;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ file_path, id, setIsLoading }) => {
-  const navigate = useNavigate();
-  const [openAlert, setOpenAlert] = useState<boolean>(false);
-
-  const handleDelete = async (id: string) => {
-    try {
-      await axios.delete<{
-        code: number;
-        status: string;
-        message: string;
-        data: number;
-      }>(`${baseAPI.dev}/decrees/${id}`);
-
-      setOpenAlert(false);
-      setIsLoading(true);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  return (
-    <>
-      <div className="flex justify-end items-center gap-3">
-        <Button variant="outline" size="icon" asChild>
-          <a
-            href={`${baseAPI.dev}/uploads/decrees/${file_path}`}
-            target="_blank">
-            <Eye className="w-4 h-4" />
-          </a>
-        </Button>
-
-        <Popover>
-          <PopoverTrigger className="p-2 flex items-center rounded-sm border">
-            <span>
-              <EllipsisVertical className="w-4 h-4" />
-            </span>
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-40 overflow-hidden rounded-lg p-0"
-            align="end">
-            <Sidebar collapsible="none" className="bg-transparent">
-              <SidebarContent>
-                <SidebarGroup className="border-b last:border-none">
-                  <SidebarGroupContent className="gap-0">
-                    <SidebarMenu>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton
-                          onClick={() => navigate(`/admin/decree/form/${id}`)}>
-                          <span>Edit</span>
-                        </SidebarMenuButton>
-
-                        <SidebarMenuButton
-                          onClick={() => setOpenAlert((prev) => !prev)}>
-                          <span className="text-red-500">Hapus</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              </SidebarContent>
-            </Sidebar>
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      <Dialog open={openAlert} onOpenChange={setOpenAlert}>
-        <DialogContent className="rounded-md">
-          <DialogHeader>
-            <DialogTitle className="text-left">Peringatan</DialogTitle>
-            <DialogDescription className="text-left">
-              Apakah anda yakin ingin menghapus.?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex justify-end gap-2 flex-row">
-            <Button variant="destructive" onClick={() => handleDelete(id)}>
-              Hapus
-            </Button>
-            <Button
-              onClick={() => setOpenAlert((prev) => !prev)}
-              variant="outline">
-              Kembali
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
   );
 };
 
