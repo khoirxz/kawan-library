@@ -38,10 +38,6 @@ const UserContact = db.define("user_contact", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  twitter: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
 });
 
 module.exports = UserContact;

@@ -27,7 +27,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { baseAPI } from "@/api";
 import { userDataProps } from "@/types/user";
 
+import UserSettingLayout from "../..";
+
 const formSchema = z.object({
+  nik: z.string(),
   first_name: z.string(),
   last_name: z.string(),
   dateBirth: z.string(),
@@ -36,10 +39,11 @@ const formSchema = z.object({
   maritalStatus: z.enum(["single", "married", "widow", "0"]),
 });
 
-const FormPersonal: React.FC = () => {
+const UserSettingPersoalFormPage: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      nik: "",
       first_name: "",
       last_name: "",
       dateBirth: "",
@@ -69,6 +73,7 @@ const FormPersonal: React.FC = () => {
           const data = response.data.data;
           if (data) {
             setIsAvailable(true);
+            form.setValue("nik", data[0].nik);
             form.setValue("first_name", data[0].firstName);
             form.setValue("last_name", data[0].lastName);
             form.setValue(
@@ -93,35 +98,29 @@ const FormPersonal: React.FC = () => {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     // return console.log(data);
+    const dataForm = {
+      user_id: id,
+      nik: data.nik,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      dateBirth: new Date(data.dateBirth).toISOString(),
+      gender: data.gender,
+      religion: data.religion,
+      maritalStatus: data.maritalStatus,
+    };
 
     try {
       setIsLoading(true);
 
       let response;
       if (isAvailable) {
-        response = await axios.put(`${baseAPI.dev}/user/data`, {
-          user_id: id,
-          first_name: data.first_name,
-          last_name: data.last_name,
-          dateBirth: new Date(data.dateBirth).toISOString(),
-          gender: data.gender,
-          religion: data.religion,
-          maritalStatus: data.maritalStatus,
-        });
+        response = await axios.put(`${baseAPI.dev}/user/data`, dataForm);
       } else {
         response = await axios.post<{
           code: number;
           status: string;
           message: string;
-        }>(`${baseAPI.dev}/user/data`, {
-          user_id: id,
-          first_name: data.first_name,
-          last_name: data.last_name,
-          dateBirth: new Date(data.dateBirth).toISOString(),
-          gender: data.gender,
-          religion: data.religion,
-          maritalStatus: data.maritalStatus,
-        });
+        }>(`${baseAPI.dev}/user/data`, dataForm);
       }
 
       console.log(response);
@@ -133,12 +132,10 @@ const FormPersonal: React.FC = () => {
   };
 
   return (
-    <>
-      <div className="my-7">
-        <h1 className="font-semibold text-xl">Informasi Personal</h1>
-        <p className="text-gray-500 text-sm">
-          Anda sudah melengkapi informasi personal
-        </p>
+    <UserSettingLayout>
+      <div className="mb-5">
+        <h1 className="text-lg">Form Personal</h1>
+        <p className="text-sm text-gray-500">Lengkapi form dibawah ini</p>
       </div>
 
       {isLoading ? (
@@ -146,6 +143,21 @@ const FormPersonal: React.FC = () => {
       ) : (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="nik"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nomor Induk Kependudukan (NIK)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="NIK" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -313,8 +325,8 @@ const FormPersonal: React.FC = () => {
           </form>
         </Form>
       )}
-    </>
+    </UserSettingLayout>
   );
 };
 
-export default FormPersonal;
+export default UserSettingPersoalFormPage;

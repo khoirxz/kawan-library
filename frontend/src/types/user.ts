@@ -1,3 +1,6 @@
+import { certificationListProps } from "./certificate";
+import { decreeListProps } from "./decree";
+
 export interface userProp {
   id: string;
   role: "user" | "admin";
@@ -12,6 +15,7 @@ export interface userProp {
 export interface userDataProps {
   id: number;
   user_id: string;
+  nik: string;
   firstName: string;
   lastName: string;
   dateBirth: string;
@@ -62,4 +66,35 @@ export interface userEmployeProps {
   } | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface userJobHistoryProps {
+  id: number;
+  user_id: string;
+  company_name: string;
+  position: string;
+  start_date: string;
+  end_date: string;
+  job_description: string;
+  location: string;
+  is_current: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface userProfileProps extends userProp {
+  user_data: userDataProps | null;
+  user_contact: userContactProps | null;
+  user_data_employe: userEmployeProps | null;
+  user_geography: userGeographyProps | null;
+  job_history: userJobHistoryProps | null;
+  certifications: certificationListProps[] | null;
+  decrees: decreeListProps[] | null;
+}
+
+export interface userPortfolioProps extends userProp {
+  user_info: userDataProps | null;
+  user_contact: userContactProps | null;
+  user_geography: userGeographyProps | null;
+  certifications: certificationListProps[] | null;
 }

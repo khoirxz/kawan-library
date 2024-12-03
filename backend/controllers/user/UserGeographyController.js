@@ -10,34 +10,23 @@ const responseHandler = require("../../helpers/responseHandler");
  */
 const getById = async (req, res) => {
   try {
-    let data;
-    if (req.decoded.role === "admin") {
-      data = await UserGeographyModel.findAll({
-        where: { user_id: req.params.id },
-      });
+    const userId =
+      req.decoded.role === "admin" ? req.params.id : req.decoded.userId;
+    const data = await UserGeographyModel.findAll({
+      where: { user_id: userId },
+    });
 
-      if (data.length === 0) {
-        return res.status(204).json({
-          code: 204,
-          status: "success",
-          message: "User data not found",
-        });
-      }
-    } else {
-      data = await UserGeographyModel.findAll({
-        where: { user_id: req.decoded.userId },
+    if (data.length === 0) {
+      const statusCode = req.decoded.role === "admin" ? 200 : 204;
+      return responseHandler(res, statusCode, {
+        message: "User data not found",
+        data: req.decoded.role === "admin" ? null : undefined,
       });
-
-      if (data.length === 0) {
-        return responseHandler(res, 204, {
-          message: "User data not found",
-        });
-      }
     }
 
     responseHandler(res, 200, {
       message: "Success get user data",
-      data: data,
+      data,
     });
   } catch (error) {
     responseHandler(res, 500, {

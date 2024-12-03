@@ -97,20 +97,29 @@ const login = async (req, res) => {
     });
 
     if (data.length === 0) {
-      return res.status(401).json({
-        code: 401,
-        status: "error",
-        message: "Incorrect username or password",
+      return responseHandler(res, 401, {
+        message: "Incorrect username",
+      });
+    }
+
+    // check if user verified
+    if (data[0].dataValues.verified === false) {
+      return responseHandler(res, 401, {
+        message: "Please contact admin to verify your account",
       });
     }
 
     // check if password match
     const match = await argon2.verify(data[0].dataValues.password, password);
     if (!match) {
-      return res.status(401).json({
-        code: 401,
-        status: "error",
+      return responseHandler(res, 401, {
         message: "Incorrect password",
+      });
+    }
+
+    if (data[0].dataValues.verified === false) {
+      return responseHandler(res, 401, {
+        message: "Please contact admin to verify your account",
       });
     }
 
@@ -135,10 +144,8 @@ const login = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({
-      code: 200,
-      status: "success",
-      token: token,
+    responseHandler(res, 200, {
+      message: "Login success",
     });
   } catch (error) {
     responseHandler(res, 500, { message: error.message });
@@ -150,9 +157,7 @@ const logout = async function (req, res) {
     const token = req.cookies.token;
 
     if (!token) {
-      return res.status(401).json({
-        code: 401,
-        status: "error",
+      return responseHandler(res, 401, {
         message: "Operation failed, invalid authorization",
       });
     }
@@ -162,10 +167,8 @@ const logout = async function (req, res) {
     });
 
     if (data.length === 0) {
-      return res.status(401).json({
-        code: 401,
-        status: "error",
-        message: "Invalid refresh token",
+      return responseHandler(res, 401, {
+        message: "Something went wrong, please login again",
       });
     }
 
@@ -175,13 +178,11 @@ const logout = async function (req, res) {
     );
     res.clearCookie("token");
 
-    res.status(200).json({
-      code: 200,
-      status: "success",
+    responseHandler(res, 200, {
       message: "Logout success",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    responseHandler(res, 500, { message: error.message });
   }
 };
 
@@ -190,9 +191,7 @@ const verifyUser = async function (req, res) {
     const token = req.cookies.token;
 
     if (!token) {
-      return res.status(401).json({
-        code: 401,
-        status: "error",
+      return responseHandler(res, 401, {
         message: "Operation failed, invalid authorization",
       });
     }
@@ -202,30 +201,29 @@ const verifyUser = async function (req, res) {
     });
 
     if (data.length === 0) {
-      return res.status(401).json({
-        code: 401,
-        status: "error",
+      return responseHandler(res, 401, {
         message: "Something went wrong, please login again",
       });
     }
 
     jwt.verify(token, globals.ACCESS_TOKEN_SECRET, function (err) {
-      if (err) return res.status(401).json({ code: 401, status: "failed" });
+      if (err)
+        return responseHandler(res, 401, {
+          message: "Operation failed, invalid authorization",
+        });
 
-      res.status(200).json({
-        code: 200,
-        status: "success",
+      responseHandler(res, 200, {
+        message: "User verified",
         data: {
           userId: data[0].dataValues.id,
           username: data[0].dataValues.username,
           role: data[0].dataValues.role,
           avatarImg: data[0].dataValues.avatarImg,
-          token: data[0].dataValues.token,
         },
       });
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    responseHandler(res, 500, { message: error.message });
   }
 };
 

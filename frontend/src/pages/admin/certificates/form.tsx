@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,11 +27,13 @@ import { SelectedUserDisplay } from "@/components/selected-user-display";
 import { Label } from "@/components/ui/label";
 import { UserSelectionModal } from "@/components/user-selection-modal";
 
+import { Context } from "@/context";
 import { AdminLayout } from "@/layouts/admin";
 import { baseAPI } from "@/api";
 import useCertificate from "./certificateHook";
 import { userProp } from "@/types/user";
 import { certificationListProps } from "@/types/certificate";
+import { NotificationDialog } from "@/components/notification-dialog";
 
 const formSchema = z.object({
   user_id: z.string().optional().nullable(),
@@ -55,7 +57,15 @@ const CertificateFormPage: React.FC = () => {
     },
   });
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { users } = useCertificate();
+  const {
+    modalAlert,
+    setModalAlert,
+    setModalAlertData,
+    modalAlertData,
+    resetSate,
+  } = useContext(Context);
 
   useEffect(() => {
     const getCertificateById = async () => {
@@ -84,6 +94,12 @@ const CertificateFormPage: React.FC = () => {
         form.setValue("date", new Date(response.data.data.date));
       } catch (error) {
         console.log(error);
+        setModalAlert(true);
+        setModalAlertData({
+          title: "Gagal",
+          description: "Gagal mengambil data",
+          status: "error",
+        });
       }
     };
 
@@ -109,15 +125,31 @@ const CertificateFormPage: React.FC = () => {
       formData.append("description", data.description);
       formData.append("date", data.date.toString());
 
+      let response;
       if (id) {
-        await axios.put(`${baseAPI.dev}/certifications/${id}`, formData);
+        response = await axios.put(
+          `${baseAPI.dev}/certifications/${id}`,
+          formData
+        );
       } else {
-        await axios.post(`${baseAPI.dev}/certifications`, formData);
+        response = await axios.post(`${baseAPI.dev}/certifications`, formData);
       }
 
-      console.log(data);
+      if (response.data.code === 201 || response.data.code === 200) {
+        setModalAlert(true);
+        setModalAlertData({
+          title: "Berhasil",
+          description: response.data.message,
+          status: "success",
+        });
+      }
     } catch (error) {
-      console.log(error);
+      setModalAlert(true);
+      setModalAlertData({
+        title: "Gagal",
+        description: "Data gagal disimpan",
+        status: "error",
+      });
     }
   };
 
@@ -283,6 +315,18 @@ const CertificateFormPage: React.FC = () => {
             </form>
           </Form>
         </div>
+
+        <NotificationDialog
+          isOpen={modalAlert}
+          onClose={() => {
+            setModalAlert(false);
+            resetSate();
+            navigate("/admin/certificate/list", { replace: true });
+          }}
+          message={modalAlertData.description}
+          title={modalAlertData.title}
+          type={modalAlertData.status}
+        />
       </div>
     </AdminLayout>
   );

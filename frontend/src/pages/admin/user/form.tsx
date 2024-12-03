@@ -112,7 +112,7 @@ const UserFormPage: React.FC = () => {
         }>(`${baseAPI.dev}/users/${id}`, data);
       }
 
-      if (response.data.code === 200) {
+      if (response.data.code === 201 || response.data.code === 200) {
         setModalAlert(true);
         setModalAlertData({
           title: "Berhasil",

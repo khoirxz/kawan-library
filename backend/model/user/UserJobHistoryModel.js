@@ -1,9 +1,9 @@
 const Sequelize = require("sequelize");
-const db = require("../config/database");
+const db = require("../../config/database");
 
 const DataTypes = Sequelize.DataTypes;
 
-const JobHistory = db.define("job_history", {
+const JobHistory = db.define("user_job_history", {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,

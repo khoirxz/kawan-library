@@ -48,15 +48,8 @@ const getById = async (req, res) => {
 };
 
 const create = async (req, res) => {
-  const {
-    user_id,
-    email,
-    phone,
-    emergency_contact,
-    instagram,
-    facebook,
-    twitter,
-  } = req.body;
+  const { user_id, email, phone, emergency_contact, instagram, facebook } =
+    req.body;
 
   const schema = Joi.object({
     user_id: Joi.string().required(),
@@ -65,7 +58,6 @@ const create = async (req, res) => {
     emergency_contact: Joi.number().required(),
     instagram: Joi.string().required(),
     facebook: Joi.string().required(),
-    twitter: Joi.string().required(),
   });
 
   const { error } = schema.validate(req.body);
@@ -96,7 +88,6 @@ const create = async (req, res) => {
         emergency_contact: emergency_contact,
         instagram: instagram,
         facebook: facebook,
-        twitter: twitter,
       });
     } else {
       data = await UserContactModel.create({
@@ -106,7 +97,6 @@ const create = async (req, res) => {
         emergency_contact: emergency_contact,
         instagram: instagram,
         facebook: facebook,
-        twitter: twitter,
       });
     }
 
@@ -122,15 +112,8 @@ const create = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const {
-    user_id,
-    email,
-    phone,
-    emergency_contact,
-    instagram,
-    facebook,
-    twitter,
-  } = req.body;
+  const { user_id, email, phone, emergency_contact, instagram, facebook } =
+    req.body;
 
   const schema = Joi.object({
     user_id: Joi.string().required(),
@@ -139,7 +122,6 @@ const update = async (req, res) => {
     emergency_contact: Joi.number().required(),
     instagram: Joi.string().required(),
     facebook: Joi.string().required(),
-    twitter: Joi.string().required(),
   });
 
   const { error } = schema.validate(req.body);
@@ -171,7 +153,6 @@ const update = async (req, res) => {
           emergency_contact: emergency_contact,
           instagram: instagram,
           facebook: facebook,
-          twitter: twitter,
         },
         {
           where: { user_id: user_id },
@@ -186,7 +167,6 @@ const update = async (req, res) => {
           emergency_contact: emergency_contact,
           instagram: instagram,
           facebook: facebook,
-          twitter: twitter,
         },
         {
           where: { user_id: req.decoded.id },

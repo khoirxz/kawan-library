@@ -18,6 +18,10 @@ const UserData = db.define("user_data", {
       key: "id",
     },
   },
+  nik: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   firstName: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -39,7 +43,7 @@ const UserData = db.define("user_data", {
     allowNull: false,
   },
   maritalStatus: {
-    type: DataTypes.ENUM("single", "married"),
+    type: DataTypes.ENUM("single", "married", "widow"),
     allowNull: false,
   },
 });

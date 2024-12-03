@@ -27,9 +27,13 @@ const UserDataEmployeRoute = require("./routes/user/UserDataEmployeRoute.js");
 // routes Geography data
 const UserGeographyRoute = require("./routes/user/UserGeographyRoute.js");
 // routes job history
-const JobHistoryRoute = require("./routes/JobHistoryRoute.js");
+const UserJobHistoryRoute = require("./routes/user/UserJobHistoryRoute.js");
 // routes decree category
 const DecreeCategoryRoute = require("./routes/DecreeCategoryRoute.js");
+// routes user portfolio
+const UserPortfolioRoute = require("./routes/user/UserPortfolioRoute.js");
+// routes user profile
+const UserProfileRoute = require("./routes/user/UserProfileRoute.js");
 
 // init express
 const app = express();
@@ -73,7 +77,7 @@ app.get("/api.library", (req, res) => {
 });
 
 app.use("/api.library/auth/", AuthRoute);
-app.use("/api.library/decreecategory/", DecreeCategoryRoute);
+app.use("/api.library/decree/category/", DecreeCategoryRoute);
 // routes berasosiasi dengan data user
 app.use("/api.library/users/", UsersRoute);
 app.use("/api.library/decrees/", DecreesRoute);
@@ -82,7 +86,10 @@ app.use("/api.library/user/data/", UserDataRoute);
 app.use("/api.library/user/contact/", UserContact);
 app.use("/api.library/user/data/employe/", UserDataEmployeRoute);
 app.use("/api.library/user/geography/", UserGeographyRoute);
-app.use("/api.library/job/history/", JobHistoryRoute);
+app.use("/api.library/user/job/history/", UserJobHistoryRoute);
+
+app.use("/api.library/user/profile/", UserProfileRoute);
+app.use("/api.library/user/portfolio/", UserPortfolioRoute);
 
 // async to db
 (() => db.sync())();

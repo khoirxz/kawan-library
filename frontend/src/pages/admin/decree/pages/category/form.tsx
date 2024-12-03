@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,8 +15,11 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AdminLayout } from "@/layouts/admin";
+import { Textarea } from "@/components/ui/textarea";
+import { NotificationDialog } from "@/components/notification-dialog";
 
+import { Context } from "@/context";
+import { AdminLayout } from "@/layouts/admin";
 import { baseAPI } from "@/api";
 
 const formSchema = z.object({
@@ -41,6 +44,14 @@ const DecreeCategoryFormPage: React.FC = () => {
     },
   });
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const {
+    modalAlert,
+    setModalAlert,
+    setModalAlertData,
+    modalAlertData,
+    resetSate,
+  } = useContext(Context);
 
   useEffect(() => {
     const getDecreeCategoriesById = async () => {
@@ -56,6 +67,12 @@ const DecreeCategoryFormPage: React.FC = () => {
         form.setValue("description", response.data.data.description);
       } catch (error) {
         console.log(error);
+        setModalAlert(true);
+        setModalAlertData({
+          title: "Gagal",
+          description: "Gagal mengambil data",
+          status: "error",
+        });
       }
     };
 
@@ -83,9 +100,21 @@ const DecreeCategoryFormPage: React.FC = () => {
         }>(`${baseAPI.dev}/decree/category/${id}`, data);
       }
 
-      console.log(response);
+      if (response.data.code === 201 || response.data.code === 200) {
+        setModalAlert(true);
+        setModalAlertData({
+          title: "Berhasil",
+          description: response.data.message,
+          status: "success",
+        });
+      }
     } catch (error) {
-      console.log(error);
+      setModalAlert(true);
+      setModalAlertData({
+        title: "Gagal",
+        description: "Data gagal disimpan",
+        status: "error",
+      });
     }
   };
 
@@ -124,7 +153,8 @@ const DecreeCategoryFormPage: React.FC = () => {
                   <FormItem>
                     <FormLabel>Masukan Deskripsi</FormLabel>
                     <FormControl>
-                      <Input
+                      <Textarea
+                        rows={4}
                         placeholder="Jelaskan deskripsi kategori"
                         {...field}
                       />
@@ -137,6 +167,18 @@ const DecreeCategoryFormPage: React.FC = () => {
             </form>
           </Form>
         </div>
+
+        <NotificationDialog
+          isOpen={modalAlert}
+          onClose={() => {
+            setModalAlert(false);
+            resetSate();
+            navigate("/admin/decree/category/list", { replace: true });
+          }}
+          message={modalAlertData.description}
+          title={modalAlertData.title}
+          type={modalAlertData.status}
+        />
       </div>
     </AdminLayout>
   );

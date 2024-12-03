@@ -110,18 +110,20 @@ export function ActionButton({
   linkAction,
   linkDelete,
   linkView,
+  isDelete = true,
 }: {
-  id: string;
+  id: string | number;
   file_path?: string;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   linkAction: string;
   linkDelete: string;
   linkView?: string;
+  isDelete?: boolean;
 }) {
   const navigate = useNavigate();
   const [openAlert, setOpenAlert] = useState<boolean>(false);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string | number) => {
     try {
       await axios.delete<{
         code: number;
@@ -170,10 +172,12 @@ export function ActionButton({
                           <span>Edit</span>
                         </SidebarMenuButton>
 
-                        <SidebarMenuButton
-                          onClick={() => setOpenAlert((prev) => !prev)}>
-                          <span className="text-red-500">Hapus</span>
-                        </SidebarMenuButton>
+                        {isDelete && (
+                          <SidebarMenuButton
+                            onClick={() => setOpenAlert((prev) => !prev)}>
+                            <span className="text-red-500">Hapus</span>
+                          </SidebarMenuButton>
+                        )}
                       </SidebarMenuItem>
                     </SidebarMenu>
                   </SidebarGroupContent>

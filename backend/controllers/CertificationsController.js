@@ -2,7 +2,13 @@ const Joi = require("joi");
 const fs = require("fs");
 const Op = require("sequelize").Op;
 const CertificationsModel = require("../model/CertificationsModel");
+const UsersModel = require("../model/user/UsersModel");
 const responseHandler = require("../helpers/responseHandler");
+
+CertificationsModel.belongsTo(UsersModel, {
+  foreignKey: "user_id", // Sesuai kolom foreign key di tabel decrees
+  as: "user", // Alias untuk relasi
+});
 
 const getAllCertificates = async (req, res) => {
   try {
@@ -20,6 +26,14 @@ const getAllCertificates = async (req, res) => {
 
       data = await CertificationsModel.findAll({
         where: whereClause,
+        attributes: { exclude: ["user_id"] },
+        include: [
+          {
+            model: UsersModel,
+            as: "user",
+            attributes: ["id", "username", "role", "avatarImg", "verified"],
+          },
+        ],
       });
     } else {
       data = await CertificationsModel.findAll({
@@ -28,7 +42,7 @@ const getAllCertificates = async (req, res) => {
     }
 
     responseHandler(res, 200, {
-      message: "Success get all decrees",
+      message: "Success get all certificates",
       data: data,
     });
   } catch (error) {
@@ -42,23 +56,30 @@ const getCertificateById = async (req, res) => {
   try {
     const data = await CertificationsModel.findOne({
       where: { id: req.params.id },
+      attributes: { exclude: ["user_id"] },
+      include: [
+        {
+          model: UsersModel,
+          as: "user",
+          attributes: ["id", "username", "role", "avatarImg", "verified"],
+        },
+      ],
     });
 
     if (!data) {
-      return res.status(404).json({
-        code: 404,
-        status: "failed",
+      return responseHandler(res, 404, {
         message: "Certificate not found",
       });
     }
 
-    res.status(200).json({
-      code: 200,
-      status: "success",
+    responseHandler(res, 200, {
+      message: "Success get certificate by id",
       data: data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    responseHandler(res, 500, {
+      message: error.message,
+    });
   }
 };
 
@@ -67,15 +88,13 @@ const createCertificate = async (req, res) => {
     const { user_id, name, description, date } = req.body;
 
     if (!req.file) {
-      return res.status(400).json({
-        code: 400,
-        status: "failed",
-        message: "File required",
+      return responseHandler(res, 400, {
+        message: "File is required",
       });
     }
 
     const schema = Joi.object({
-      user_id: Joi.number().required(),
+      user_id: Joi.string().required(),
       name: Joi.string().required(),
       description: Joi.string().required(),
       date: Joi.date().required(),
@@ -84,9 +103,7 @@ const createCertificate = async (req, res) => {
     const { error } = schema.validate(req.body);
 
     if (error) {
-      return res.status(400).json({
-        code: 400,
-        status: "failed",
+      return responseHandler(res, 400, {
         message: error.message,
       });
     }
@@ -99,15 +116,13 @@ const createCertificate = async (req, res) => {
       file_path: req.file.filename,
     });
 
-    return res.status(201).json({
-      code: 201,
-      status: "success",
+    responseHandler(res, 200, {
+      message: "Success create certificate",
       data: data,
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
+    fs.unlinkSync("public/uploads/certificates/" + req.file.filename);
+    responseHandler(res, 500, {
       message: error.message,
     });
   }
@@ -120,9 +135,7 @@ const updateCertificateById = async (req, res) => {
     });
 
     if (!oldData) {
-      return res.status(404).json({
-        code: 404,
-        status: "failed",
+      return responseHandler(res, 404, {
         message: "Certificate not found",
       });
     }
@@ -130,7 +143,7 @@ const updateCertificateById = async (req, res) => {
     const { user_id, name, description, date } = req.body;
 
     const schema = Joi.object({
-      user_id: Joi.number().required(),
+      user_id: Joi.string().required(),
       name: Joi.string().required(),
       description: Joi.string().required(),
       date: Joi.date().required(),
@@ -139,10 +152,9 @@ const updateCertificateById = async (req, res) => {
     const { error } = schema.validate(req.body);
 
     if (error) {
-      return res.status(400).json({
-        code: 400,
-        status: "failed",
-        message: error.message,
+      return responseHandler(res, 404, {
+        message: "Lengkapi data dengan benar",
+        data: error.message,
       });
     }
 
@@ -181,15 +193,12 @@ const updateCertificateById = async (req, res) => {
       where: { id: req.params.id },
     });
 
-    return res.status(200).json({
-      code: 200,
-      status: "success",
+    return responseHandler(res, 200, {
+      message: "Success update certificate",
       data: data,
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
+    responseHandler(res, 500, {
       message: error.message,
     });
   }
@@ -202,9 +211,7 @@ const deleteCertificateById = async (req, res) => {
     });
 
     if (!data) {
-      return res.status(404).json({
-        code: 404,
-        status: "failed",
+      return responseHandler(res, 404, {
         message: "Certificate not found",
       });
     }
@@ -215,15 +222,11 @@ const deleteCertificateById = async (req, res) => {
       where: { id: req.params.id },
     });
 
-    return res.status(204).json({
-      code: 204,
-      status: "success",
-      data: "Certificate deleted successfully",
+    responseHandler(res, 200, {
+      message: "Success delete certificate",
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
+    responseHandler(res, 500, {
       message: error.message,
     });
   }
@@ -248,15 +251,12 @@ const searchCertificate = async (req, res) => {
       },
     });
 
-    return res.status(200).json({
-      code: 200,
-      status: "success",
+    responseHandler(res, 200, {
+      message: "Success search certificate",
       data: data,
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
+    responseHandler(res, 500, {
       message: error.message,
     });
   }

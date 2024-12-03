@@ -18,6 +18,7 @@ const {
 
 const router = express.Router();
 
+// configure multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "public/uploads/certificates");
@@ -34,6 +35,7 @@ const upload = multer({
   },
 });
 
+// routes
 router.get("/search/:id", authMiddleware, searchCertificate);
 
 router.get("/", authMiddleware, getAllCertificates);

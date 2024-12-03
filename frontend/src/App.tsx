@@ -12,7 +12,13 @@ import DecreeCategoryListPage from "@/pages/admin/decree/pages/category";
 import DecreeCategoryFormPage from "@/pages/admin/decree/pages/category/form";
 import CertificateListPage from "@/pages/admin/certificates";
 import CertificateFormPage from "@/pages/admin/certificates/form";
-import ProfilePage from "@/pages/user/profile";
+import UserProfilePage from "@/pages/user/profile";
+import UserPortfolioPage from "./pages/user/portfolio";
+import UserSettingPersoalFormPage from "@/pages/user/setting/pages/personal/form";
+import UserSettingLocationFormPage from "@/pages/user/setting/pages/location/form";
+import UserSettingContactFormPage from "@/pages/user/setting/pages/contact/form";
+import UserCertificateListPage from "@/pages/user/certificates";
+import UserDecreeListPage from "./pages/user/decree";
 
 const router = createBrowserRouter(
   [
@@ -128,7 +134,57 @@ const router = createBrowserRouter(
       path: "/user/profile/:id",
       element: (
         <AuthRouter>
-          <ProfilePage />
+          <UserProfilePage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/user/portfolio/:id",
+      element: (
+        <AuthRouter>
+          <UserPortfolioPage />
+        </AuthRouter>
+      ),
+    },
+    // setting route
+    {
+      path: "/user/setting/personal/:id",
+      element: (
+        <AuthRouter>
+          <UserSettingPersoalFormPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/user/setting/location/:id",
+      element: (
+        <AuthRouter>
+          <UserSettingLocationFormPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/user/setting/contact/:id",
+      element: (
+        <AuthRouter>
+          <UserSettingContactFormPage />
+        </AuthRouter>
+      ),
+    },
+    // end setting route
+    {
+      path: "/user/certificate/:id",
+      element: (
+        <AuthRouter>
+          <UserCertificateListPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/user/decree/:id",
+      element: (
+        <AuthRouter>
+          <UserDecreeListPage />
         </AuthRouter>
       ),
     },

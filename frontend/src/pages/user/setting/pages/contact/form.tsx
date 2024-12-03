@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { baseAPI } from "@/api";
 import { userContactProps } from "@/types/user";
 
+import UserSettingLayout from "../..";
+
 const formSchema = z.object({
   email: z.string().email(),
   phone: z.string(),
@@ -27,7 +29,7 @@ const formSchema = z.object({
   facebook: z.string(),
 });
 
-const FormContact: React.FC = () => {
+const UserSettingContactFormPage = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -117,8 +119,11 @@ const FormContact: React.FC = () => {
   };
 
   return (
-    <>
-      <h1 className="my-7 font-semibold text-xl">Informasi Kontak</h1>
+    <UserSettingLayout>
+      <div className="mb-5">
+        <h1 className="text-lg">Form Kontak</h1>
+        <p className="text-sm text-gray-500">Lengkapi form dibawah ini</p>
+      </div>
       {isLoading ? (
         <p>Loading...</p>
       ) : (
@@ -211,8 +216,8 @@ const FormContact: React.FC = () => {
           </form>
         </Form>
       )}
-    </>
+    </UserSettingLayout>
   );
 };
 
-export default FormContact;
+export default UserSettingContactFormPage;

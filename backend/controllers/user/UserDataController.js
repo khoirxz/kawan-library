@@ -24,10 +24,9 @@ const getById = async (req, res) => {
       });
 
       if (data.length === 0) {
-        return res.status(204).json({
-          code: 204,
-          status: "success",
+        return responseHandler(res, 200, {
           message: "User data not found",
+          data: null,
         });
       }
     } else {
@@ -56,6 +55,7 @@ const getById = async (req, res) => {
 const create = async (req, res) => {
   const {
     user_id,
+    nik,
     first_name,
     last_name,
     dateBirth,
@@ -66,6 +66,7 @@ const create = async (req, res) => {
 
   const schema = Joi.object({
     user_id: Joi.string().required(),
+    nik: Joi.string().required(),
     first_name: Joi.string().required(),
     last_name: Joi.string().required(),
     dateBirth: Joi.date().required(),
@@ -98,6 +99,7 @@ const create = async (req, res) => {
     if (req.decoded.role === "admin") {
       data = await UserDataModel.create({
         user_id: user_id,
+        nik: nik,
         firstName: first_name,
         lastName: last_name,
         dateBirth: dateBirth,
@@ -108,6 +110,7 @@ const create = async (req, res) => {
     } else {
       data = await UserDataModel.create({
         user_id: req.decoded.userId,
+        nik: nik,
         firstName: first_name,
         lastName: last_name,
         dateBirth: dateBirth,
@@ -131,6 +134,7 @@ const create = async (req, res) => {
 const update = async (req, res) => {
   const {
     user_id,
+    nik,
     first_name,
     last_name,
     dateBirth,
@@ -141,6 +145,7 @@ const update = async (req, res) => {
 
   const schema = Joi.object({
     user_id: Joi.string().required(),
+    nik: Joi.string().required(),
     first_name: Joi.string().required(),
     last_name: Joi.string().required(),
     dateBirth: Joi.date().required(),
@@ -173,6 +178,7 @@ const update = async (req, res) => {
       data = await UserDataModel.update(
         {
           user_id: user_id,
+          nik: nik,
           first_name: first_name,
           last_name: last_name,
           dateBirth: dateBirth,
@@ -186,6 +192,7 @@ const update = async (req, res) => {
       data = await UserDataModel.update(
         {
           user_id: req.decoded.userId,
+          nik: nik,
           first_name: first_name,
           last_name: last_name,
           dateBirth: dateBirth,

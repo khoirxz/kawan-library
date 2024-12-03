@@ -3,13 +3,13 @@ const Joi = require("joi");
 
 // controllers job history
 const {
-  getUserJobHistory,
+  getAllUserJobHistory,
   getUserJobHistoryById,
   createUserJobHistory,
   updateUserJobHistory,
   deleteUserJobHistory,
-} = require("../controllers/JobHistoryController.js");
-const { authMiddleware } = require("../middleware/authMiddleware.js");
+} = require("../../controllers/user/UserJobHistoryController.js");
+const { authMiddleware } = require("../../middleware/authMiddleware.js");
 
 const router = express.Router();
 
@@ -35,7 +35,7 @@ const router = express.Router();
  */
 const filterInput = (req, res, next) => {
   const schema = Joi.object({
-    user_id: Joi.number().required(),
+    user_id: Joi.string().required(),
     company_name: Joi.string().required(),
     position: Joi.string().required(),
     start_date: Joi.date().required(),
@@ -57,8 +57,7 @@ const filterInput = (req, res, next) => {
   next();
 };
 
-router.get("/", authMiddleware, getUserJobHistory);
-router.get("/:id", authMiddleware, getUserJobHistory);
+router.get("/:id", authMiddleware, getAllUserJobHistory);
 router.get("/id/:id", authMiddleware, getUserJobHistoryById);
 router.post("/", authMiddleware, filterInput, createUserJobHistory);
 router.put("/:id", authMiddleware, filterInput, updateUserJobHistory);

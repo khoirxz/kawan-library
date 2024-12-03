@@ -1,53 +1,48 @@
 import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import dayjs from "dayjs";
+import { ColumnDef } from "@tanstack/react-table";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenuButton,
-  SidebarMenu,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { EllipsisVertical } from "lucide-react";
+import { ResponsiveTable, ActionButton } from "@/components/responsive-table";
 
 import { baseAPI } from "@/api";
 import { AdminLayout } from "@/layouts/admin";
+import { categoryListProps } from "@/types/certificate";
 
-type categoryListProps = {
-  id: number;
-  name: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-};
+const columns: ColumnDef<categoryListProps>[] = [
+  {
+    accessorKey: "id",
+    header: () => <p className="text-center">ID</p>,
+    cell: ({ row }) => (
+      <div className="text-center">
+        <p className="font-mono">{row.original.id}</p>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "name",
+    header: "Nama",
+    cell: ({ row }) => (
+      <div className="flex flex-col gap-1">
+        <span className="font-semibold">{row.original.name}</span>
+        <span className="text-sm text-gray-500">
+          {row.original.description}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Dibuat/Diperbarui",
+    cell: ({ row }) => (
+      <>{dayjs(row.original.createdAt).format("DD/MMMM/YYYY")}</>
+    ),
+  },
+];
 
 const DecreeCategoryListPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -97,131 +92,32 @@ const DecreeCategoryListPage: React.FC = () => {
           {isLoading ? (
             <Progress value={100} />
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center">Kode</TableHead>
-                  <TableHead>Nama</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Dibuat/Diperbarui</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {listUser.map((category) => (
-                  <TableItem
-                    key={category.id}
-                    {...category}
-                    setIsLoading={setIsLoading}
-                  />
-                ))}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-auto">
+              <div className="inline-block min-w-full align-middle w-[200px]">
+                <ResponsiveTable
+                  columns={[
+                    ...columns,
+                    {
+                      id: "action",
+                      header: () => <p className="text-right">Aksi</p>,
+                      cell: ({ row }) => (
+                        <ActionButton
+                          id={row.original.id}
+                          setIsLoading={setIsLoading}
+                          linkAction="/admin/decree/category/form"
+                          linkDelete="decree/category"
+                        />
+                      ),
+                    },
+                  ]}
+                  data={listUser}
+                />
+              </div>
+            </div>
           )}
         </div>
       </div>
     </AdminLayout>
-  );
-};
-
-const TableItem: React.FC<
-  categoryListProps & { setIsLoading: (value: boolean) => void }
-> = ({ id, name, description, createdAt, updatedAt, setIsLoading }) => {
-  const navigate = useNavigate();
-  const [openAlert, setOpenAlert] = useState<boolean>(false);
-
-  const handleDelete = async (id: number) => {
-    try {
-      await axios.delete<{
-        code: number;
-        status: string;
-        message: string;
-        data: number;
-      }>(`${baseAPI.dev}/decree/category/${id}`);
-
-      setOpenAlert(false);
-      setIsLoading(true);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  return (
-    <TableRow>
-      <TableCell className="font-medium hover:underline">
-        <div className="flex flex-col items-center">
-          <p className="capitalize font-mono">{id}</p>
-        </div>
-      </TableCell>
-      <TableCell>
-        <span>{name}</span>
-      </TableCell>
-      <TableCell>{description}</TableCell>
-      <TableCell>
-        {updatedAt
-          ? dayjs(updatedAt).format("DD-MMMM-YYYY")
-          : dayjs(createdAt).format("DD-MMMM-YYYY")}
-      </TableCell>
-      <TableCell>
-        <div className="flex justify-end items-center gap-3">
-          <Popover>
-            <PopoverTrigger className="p-2 flex items-center rounded-sm border">
-              <span>
-                <EllipsisVertical className="w-4 h-4" />
-              </span>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-40 overflow-hidden rounded-lg p-0"
-              align="end">
-              <Sidebar collapsible="none" className="bg-transparent">
-                <SidebarContent>
-                  <SidebarGroup className="border-b last:border-none">
-                    <SidebarGroupContent className="gap-0">
-                      <SidebarMenu>
-                        <SidebarMenuItem>
-                          <SidebarMenuButton
-                            onClick={() =>
-                              navigate(`/admin/decree/category/form/${id}`)
-                            }>
-                            <span>Edit</span>
-                          </SidebarMenuButton>
-
-                          <SidebarMenuButton
-                            onClick={() => setOpenAlert((prev) => !prev)}>
-                            <span className="text-red-500">Hapus</span>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      </SidebarMenu>
-                    </SidebarGroupContent>
-                  </SidebarGroup>
-                </SidebarContent>
-              </Sidebar>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <Dialog open={openAlert} onOpenChange={setOpenAlert}>
-          <DialogContent className="rounded-md">
-            <DialogHeader>
-              <DialogTitle className="text-left">Peringatan</DialogTitle>
-              <DialogDescription className="text-left">
-                Apakah anda yakin ingin menghapus.?
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="flex justify-end gap-2 flex-row">
-              <Button variant="destructive" onClick={() => handleDelete(id)}>
-                Hapus
-              </Button>
-              <Button
-                onClick={() => setOpenAlert((prev) => !prev)}
-                variant="outline">
-                Kembali
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </TableCell>
-    </TableRow>
   );
 };
 

@@ -2,7 +2,19 @@ const Joi = require("joi");
 const fs = require("fs");
 const Op = require("sequelize").Op;
 const DecreesModel = require("../model/DecreesModel");
+const DecreeCategoryModel = require("../model/DecreeCategoryModel");
+const UserModel = require("../model/user/UsersModel");
 const responseHandler = require("../helpers/responseHandler");
+
+DecreesModel.belongsTo(UserModel, {
+  foreignKey: "user_id", // Sesuai kolom foreign key di tabel decrees
+  as: "user", // Alias untuk relasi
+});
+
+DecreesModel.belongsTo(DecreeCategoryModel, {
+  foreignKey: "category_id", // Sesuai kolom foreign key di tabel decrees
+  as: "category", // Alias untuk relasi
+});
 
 // same as getAllDecrees
 const getAllDecrees = async (req, res) => {
@@ -21,6 +33,20 @@ const getAllDecrees = async (req, res) => {
         : {};
       data = await DecreesModel.findAll({
         where: whereClause,
+        attributes: { exclude: ["category_id", "user_id"] },
+        include: [
+          {
+            model: DecreeCategoryModel,
+            as: "category",
+            attributes: ["name", "id"],
+          },
+          {
+            model: UserModel,
+            as: "user",
+            attributes: ["id", "username", "role", "avatarImg", "verified"],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
       });
     } else {
       const whereClause = searchQuery
@@ -34,6 +60,19 @@ const getAllDecrees = async (req, res) => {
         : { user_id: req.decoded.userId };
       data = await DecreesModel.findAll({
         where: whereClause,
+        include: [
+          {
+            model: DecreeCategoryModel,
+            as: "category",
+            attributes: ["name", "id"],
+          },
+          {
+            model: UserModel,
+            as: "user",
+            attributes: ["id", "username", "role", "avatarImg", "verified"],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
       });
     }
 
@@ -52,6 +91,14 @@ const getDecreeById = async (req, res) => {
   try {
     const data = await DecreesModel.findOne({
       where: { id: req.params.id },
+      attributes: { exclude: ["user_id"] },
+      include: [
+        {
+          model: UserModel,
+          as: "user",
+          attributes: ["id", "username", "role", "avatarImg", "verified"],
+        },
+      ],
     });
 
     if (!data) {
@@ -97,7 +144,7 @@ const createDecree = async (req, res) => {
     }
 
     const schema = Joi.object({
-      user_id: Joi.string().required(),
+      user_id: Joi.string().optional().allow(null, ""),
       category_id: Joi.number().required(),
       title: Joi.string().required(),
       description: Joi.string().required(),
@@ -116,7 +163,7 @@ const createDecree = async (req, res) => {
     }
 
     const data = await DecreesModel.create({
-      user_id,
+      user_id: user_id || null,
       title,
       description,
       category_id,
@@ -150,17 +197,17 @@ const updateDecreeById = async (req, res) => {
       user_id,
       title,
       description,
-      category,
+      category_id,
       status,
       effective_date,
       expired_date,
     } = req.body;
 
     const schema = Joi.object({
-      user_id: Joi.number().required(),
+      user_id: Joi.string().optional(),
       title: Joi.string().required(),
       description: Joi.string().required(),
-      category: Joi.string().required(),
+      category_id: Joi.string().required(),
       status: Joi.string().required(),
       effective_date: Joi.date().required(),
       expired_date: Joi.date().allow(null),
@@ -183,7 +230,7 @@ const updateDecreeById = async (req, res) => {
           user_id,
           title,
           description,
-          category,
+          category_id,
           status,
           effective_date,
           expired_date,
@@ -202,7 +249,7 @@ const updateDecreeById = async (req, res) => {
           user_id,
           title,
           description,
-          category,
+          category_id,
           status,
           effective_date,
           expired_date,

@@ -10,3 +10,11 @@ export interface certificationListProps {
   updatedAt: string;
   user: userProp;
 }
+
+export interface categoryListProps {
+  id: number;
+  name: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -1,12 +1,24 @@
 const argon2 = require("argon2");
 const fs = require("fs");
 const UsersModel = require("../../model/user/UsersModel");
+const UserDataModel = require("../../model/user/UserDataModel");
 const responseHandler = require("../../helpers/responseHandler");
+
+UsersModel.hasOne(UserDataModel, {
+  foreignKey: "user_id", // Sesuai kolom foreign key di tabel user data
+  as: "user_data", // Alias untuk relasi
+});
 
 const getUsers = async (req, res) => {
   try {
     const data = await UsersModel.findAll({
-      attributes: ["id", "role", "username", "avatarImg"],
+      include: [
+        {
+          model: UserDataModel,
+          as: "user_data",
+        },
+      ],
+      attributes: ["id", "role", "username", "avatarImg", "verified"],
     });
 
     responseHandler(res, 200, {
@@ -24,7 +36,7 @@ const getUsersById = async (req, res) => {
   try {
     const data = await UsersModel.findAll({
       where: { id: req.params.id },
-      attributes: ["id", "role", "username", "avatarImg"],
+      attributes: ["id", "role", "username", "avatarImg", "verified"],
     });
 
     responseHandler(res, 200, {
@@ -104,10 +116,12 @@ const updateUser = async (req, res) => {
     }
 
     // encrypt password
-    let newPassword;
-    if (password) {
-      newPassword = await argon2.hash(password);
-    }
+    const newPassword =
+      password === ""
+        ? oldData[0].password
+        : password
+        ? await argon2.hash(password)
+        : undefined;
 
     // update user
     await UsersModel.update(

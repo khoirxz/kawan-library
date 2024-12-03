@@ -21,6 +21,8 @@ import { baseAPI } from "@/api";
 import { userGeographyProps } from "@/types/user";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import UserSettingLayout from "../..";
+
 const formSchema = z.object({
   country: z.string(),
   province: z.string(),
@@ -30,7 +32,7 @@ const formSchema = z.object({
   address: z.string(),
 });
 
-const FormGeography: React.FC = () => {
+const UserSettingLocationFormPage: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -124,8 +126,12 @@ const FormGeography: React.FC = () => {
   };
 
   return (
-    <>
-      <h1 className="my-7 font-semibold text-xl">Informasi Geografi</h1>
+    <UserSettingLayout>
+      <div className="mb-5">
+        <h1 className="text-lg">Form Lokasi</h1>
+        <p className="text-sm text-gray-500">Lengkapi form dibawah ini</p>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-7 space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -233,8 +239,8 @@ const FormGeography: React.FC = () => {
           <Button type="submit">Simpan</Button>
         </form>
       </Form>
-    </>
+    </UserSettingLayout>
   );
 };
 
-export default FormGeography;
+export default UserSettingLocationFormPage;

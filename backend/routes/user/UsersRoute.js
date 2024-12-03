@@ -51,11 +51,28 @@ const filterInput = (req, res, next) => {
 
   next();
 };
+const filterInputUpdate = (req, res, next) => {
+  const schema = Joi.object({
+    username: Joi.string().required().min(4),
+    password: Joi.string().allow("").optional(),
+    role: Joi.string().required(),
+    verified: Joi.boolean().required(),
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return responseHandler(res, 400, {
+      message: error.message,
+    });
+  }
+
+  next();
+};
 
 router.get("/", authMiddleware, adminRoleMiddleware, getUsers);
 router.get("/:id", authMiddleware, adminRoleMiddleware, getUsersById);
 router.post("/", authMiddleware, adminRoleMiddleware, filterInput, createUser);
-router.put("/:id", authMiddleware, filterInput, updateUser);
+router.put("/:id", authMiddleware, filterInputUpdate, updateUser);
 router.delete("/:id", authMiddleware, adminRoleMiddleware, deleteUser);
 
 // upload avatar

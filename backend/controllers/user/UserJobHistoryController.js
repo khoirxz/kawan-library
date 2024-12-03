@@ -1,26 +1,16 @@
-const JobHistoryModel = require("../model/JobHistoryModel");
-const UsersModel = require("../model/user/UsersModel");
-const responseHandler = require("../helpers/responseHandler");
+const JobHistoryModel = require("../../model/user/UserJobHistoryModel");
+const UsersModel = require("../../model/user/UsersModel");
+const responseHandler = require("../../helpers/responseHandler");
 
-const getUserJobHistory = async function (req, res) {
+// getAllUserJobHistory is get all user job history with id user
+const getAllUserJobHistory = async function (req, res) {
   try {
-    const { user_id } = req.params;
+    const id = req.params.id;
 
-    let data;
-    // cek jika admin
-    if (req.decoded.role === "admin") {
-      data = await JobHistoryModel.findAll({
-        where: { user_id: user_id },
-      });
-    } else {
-      // jika bukan admin, hanya akan mengambil data sesuai user_id
-      data = await JobHistoryModel.findAll({
-        where: { user_id: req.decoded.userId },
-      });
-    }
+    const data = await JobHistoryModel.findAll({ where: { user_id: id } });
 
     return responseHandler(res, 200, {
-      message: "Success get user job history",
+      message: "Success get all user job history",
       data: data,
     });
   } catch (error) {
@@ -68,9 +58,7 @@ const createUserJobHistory = async function (req, res) {
     });
 
     if (user.length == 0) {
-      return res.status(404).json({
-        code: 404,
-        status: "failed",
+      return responseHandler(res, 404, {
         message: "User not found",
       });
     }
@@ -132,9 +120,7 @@ const updateUserJobHistory = async function (req, res) {
     });
 
     if (user.length == 0) {
-      return res.status(404).json({
-        code: 404,
-        status: "failed",
+      return responseHandler(res, 404, {
         message: "User not found",
       });
     }
@@ -195,10 +181,8 @@ const deleteUserJobHistory = async function (req, res) {
     });
 
     if (!oldData) {
-      return res.status(404).json({
-        code: 404,
-        status: "failed",
-        message: "Data not found",
+      return responseHandler(res, 404, {
+        message: "User job history not found",
       });
     }
 
@@ -209,10 +193,8 @@ const deleteUserJobHistory = async function (req, res) {
       });
 
       if (!userJobHistory) {
-        return res.status(403).json({
-          code: 403,
-          status: "failed",
-          message: "Forbidden, you don't have permission",
+        return responseHandler(res, 404, {
+          message: "User job history not found",
         });
       }
 
@@ -237,7 +219,7 @@ const deleteUserJobHistory = async function (req, res) {
 };
 
 module.exports = {
-  getUserJobHistory,
+  getAllUserJobHistory,
   getUserJobHistoryById,
   createUserJobHistory,
   updateUserJobHistory,

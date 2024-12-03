@@ -1,6 +1,12 @@
 const Joi = require("joi");
 const UserDataEmployeModel = require("../../model/user/UserDataEmployeModel");
+const UserModel = require("../../model/user/UsersModel");
 const responseHandler = require("../../helpers/responseHandler");
+
+UserDataEmployeModel.belongsTo(UserModel, {
+  foreignKey: "supervisor", // Sesuai kolom foreign key di tabel userDataEmploye
+  as: "supervisor_info", // Alias untuk relasi
+});
 
 const getById = async (req, res) => {
   const schema = Joi.object({
@@ -21,6 +27,14 @@ const getById = async (req, res) => {
     if (req.decoded.role === "admin") {
       data = await UserDataEmployeModel.findAll({
         where: { user_id: req.params.id },
+        attributes: { exclude: ["supervisor"] },
+        include: [
+          {
+            model: UserModel,
+            as: "supervisor_info",
+            attributes: ["id", "username", "role", "avatarImg", "verified"],
+          },
+        ],
       });
 
       if (data.length === 0) {
@@ -33,6 +47,14 @@ const getById = async (req, res) => {
     } else {
       data = await UserDataEmployeModel.findOne({
         where: { user_id: req.decoded.id },
+        attributes: { exclude: ["supervisor"] },
+        include: [
+          {
+            model: UserModel,
+            as: "supervisor_info",
+            attributes: ["id", "username", "role", "avatarImg", "verified"],
+          },
+        ],
       });
 
       if (!data) {
@@ -54,15 +76,7 @@ const getById = async (req, res) => {
 };
 
 const create = async (req, res) => {
-  const {
-    user_id,
-    supervisor_id,
-    position,
-    status,
-    salary,
-    start_date,
-    end_date,
-  } = req.body;
+  const { user_id, supervisor_id, position, status, salary } = req.body;
 
   const schema = Joi.object({
     user_id: Joi.string().required(),
@@ -70,8 +84,8 @@ const create = async (req, res) => {
     position: Joi.string().required(),
     status: Joi.string().required(),
     salary: Joi.number().required(),
-    start_date: Joi.date().required(),
-    end_date: Joi.date().allow(null).required(),
+    // start_date: Joi.date().required(),
+    // end_date: Joi.date().allow(null).required(),
   });
 
   const { error } = schema.validate(req.body);
@@ -99,8 +113,8 @@ const create = async (req, res) => {
       position: position,
       status: status,
       salary: salary,
-      start_date: start_date,
-      end_date: end_date,
+      // start_date: start_date,
+      // end_date: end_date,
     });
 
     responseHandler(res, 200, {
@@ -121,8 +135,8 @@ const update = async (req, res) => {
     position,
     status,
     salary,
-    start_date,
-    end_date,
+    // start_date,
+    // end_date,
   } = req.body;
 
   const schema = Joi.object({
@@ -131,8 +145,8 @@ const update = async (req, res) => {
     position: Joi.string().required(),
     status: Joi.string().required(),
     salary: Joi.number().required(),
-    start_date: Joi.date().required(),
-    end_date: Joi.date().allow(null).required(),
+    // start_date: Joi.date().required(),
+    // end_date: Joi.date().allow(null).required(),
   });
 
   const { error } = schema.validate(req.body);
@@ -151,8 +165,8 @@ const update = async (req, res) => {
         position: position,
         status: status,
         salary: salary,
-        start_date: start_date,
-        end_date: end_date,
+        // start_date: start_date,
+        // end_date: end_date,
       },
       {
         where: { user_id: user_id },

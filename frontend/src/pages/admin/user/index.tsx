@@ -16,6 +16,7 @@ import {
 import { ResponsiveTable, ActionButton } from "@/components/responsive-table";
 import { BadgeCheck } from "lucide-react";
 
+import { useAppSelector } from "@/app/store";
 import { baseAPI } from "@/api";
 import { AdminLayout } from "@/layouts/admin";
 import { userProp } from "@/types/user";
@@ -87,6 +88,13 @@ const columns: ColumnDef<userProp>[] = [
 const UserListPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [listUser, setListUser] = useState<userProp[]>([]);
+  const {
+    main: {
+      verify: {
+        data: { userId },
+      },
+    },
+  } = useAppSelector((state) => state.authState);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -145,7 +153,8 @@ const UserListPage: React.FC = () => {
                           id={row.original.id}
                           setIsLoading={setIsLoading}
                           linkAction={`/admin/user/form`}
-                          linkDelete={`user`}
+                          linkDelete={`users`}
+                          isDelete={userId === row.original.id ? false : true}
                         />
                       ),
                     },

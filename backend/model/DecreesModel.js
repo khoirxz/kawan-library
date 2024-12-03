@@ -12,7 +12,7 @@ const Decrees = db.define("decrees", {
   user_id: {
     type: DataTypes.CHAR,
     defaultValue: DataTypes.UUIDV4,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: "users",
       key: "id",

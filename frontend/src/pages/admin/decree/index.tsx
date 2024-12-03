@@ -19,12 +19,10 @@ const columns: ColumnDef<decreeListProps>[] = [
     accessorKey: "title",
     header: "Judul",
     cell: ({ row }) => (
-      <div>
-        <p>{row.original.category.name}</p>
-        {row.original.user ? (
-          <p>{row.original.user?.user_data?.firstName}</p>
-        ) : null}
-        <p>{row.original.title}</p>
+      <div className="flex flex-col gap-1">
+        <p className="font-semibold underline">{row.original.title}</p>
+        <p className="font-semibold">{row.original.category.name}</p>
+        {row.original.user ? <p>{row.original.user.username}</p> : null}
       </div>
     ),
   },
