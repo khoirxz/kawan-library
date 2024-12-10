@@ -9,7 +9,7 @@ const DecreeCategory = db.define("decrees_category", {
     primaryKey: true,
     autoIncrement: true,
   },
-  name: {
+  title: {
     type: DataTypes.STRING,
     allowNull: false,
   },

@@ -45,7 +45,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "https://localhost:*",
-      "https://bprkawan.co.id/library/",
+      "https://bprkawan.co.id/library",
     ],
   })
 );

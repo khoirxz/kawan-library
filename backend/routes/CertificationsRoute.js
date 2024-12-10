@@ -9,7 +9,6 @@ const {
   createCertificate,
   updateCertificateById,
   deleteCertificateById,
-  searchCertificate,
 } = require("../controllers/CertificationsController.js");
 const {
   authMiddleware,
@@ -35,11 +34,8 @@ const upload = multer({
   },
 });
 
-// routes
-router.get("/search/:id", authMiddleware, searchCertificate);
-
 router.get("/", authMiddleware, getAllCertificates);
-router.get("/:id", authMiddleware, getCertificateById);
+router.get("/id/:id", authMiddleware, getCertificateById);
 router.post(
   "/",
   authMiddleware,

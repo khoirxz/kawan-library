@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const UserGeographyModel = require("../../model/user/UserGeographyModel");
+const { UserGeographyModel } = require("../../model/index");
 const responseHandler = require("../../helpers/responseHandler");
 
 /**

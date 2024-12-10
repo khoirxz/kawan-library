@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const DecreeCategoryModel = require("../model/DecreeCategoryModel");
+const { DecreeCategoryModel } = require("../model/index");
 const responseHandler = require("../helpers/responseHandler");
 
 const getAllDecreeCategory = async (req, res) => {
@@ -32,22 +32,23 @@ const getDecreeCategoryById = async (req, res) => {
 };
 
 const createDecreeCategory = async (req, res) => {
-  const { name, description } = req.body;
+  const { title, description } = req.body;
 
   const schema = Joi.object({
-    name: Joi.string().required(),
+    title: Joi.string().required(),
     description: Joi.string().required(),
   });
 
-  const { error } = schema.validate({ name, description });
+  const { error } = schema.validate({ title, description });
 
   if (error) {
     return responseHandler(res, 400, { message: error.message });
   }
+
   try {
     // check if decree category already exist
     const oldData = await DecreeCategoryModel.findAll({
-      where: { name: name },
+      where: { title: title },
     });
 
     if (oldData.length > 0) {
@@ -58,7 +59,7 @@ const createDecreeCategory = async (req, res) => {
 
     // save
     const data = await DecreeCategoryModel.create({
-      name,
+      title,
       description,
     });
 
@@ -73,14 +74,14 @@ const createDecreeCategory = async (req, res) => {
 
 const updateDecreeCategoryById = async (req, res) => {
   const id = req.params.id;
-  const { name, description } = req.body;
+  const { title, description } = req.body;
 
   const schema = Joi.object({
-    name: Joi.string().required(),
+    title: Joi.string().required(),
     description: Joi.string().required(),
   });
 
-  const { error } = schema.validate({ name, description });
+  const { error } = schema.validate({ title, description });
 
   if (error) {
     return responseHandler(res, 400, { message: error.message });
@@ -88,7 +89,7 @@ const updateDecreeCategoryById = async (req, res) => {
 
   try {
     const result = await DecreeCategoryModel.update(
-      { name, description },
+      { title, description },
       { where: { id: id } }
     );
 

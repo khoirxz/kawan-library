@@ -1,23 +1,12 @@
 const argon2 = require("argon2");
 const fs = require("fs");
-const UsersModel = require("../../model/user/UsersModel");
-const UserDataModel = require("../../model/user/UserDataModel");
+const { UsersModel } = require("../../model/index");
 const responseHandler = require("../../helpers/responseHandler");
-
-UsersModel.hasOne(UserDataModel, {
-  foreignKey: "user_id", // Sesuai kolom foreign key di tabel user data
-  as: "user_data", // Alias untuk relasi
-});
 
 const getUsers = async (req, res) => {
   try {
     const data = await UsersModel.findAll({
-      include: [
-        {
-          model: UserDataModel,
-          as: "user_data",
-        },
-      ],
+      include: ["user_data", "user_data_employe"],
       attributes: ["id", "role", "username", "avatarImg", "verified"],
     });
 
@@ -235,6 +224,7 @@ const getAvatarById = async (req, res) => {
   try {
     const data = await UsersModel.findAll({
       where: { id: req.params.id },
+      attributes: ["avatarImg"],
     });
     responseHandler(res, 200, {
       message: "Success get avatar",

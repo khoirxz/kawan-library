@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const UserDataModel = require("../../model/user/UserDataModel");
+const { UserDataModel } = require("../../model/index");
 const responseHandler = require("../../helpers/responseHandler");
 
 const getById = async (req, res) => {

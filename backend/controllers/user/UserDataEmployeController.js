@@ -1,12 +1,6 @@
 const Joi = require("joi");
-const UserDataEmployeModel = require("../../model/user/UserDataEmployeModel");
-const UserModel = require("../../model/user/UsersModel");
+const { UserDataEmployeModel } = require("../../model/index");
 const responseHandler = require("../../helpers/responseHandler");
-
-UserDataEmployeModel.belongsTo(UserModel, {
-  foreignKey: "supervisor", // Sesuai kolom foreign key di tabel userDataEmploye
-  as: "supervisor_info", // Alias untuk relasi
-});
 
 const getById = async (req, res) => {
   const schema = Joi.object({
@@ -28,13 +22,7 @@ const getById = async (req, res) => {
       data = await UserDataEmployeModel.findAll({
         where: { user_id: req.params.id },
         attributes: { exclude: ["supervisor"] },
-        include: [
-          {
-            model: UserModel,
-            as: "supervisor_info",
-            attributes: ["id", "username", "role", "avatarImg", "verified"],
-          },
-        ],
+        include: ["supervisor_info"],
       });
 
       if (data.length === 0) {
@@ -46,15 +34,9 @@ const getById = async (req, res) => {
       }
     } else {
       data = await UserDataEmployeModel.findOne({
-        where: { user_id: req.decoded.id },
+        where: { user_id: req.decoded.userId },
         attributes: { exclude: ["supervisor"] },
-        include: [
-          {
-            model: UserModel,
-            as: "supervisor_info",
-            attributes: ["id", "username", "role", "avatarImg", "verified"],
-          },
-        ],
+        include: ["supervisor_info"],
       });
 
       if (!data) {

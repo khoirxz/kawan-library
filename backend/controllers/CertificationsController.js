@@ -1,49 +1,62 @@
 const Joi = require("joi");
 const fs = require("fs");
 const Op = require("sequelize").Op;
-const CertificationsModel = require("../model/CertificationsModel");
-const UsersModel = require("../model/user/UsersModel");
+const { CertificationsModel } = require("../model/index");
 const responseHandler = require("../helpers/responseHandler");
-
-CertificationsModel.belongsTo(UsersModel, {
-  foreignKey: "user_id", // Sesuai kolom foreign key di tabel decrees
-  as: "user", // Alias untuk relasi
-});
+const { Paginate } = require("../helpers/paginationHandler");
 
 const getAllCertificates = async (req, res) => {
   try {
-    let data;
-    if (req.decoded.role === "admin") {
-      const searchQuery = req.query.search;
-      const whereClause = searchQuery
+    // Example: GET /certificates?search=cert&userId=123&page=2&limit=5
+
+    // Ambil query dari request
+    const { search, userId, page, limit } = req.query;
+
+    // Filter pencarian
+    const whereClause =
+      search !== undefined && search !== null && search !== ""
         ? {
             [Op.or]: [
-              { name: { [Op.like]: `%${searchQuery}%` } },
-              { description: { [Op.like]: `%${searchQuery}%` } },
+              { title: { [Op.like]: `%${search}%` } },
+              { description: { [Op.like]: `%${search}%` } },
             ],
           }
         : {};
 
-      data = await CertificationsModel.findAll({
-        where: whereClause,
-        attributes: { exclude: ["user_id"] },
-        include: [
-          {
-            model: UsersModel,
-            as: "user",
-            attributes: ["id", "username", "role", "avatarImg", "verified"],
+    // Filter user berdasarkan role
+    const userFilter =
+      req.decoded.role === "admin"
+        ? userId === undefined || userId === null || userId === ""
+          ? {}
+          : { user_id: userId }
+        : { user_id: req.decoded.userId };
+
+    // Gabungkan filter pencarian dan user
+    const where = {
+      ...whereClause,
+      ...userFilter,
+    };
+
+    // Pagination
+    const result = await Paginate(CertificationsModel, {
+      page,
+      limit,
+      where,
+      include: [
+        {
+          association: "user",
+          attributes: {
+            exclude: ["password", "token", "createdAt", "updatedAt"],
           },
-        ],
-      });
-    } else {
-      data = await CertificationsModel.findAll({
-        where: { user_id: req.decoded.userId },
-      });
-    }
+        },
+      ],
+      attributes: { exclude: ["user_id"] },
+    });
 
     responseHandler(res, 200, {
       message: "Success get all certificates",
-      data: data,
+      pagination: result.pagination,
+      data: result.data,
     });
   } catch (error) {
     responseHandler(res, 500, {
@@ -57,13 +70,7 @@ const getCertificateById = async (req, res) => {
     const data = await CertificationsModel.findOne({
       where: { id: req.params.id },
       attributes: { exclude: ["user_id"] },
-      include: [
-        {
-          model: UsersModel,
-          as: "user",
-          attributes: ["id", "username", "role", "avatarImg", "verified"],
-        },
-      ],
+      include: ["user"],
     });
 
     if (!data) {
@@ -85,7 +92,7 @@ const getCertificateById = async (req, res) => {
 
 const createCertificate = async (req, res) => {
   try {
-    const { user_id, name, description, date } = req.body;
+    const { user_id, title, description, date } = req.body;
 
     if (!req.file) {
       return responseHandler(res, 400, {
@@ -95,7 +102,7 @@ const createCertificate = async (req, res) => {
 
     const schema = Joi.object({
       user_id: Joi.string().required(),
-      name: Joi.string().required(),
+      title: Joi.string().required(),
       description: Joi.string().required(),
       date: Joi.date().required(),
     });
@@ -110,7 +117,7 @@ const createCertificate = async (req, res) => {
 
     const data = await CertificationsModel.create({
       user_id: user_id,
-      name: name,
+      title: title,
       description: description,
       date: date,
       file_path: req.file.filename,
@@ -140,11 +147,11 @@ const updateCertificateById = async (req, res) => {
       });
     }
 
-    const { user_id, name, description, date } = req.body;
+    const { user_id, title, description, date } = req.body;
 
     const schema = Joi.object({
       user_id: Joi.string().required(),
-      name: Joi.string().required(),
+      title: Joi.string().required(),
       description: Joi.string().required(),
       date: Joi.date().required(),
     });
@@ -164,7 +171,7 @@ const updateCertificateById = async (req, res) => {
       await CertificationsModel.update(
         {
           user_id,
-          name,
+          title,
           description,
           date,
           file_path: req.file.filename,
@@ -179,7 +186,7 @@ const updateCertificateById = async (req, res) => {
       data = await CertificationsModel.update(
         {
           user_id,
-          name,
+          title,
           description,
           date,
         },
@@ -232,41 +239,10 @@ const deleteCertificateById = async (req, res) => {
   }
 };
 
-/**
- * Search certification by name and description
- * @param {Object} req - Request object
- * @param {Object} res - Response object
- * @param {String} req.query.search - Search query
- * @returns {Object} - Response object, containing status code and data
- */
-const searchCertificate = async (req, res) => {
-  try {
-    const data = await CertificationsModel.findAll({
-      where: {
-        [Op.or]: [
-          { name: { [Op.like]: `%${req.query.search}%` } },
-          { description: { [Op.like]: `%${req.query.search}%` } },
-        ],
-        user_id: req.params.id,
-      },
-    });
-
-    responseHandler(res, 200, {
-      message: "Success search certificate",
-      data: data,
-    });
-  } catch (error) {
-    responseHandler(res, 500, {
-      message: error.message,
-    });
-  }
-};
-
 module.exports = {
   getAllCertificates,
   getCertificateById,
   createCertificate,
   updateCertificateById,
   deleteCertificateById,
-  searchCertificate,
 };

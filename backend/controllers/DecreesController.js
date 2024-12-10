@@ -1,84 +1,62 @@
 const Joi = require("joi");
 const fs = require("fs");
 const Op = require("sequelize").Op;
-const DecreesModel = require("../model/DecreesModel");
-const DecreeCategoryModel = require("../model/DecreeCategoryModel");
-const UserModel = require("../model/user/UsersModel");
+const { DecreesModel } = require("../model/index");
 const responseHandler = require("../helpers/responseHandler");
+const { Paginate } = require("../helpers/paginationHandler");
 
-DecreesModel.belongsTo(UserModel, {
-  foreignKey: "user_id", // Sesuai kolom foreign key di tabel decrees
-  as: "user", // Alias untuk relasi
-});
-
-DecreesModel.belongsTo(DecreeCategoryModel, {
-  foreignKey: "category_id", // Sesuai kolom foreign key di tabel decrees
-  as: "category", // Alias untuk relasi
-});
-
-// same as getAllDecrees
 const getAllDecrees = async (req, res) => {
   try {
-    let data;
-    const searchQuery = req.query.search;
+    const { search, userId, page, limit } = req.query;
 
-    if (req.decoded.role === "admin") {
-      const whereClause = searchQuery
-        ? {
-            [Op.or]: [
-              { title: { [Op.like]: `%${searchQuery}%` } },
-              { description: { [Op.like]: `%${searchQuery}%` } },
-            ],
-          }
-        : {};
-      data = await DecreesModel.findAll({
-        where: whereClause,
-        attributes: { exclude: ["category_id", "user_id"] },
-        include: [
-          {
-            model: DecreeCategoryModel,
-            as: "category",
-            attributes: ["name", "id"],
-          },
-          {
-            model: UserModel,
-            as: "user",
-            attributes: ["id", "username", "role", "avatarImg", "verified"],
-          },
-        ],
-        order: [["createdAt", "DESC"]],
-      });
-    } else {
-      const whereClause = searchQuery
-        ? {
-            [Op.or]: [
-              { title: { [Op.like]: `%${searchQuery}%` } },
-              { description: { [Op.like]: `%${searchQuery}%` } },
-            ],
-            user_id: req.decoded.userId,
-          }
+    // Filter pencarian
+    const whereClause = search
+      ? {
+          [Op.or]: [
+            { title: { [Op.like]: `%${search}%` } },
+            { description: { [Op.like]: `%${search}%` } },
+          ],
+        }
+      : {};
+
+    // Filter user berdasarkan role
+    const userFilter =
+      req.decoded.role === "admin"
+        ? userId === undefined || userId === null || userId === ""
+          ? {}
+          : { user_id: userId }
         : { user_id: req.decoded.userId };
-      data = await DecreesModel.findAll({
-        where: whereClause,
-        include: [
-          {
-            model: DecreeCategoryModel,
-            as: "category",
-            attributes: ["name", "id"],
-          },
-          {
-            model: UserModel,
-            as: "user",
-            attributes: ["id", "username", "role", "avatarImg", "verified"],
-          },
-        ],
-        order: [["createdAt", "DESC"]],
-      });
-    }
+
+    // Gabungkan filter pencarian dan user
+    const where = {
+      ...whereClause,
+      ...userFilter,
+    };
+
+    // Pagination
+    const result = await Paginate(DecreesModel, {
+      page,
+      limit,
+      where,
+      include: [
+        {
+          association: "user",
+          attributes: ["id", "role", "username", "avatarImg", "verified"],
+        },
+        {
+          association: "category",
+          attributes: ["id", "title", "description"],
+        },
+      ],
+      attributes: { exclude: ["user_id", "category_id"] },
+    });
+
+    console.log(typeof userId);
 
     responseHandler(res, 200, {
-      message: "Success get all decrees",
-      data: data,
+      message: `Success get ${userId ? "user" : "all"} decrees`,
+      data: result.data,
+      pagination: result.pagination,
     });
   } catch (error) {
     responseHandler(res, 500, {
@@ -92,13 +70,7 @@ const getDecreeById = async (req, res) => {
     const data = await DecreesModel.findOne({
       where: { id: req.params.id },
       attributes: { exclude: ["user_id"] },
-      include: [
-        {
-          model: UserModel,
-          as: "user",
-          attributes: ["id", "username", "role", "avatarImg", "verified"],
-        },
-      ],
+      include: ["user"],
     });
 
     if (!data) {
@@ -312,38 +284,10 @@ const deleteDecreeById = async (req, res) => {
   }
 };
 
-// search decrees by name and userID
-const searchDecrees = async (req, res) => {
-  try {
-    const data = await DecreesModel.findAll({
-      where: {
-        [Op.or]: [
-          { title: { [Op.like]: `%${req.query.search}%` } },
-          { description: { [Op.like]: `%${req.query.search}%` } },
-        ],
-        user_id: req.params.id,
-      },
-    });
-
-    return res.status(200).json({
-      code: 200,
-      status: "success",
-      data: data,
-    });
-  } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
-      message: error.message,
-    });
-  }
-};
-
 module.exports = {
   getAllDecrees,
   getDecreeById,
   createDecree,
   updateDecreeById,
   deleteDecreeById,
-  searchDecrees,
 };

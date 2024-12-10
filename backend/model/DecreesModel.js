@@ -10,7 +10,7 @@ const Decrees = db.define("decrees", {
     defaultValue: DataTypes.UUIDV4,
   },
   user_id: {
-    type: DataTypes.CHAR,
+    type: DataTypes.CHAR(36),
     defaultValue: DataTypes.UUIDV4,
     allowNull: true,
     references: {

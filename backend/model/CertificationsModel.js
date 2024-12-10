@@ -17,7 +17,7 @@ const Certifications = db.define("certifications", {
       key: "id",
     },
   },
-  name: {
+  title: {
     type: DataTypes.STRING,
     allowNull: false,
   },

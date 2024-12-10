@@ -1,4 +1,4 @@
-const UsersModel = require("../model/user/UsersModel");
+const { UsersModel } = require("../model/index");
 const Joi = require("joi");
 const argon2 = require("argon2");
 const jwt = require("jsonwebtoken");
@@ -23,9 +23,7 @@ const signup = async (req, res) => {
     const { error } = schema.validate(req.body);
 
     if (error) {
-      return res.status(400).json({
-        code: 400,
-        status: "error",
+      return responseHandler(res, 400, {
         message: error.message,
       });
     }
@@ -37,9 +35,7 @@ const signup = async (req, res) => {
     });
 
     if (data.length !== 0) {
-      return res.status(401).json({
-        code: 401,
-        status: "error",
+      return responseHandler(res, 400, {
         message: "Username already exist",
       });
     }
@@ -53,22 +49,21 @@ const signup = async (req, res) => {
         username: username,
         password: encryptedPassword,
         role: "user",
-        verified: true,
+        verified: false,
       },
       {
         fields: ["username", "role", "verified", "password"],
       }
     );
-    res.status(201).json({
-      code: 201,
-      status: "success",
-      data: data,
+
+    responseHandler(res, 201, {
+      message: "Success create user",
+      data,
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
-      message: error.message,
+    responseHandler(res, 500, {
+      message: "Internal server error",
+      data: error.message,
     });
   }
 };
@@ -190,9 +185,12 @@ const verifyUser = async function (req, res) {
   try {
     const token = req.cookies.token;
 
+    // debug
+    console.log(req.cookies);
+
     if (!token) {
       return responseHandler(res, 401, {
-        message: "Operation failed, invalid authorization",
+        message: "Operation failed, invalid authorization!",
       });
     }
 
@@ -209,7 +207,7 @@ const verifyUser = async function (req, res) {
     jwt.verify(token, globals.ACCESS_TOKEN_SECRET, function (err) {
       if (err)
         return responseHandler(res, 401, {
-          message: "Operation failed, invalid authorization",
+          message: "Invalid authorization",
         });
 
       responseHandler(res, 200, {
