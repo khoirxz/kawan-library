@@ -51,8 +51,6 @@ const getAllDecrees = async (req, res) => {
       attributes: { exclude: ["user_id", "category_id"] },
     });
 
-    console.log(typeof userId);
-
     responseHandler(res, 200, {
       message: `Success get ${userId ? "user" : "all"} decrees`,
       data: result.data,

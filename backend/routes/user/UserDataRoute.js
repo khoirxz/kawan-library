@@ -1,5 +1,8 @@
 const express = require("express");
 
+const { userDataSchema } = require("../../validation/User/UserDataScheme");
+const { validateInput } = require("../../middleware/validateMiddleware");
+
 // controllers user data
 const {
   getById,
@@ -11,7 +14,7 @@ const { authMiddleware } = require("../../middleware/authMiddleware.js");
 const router = express.Router();
 
 router.get("/:id", authMiddleware, getById);
-router.post("/", authMiddleware, create);
-router.put("/", authMiddleware, update);
+router.post("/", authMiddleware, validateInput(userDataSchema), create);
+router.put("/", authMiddleware, validateInput(userDataSchema), update);
 
 module.exports = router;

@@ -64,25 +64,6 @@ const create = async (req, res) => {
     maritalStatus,
   } = req.body;
 
-  const schema = Joi.object({
-    user_id: Joi.string().required(),
-    nik: Joi.string().required(),
-    first_name: Joi.string().required(),
-    last_name: Joi.string().required(),
-    dateBirth: Joi.date().required(),
-    gender: Joi.string().required(),
-    religion: Joi.string().required(),
-    maritalStatus: Joi.string().required(),
-  });
-
-  const { error } = schema.validate(req.body);
-
-  if (error) {
-    return responseHandler(res, 400, {
-      message: error.message,
-    });
-  }
-
   try {
     // cek jika data sudah ada
     const oldData = await UserDataModel.findAll({
@@ -142,25 +123,6 @@ const update = async (req, res) => {
     religion,
     maritalStatus,
   } = req.body;
-
-  const schema = Joi.object({
-    user_id: Joi.string().required(),
-    nik: Joi.string().required(),
-    first_name: Joi.string().required(),
-    last_name: Joi.string().required(),
-    dateBirth: Joi.date().required(),
-    gender: Joi.string().required(),
-    religion: Joi.string().required(),
-    maritalStatus: Joi.string().required(),
-  });
-
-  const { error } = schema.validate(req.body);
-
-  if (error) {
-    return responseHandler(res, 400, {
-      message: error.message,
-    });
-  }
 
   try {
     // cek jika data sudah ada

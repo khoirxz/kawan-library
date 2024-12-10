@@ -1,18 +1,41 @@
 const argon2 = require("argon2");
 const fs = require("fs");
+const Op = require("sequelize").Op;
 const { UsersModel } = require("../../model/index");
 const responseHandler = require("../../helpers/responseHandler");
+const { Paginate } = require("../../helpers/paginationHandler");
 
 const getUsers = async (req, res) => {
   try {
-    const data = await UsersModel.findAll({
+    const { search, page, limit } = req.query;
+
+    // Filter pencarian
+    const whereClause = search
+      ? {
+          [Op.or]: [
+            { title: { [Op.like]: `%${search}%` } },
+            { description: { [Op.like]: `%${search}%` } },
+          ],
+        }
+      : {};
+
+    const where = {
+      ...whereClause,
+    };
+
+    // Pagination
+    const result = await Paginate(UsersModel, {
+      page,
+      limit,
+      where,
       include: ["user_data", "user_data_employe"],
       attributes: ["id", "role", "username", "avatarImg", "verified"],
     });
 
     responseHandler(res, 200, {
       message: "Success get all users",
-      data,
+      data: result.data,
+      pagination: result.pagination,
     });
   } catch (error) {
     responseHandler(res, 500, {
