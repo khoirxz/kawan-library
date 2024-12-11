@@ -13,6 +13,7 @@ import { ResponsiveTable, ActionButton } from "@/components/responsive-table";
 import { baseAPI } from "@/api";
 import { AdminLayout } from "@/layouts/admin";
 import { decreeListProps } from "@/types/decree";
+import useDecree from "./decreeHook";
 
 const columns: ColumnDef<decreeListProps>[] = [
   {
@@ -76,6 +77,7 @@ const columns: ColumnDef<decreeListProps>[] = [
 const DecreeListPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [listUser, setListUser] = useState<decreeListProps[]>([]);
+  const { categories } = useDecree();
 
   useEffect(() => {
     const getUsers = async () => {
@@ -108,9 +110,13 @@ const DecreeListPage: React.FC = () => {
       <div className="p-4 lg:p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Daftar Surat Keputusan</h1>
-          <Button asChild>
-            <Link to="/admin/decree/form">Tambah</Link>
-          </Button>
+          {categories.length > 0 ? (
+            <Button asChild>
+              <Link to="/admin/decree/form">Tambah</Link>
+            </Button>
+          ) : (
+            <Button disabled>Anda belum membuat kategori</Button>
+          )}
         </div>
 
         <div className="flex mb-4">
@@ -121,30 +127,26 @@ const DecreeListPage: React.FC = () => {
           {isLoading ? (
             <Progress value={100} />
           ) : (
-            <div className="overflow-x-auto">
-              <div className="inline-block min-w-full align-middle w-[200px]">
-                <ResponsiveTable
-                  columns={[
-                    ...columns,
-                    {
-                      id: "action",
-                      header: "Action",
-                      cell: ({ row }) => (
-                        <ActionButton
-                          file_path={row.original.file_path}
-                          id={row.original.id}
-                          setIsLoading={setIsLoading}
-                          linkAction="/admin/decree/form"
-                          linkDelete="decrees"
-                          linkView="decrees"
-                        />
-                      ),
-                    },
-                  ]}
-                  data={listUser}
-                />
-              </div>
-            </div>
+            <ResponsiveTable
+              columns={[
+                ...columns,
+                {
+                  id: "action",
+                  header: "Action",
+                  cell: ({ row }) => (
+                    <ActionButton
+                      file_path={row.original.file_path}
+                      id={row.original.id}
+                      setIsLoading={setIsLoading}
+                      linkAction="/admin/decree/form"
+                      linkDelete="decrees"
+                      linkView="decrees"
+                    />
+                  ),
+                },
+              ]}
+              data={listUser}
+            />
           )}
         </div>
       </div>

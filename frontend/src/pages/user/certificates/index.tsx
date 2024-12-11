@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { baseAPI } from "@/api";
 import UserLayout from "@/layouts/user";
 import { certificationListProps } from "@/types/certificate";
+import { userPortfolioProps } from "@/types/user";
 import { AppHeader } from "@/components/app-header";
 
 const columns: ColumnDef<certificationListProps>[] = [
@@ -38,6 +39,7 @@ const columns: ColumnDef<certificationListProps>[] = [
 ];
 
 const UserCertificateListPage: React.FC = () => {
+  const [btnAvaiable, setBtnAvaiable] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [listCerts, setListCerts] = useState<certificationListProps[]>([]);
   const { id } = useParams<{ id: string }>();
@@ -50,7 +52,7 @@ const UserCertificateListPage: React.FC = () => {
           status: string | null;
           message: string | null;
           data: certificationListProps[];
-        }>(`${baseAPI.dev}/certifications`);
+        }>(`${baseAPI.dev}/certifications/search/${id}`);
 
         setIsLoading(false);
         setListCerts(response.data.data);
@@ -61,6 +63,31 @@ const UserCertificateListPage: React.FC = () => {
       }
     };
 
+    const getPortfolio = async () => {
+      try {
+        const response = await axios.get<{
+          code: number;
+          status: string;
+          message: string;
+          data: userPortfolioProps;
+        }>(`${baseAPI.dev}/user/portfolio/${id}`);
+
+        const dataPortfolio = response.data.data;
+
+        if (
+          dataPortfolio.user_data !== null &&
+          dataPortfolio.user_contact !== null &&
+          dataPortfolio.user_geography !== null &&
+          dataPortfolio.user_info !== null
+        ) {
+          setBtnAvaiable(true);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getPortfolio();
     getCertificates();
 
     return () => {
@@ -83,7 +110,11 @@ const UserCertificateListPage: React.FC = () => {
           }
           additionalContent={
             <Button variant={"outline"} size="sm" asChild>
-              <Link to={`/user/portfolio/${id}`}>Lihat Portofolio</Link>
+              {btnAvaiable ? (
+                <Link to={`/user/portfolio/${id}`}>Lihat Portofolio</Link>
+              ) : (
+                <span>Lengkapi data dirikamu</span>
+              )}
             </Button>
           }
         />

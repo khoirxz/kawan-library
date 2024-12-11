@@ -302,69 +302,96 @@ const DecreeFormPage: React.FC = () => {
                   </FormItem>
                 )}
               />
-              {!isLoading ? (
+
+              <div className="grid grid-cols-2 gap-4 items-center">
+                {!isLoading ? (
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Kategori</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}>
+                                {field.value
+                                  ? categories.find(
+                                      (item) => item.value === field.value
+                                    )?.label
+                                  : "Select language"}
+                                <ChevronsUpDown className="opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="p-0">
+                            <Command>
+                              <CommandInput
+                                placeholder="Search framework..."
+                                className="h-9"
+                              />
+                              <CommandList>
+                                <CommandEmpty>No framework found.</CommandEmpty>
+                                <CommandGroup>
+                                  {categories.map((item) => (
+                                    <CommandItem
+                                      value={item.label}
+                                      key={item.value}
+                                      onSelect={() => {
+                                        form.setValue("category", item.value);
+                                      }}>
+                                      {item.label}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto",
+                                          item.value === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : null}
+
                 <FormField
                   control={form.control}
-                  name="category"
+                  name="status"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>Kategori</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              className={cn(
-                                "justify-between",
-                                !field.value && "text-muted-foreground"
-                              )}>
-                              {field.value
-                                ? categories.find(
-                                    (item) => item.value === field.value
-                                  )?.label
-                                : "Select language"}
-                              <ChevronsUpDown className="opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="p-0">
-                          <Command>
-                            <CommandInput
-                              placeholder="Search framework..."
-                              className="h-9"
-                            />
-                            <CommandList>
-                              <CommandEmpty>No framework found.</CommandEmpty>
-                              <CommandGroup>
-                                {categories.map((item) => (
-                                  <CommandItem
-                                    value={item.label}
-                                    key={item.value}
-                                    onSelect={() => {
-                                      form.setValue("category", item.value);
-                                    }}>
-                                    {item.label}
-                                    <Check
-                                      className={cn(
-                                        "ml-auto",
-                                        item.value === field.value
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
+                      <FormLabel>Status</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih status surat" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="canceled">Canceled</SelectItem>
+                          <SelectItem value="draft">Draft</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormItem>
                   )}
                 />
-              ) : null}
+              </div>
 
               <FormField
                 control={form.control}
@@ -444,29 +471,6 @@ const DecreeFormPage: React.FC = () => {
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih status surat" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="approved">Approved</SelectItem>
-                        <SelectItem value="canceled">Canceled</SelectItem>
-                        <SelectItem value="draft">Draft</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
               <Button type="submit">Simpan</Button>
             </form>
           </Form>

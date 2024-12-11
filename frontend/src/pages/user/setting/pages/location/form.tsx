@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 import {
   Form,
@@ -16,11 +16,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { NotificationDialog } from "@/components/notification-dialog";
 
+import { Context } from "@/context";
 import { baseAPI } from "@/api";
 import { userGeographyProps } from "@/types/user";
 import { Skeleton } from "@/components/ui/skeleton";
-
 import UserSettingLayout from "../..";
 
 const formSchema = z.object({
@@ -44,9 +45,16 @@ const UserSettingLocationFormPage: React.FC = () => {
       address: "",
     },
   });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAvailable, setIsAvailable] = useState<boolean>(false);
   const { id } = useParams<{ id: string }>();
+  const {
+    modalAlert,
+    setModalAlert,
+    setModalAlertData,
+    modalAlertData,
+    resetSate,
+  } = useContext(Context);
 
   useEffect(() => {
     const fetchProfileId = async () => {
@@ -73,9 +81,10 @@ const UserSettingLocationFormPage: React.FC = () => {
             form.setValue("address", data[0].address);
           }
         }
-        setIsLoading(false);
       } catch (e) {
         console.log(e);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -117,11 +126,22 @@ const UserSettingLocationFormPage: React.FC = () => {
         });
       }
 
-      console.log(response);
-
-      setIsLoading(false);
+      setModalAlert(true);
+      setModalAlertData({
+        title: "Berhasil",
+        description: response.data.message,
+        status: "success",
+      });
     } catch (error) {
-      console.log(error);
+      const errorResponse = error as AxiosError;
+      setModalAlert(true);
+      setModalAlertData({
+        title: "Gagal",
+        description: errorResponse.message,
+        status: "error",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -134,7 +154,7 @@ const UserSettingLocationFormPage: React.FC = () => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-7 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {isLoading ? (
               <Skeleton className="h-10" />
             ) : (
@@ -167,7 +187,7 @@ const UserSettingLocationFormPage: React.FC = () => {
               )}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="city"
@@ -198,7 +218,7 @@ const UserSettingLocationFormPage: React.FC = () => {
               )}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="postal_code"
@@ -239,6 +259,17 @@ const UserSettingLocationFormPage: React.FC = () => {
           <Button type="submit">Simpan</Button>
         </form>
       </Form>
+
+      <NotificationDialog
+        isOpen={modalAlert}
+        onClose={() => {
+          setModalAlert(false);
+          resetSate();
+        }}
+        message={modalAlertData.description}
+        title={modalAlertData.title}
+        type={modalAlertData.status}
+      />
     </UserSettingLayout>
   );
 };

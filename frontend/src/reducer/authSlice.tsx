@@ -17,7 +17,7 @@ interface initialStateProps {
         username: string;
         role: string;
         avatarImg: string;
-      };
+      } | null;
     };
     login: {
       code: number | null;

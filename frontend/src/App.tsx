@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AuthRouter from "@/utils/authRouter";
 
 import AuthPage from "@/pages/auth";
+import UserHomePage from "@/pages/user/home";
 import DashboardPage from "@/pages/admin/dashboard";
 import UserListPage from "@/pages/admin/user";
 import UserFormPage from "@/pages/admin/user/form";
@@ -12,19 +13,31 @@ import DecreeCategoryListPage from "@/pages/admin/decree/pages/category";
 import DecreeCategoryFormPage from "@/pages/admin/decree/pages/category/form";
 import CertificateListPage from "@/pages/admin/certificates";
 import CertificateFormPage from "@/pages/admin/certificates/form";
-import UserProfilePage from "@/pages/user/profile";
-import UserPortfolioPage from "./pages/user/portfolio";
+import EmployeFormPage from "@/pages/admin/employee/form";
+import UserProfilePage from "@/pages/user/profile/pages/user";
+import UserProfileEmployePage from "@/pages/user/profile/pages/employe";
+import UserPortfolioPage from "@/pages/user/portfolio";
 import UserSettingPersoalFormPage from "@/pages/user/setting/pages/personal/form";
 import UserSettingLocationFormPage from "@/pages/user/setting/pages/location/form";
 import UserSettingContactFormPage from "@/pages/user/setting/pages/contact/form";
+import UserSettingWorkListPage from "./pages/user/setting/pages/work";
+import UserSettingWorkFormPage from "./pages/user/setting/pages/work/form";
 import UserCertificateListPage from "@/pages/user/certificates";
-import UserDecreeListPage from "./pages/user/decree";
+import UserDecreeListPage from "@/pages/user/decree";
 
 const router = createBrowserRouter(
   [
     {
       path: "/",
       element: <AuthPage />,
+    },
+    {
+      path: "/home",
+      element: (
+        <AuthRouter>
+          <UserHomePage />
+        </AuthRouter>
+      ),
     },
     {
       path: "/admin/dashboard",
@@ -131,10 +144,26 @@ const router = createBrowserRouter(
       ),
     },
     {
+      path: "/admin/employee/form/:id",
+      element: (
+        <AuthRouter>
+          <EmployeFormPage />
+        </AuthRouter>
+      ),
+    },
+    {
       path: "/user/profile/:id",
       element: (
         <AuthRouter>
           <UserProfilePage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/user/profile/employe/:id",
+      element: (
+        <AuthRouter>
+          <UserProfileEmployePage />
         </AuthRouter>
       ),
     },
@@ -152,6 +181,30 @@ const router = createBrowserRouter(
       element: (
         <AuthRouter>
           <UserSettingPersoalFormPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/user/setting/work/:id",
+      element: (
+        <AuthRouter>
+          <UserSettingWorkListPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/user/setting/work/form/:id/",
+      element: (
+        <AuthRouter>
+          <UserSettingWorkFormPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/user/setting/work/form/:id/:itemId",
+      element: (
+        <AuthRouter>
+          <UserSettingWorkFormPage />
         </AuthRouter>
       ),
     },
@@ -190,6 +243,7 @@ const router = createBrowserRouter(
     },
   ],
   {
+    // basename: "/library",
     future: {
       v7_fetcherPersist: true,
       v7_normalizeFormMethod: true,

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "@/app/store";
-import { VerifyToken } from "@/reducer/authSlice";
+import { VerifyToken, resetAll } from "@/reducer/authSlice";
 
 import LoadingScreen from "@/components/loadingScreen";
 
@@ -16,6 +16,7 @@ const AuthRouter: React.FC<Props> = ({ children, redirectTo = "/" }) => {
     main: {
       isLoading,
       verify: { code },
+      logout: { code: logoutCode },
     },
   } = useAppSelector((state) => state.authState);
   const dispatch = useAppDispatch();
@@ -32,6 +33,15 @@ const AuthRouter: React.FC<Props> = ({ children, redirectTo = "/" }) => {
       }
     }
   }, [code, navigate, redirectTo]);
+
+  useEffect(() => {
+    if (logoutCode === 200) {
+      // return to login page with reload
+      // We're going to figure out a better way; sorry. :(
+      dispatch(resetAll());
+      window.location.href = "/";
+    }
+  }, [logoutCode, navigate, redirectTo]);
 
   if (code == null) {
     return <LoadingScreen />;

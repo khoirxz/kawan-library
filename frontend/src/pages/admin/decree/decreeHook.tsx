@@ -66,6 +66,12 @@ const useDecree = () => {
 
     fetchUsers();
     fetchCategories();
+
+    return () => {
+      setIsLoading(true);
+      setCategories([]);
+      setUsers([]);
+    };
   }, []);
 
   return { isLoading, categories, users };

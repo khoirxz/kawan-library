@@ -30,12 +30,18 @@ const useAuth = () => {
         }>(`${baseAPI.dev}/auth/verify`);
 
         if (response.data.code === 200) {
-          navigate("/admin/dashboard");
+          // navigate("/admin/dashboard");
+          if (response.data.data?.role === "admin") {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/home");
+          }
         }
       } catch (error) {
-        setIsLoading(false);
         const axiosError = error as AxiosError;
         console.error(axiosError.response?.data || axiosError.message);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -44,7 +50,7 @@ const useAuth = () => {
 
   useEffect(() => {
     if (login.code === 200) {
-      navigate("/admin/dashboard");
+      navigate("/home");
     }
   }, [login]);
 

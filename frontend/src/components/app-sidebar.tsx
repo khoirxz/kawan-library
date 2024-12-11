@@ -1,11 +1,4 @@
-import {
-  ChevronDown,
-  Home,
-  Settings,
-  User,
-  FileText,
-  ScrollText,
-} from "lucide-react";
+import { ChevronDown, Home, User, FileText, ScrollText } from "lucide-react";
 
 import {
   Sidebar,
@@ -34,19 +27,14 @@ const items = [
     url: "/admin/dashboard",
     icon: Home,
   },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ children }: { children?: React.ReactNode }) {
   return (
     <Sidebar aria-describedby="sidebar">
       <SidebarContent aria-describedby="sidebar">
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -84,6 +72,7 @@ export function AppSidebar() {
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
+
               <Collapsible className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
@@ -149,6 +138,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      {children}
     </Sidebar>
   );
 }

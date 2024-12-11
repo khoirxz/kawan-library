@@ -8,6 +8,7 @@ export interface userProp {
   avatarImg?: string | null;
   verified: boolean;
   user_data?: userDataProps | null;
+  user_data_employe?: userEmployeProps | null;
   updatedAt?: string;
   createdAt?: string;
 }

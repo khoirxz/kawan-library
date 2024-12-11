@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 import {
   Form,
@@ -15,10 +15,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { NotificationDialog } from "@/components/notification-dialog";
 
+import { Context } from "@/context";
 import { baseAPI } from "@/api";
 import { userContactProps } from "@/types/user";
-
 import UserSettingLayout from "../..";
 
 const formSchema = z.object({
@@ -41,8 +42,15 @@ const UserSettingContactFormPage = () => {
     },
   });
   const [isAvailable, setIsAvailable] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const { id } = useParams<{ id: string }>();
+  const {
+    modalAlert,
+    setModalAlert,
+    setModalAlertData,
+    modalAlertData,
+    resetSate,
+  } = useContext(Context);
 
   useEffect(() => {
     const fetchUserContactId = async () => {
@@ -68,9 +76,10 @@ const UserSettingContactFormPage = () => {
             form.setValue("instagram", data[0].instagram);
           }
         }
-        setIsLoading(false);
       } catch (e) {
         console.log(e);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -110,11 +119,22 @@ const UserSettingContactFormPage = () => {
         });
       }
 
-      console.log(response);
-
-      setIsLoading(false);
+      setModalAlert(true);
+      setModalAlertData({
+        title: "Berhasil",
+        description: response.data.message,
+        status: "success",
+      });
     } catch (error) {
-      console.log(error);
+      const errorResponse = error as AxiosError;
+      setModalAlert(true);
+      setModalAlertData({
+        title: "Gagal",
+        description: errorResponse.message,
+        status: "error",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -131,7 +151,7 @@ const UserSettingContactFormPage = () => {
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="mt-7 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="email"
@@ -163,7 +183,7 @@ const UserSettingContactFormPage = () => {
                 )}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="emergency_contact"
@@ -194,7 +214,7 @@ const UserSettingContactFormPage = () => {
                 )}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="instagram"
@@ -216,6 +236,17 @@ const UserSettingContactFormPage = () => {
           </form>
         </Form>
       )}
+
+      <NotificationDialog
+        isOpen={modalAlert}
+        onClose={() => {
+          setModalAlert(false);
+          resetSate();
+        }}
+        message={modalAlertData.description}
+        title={modalAlertData.title}
+        type={modalAlertData.status}
+      />
     </UserSettingLayout>
   );
 };

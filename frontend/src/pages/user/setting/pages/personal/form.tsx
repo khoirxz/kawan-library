@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState, useRef, useContext } from "react";
+import axios, { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,10 +23,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { NotificationDialog } from "@/components/notification-dialog";
+import { Pencil } from "lucide-react";
 
+import { Context } from "@/context";
 import { baseAPI } from "@/api";
 import { userDataProps } from "@/types/user";
-
 import UserSettingLayout from "../..";
 
 const formSchema = z.object({
@@ -40,6 +43,7 @@ const formSchema = z.object({
 });
 
 const UserSettingPersoalFormPage: React.FC = () => {
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,8 +57,16 @@ const UserSettingPersoalFormPage: React.FC = () => {
     },
   });
   const [isAvailable, setIsAvailable] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const { id } = useParams<{ id: string }>();
+  const ref = useRef<HTMLInputElement>(null);
+  const {
+    modalAlert,
+    setModalAlert,
+    setModalAlertData,
+    modalAlertData,
+    resetSate,
+  } = useContext(Context);
 
   useEffect(() => {
     const fetchUserPersonalById = async () => {
@@ -68,6 +80,18 @@ const UserSettingPersoalFormPage: React.FC = () => {
           message: string;
           data: userDataProps[] | null;
         }>(`${baseAPI.dev}/user/data/${id}`);
+        const avatar = await axios.get<{
+          code: number;
+          status: string;
+          message: string;
+          data: [
+            {
+              avatarImg: string | null;
+            }
+          ];
+        }>(`${baseAPI.dev}/users/avatar/${id}`);
+
+        setAvatarUrl(avatar.data.data[0].avatarImg);
 
         if (response.data.code === 200) {
           const data = response.data.data;
@@ -80,21 +104,22 @@ const UserSettingPersoalFormPage: React.FC = () => {
               "dateBirth",
               new Date(data[0].dateBirth).toISOString().split("T")[0]
             );
-            form.setValue("gender", data[0].gender);
-            form.setValue("religion", data[0].religion);
-            form.setValue("maritalStatus", data[0].maritalStatus);
+            form.setValue("gender", data[0]?.gender);
+            form.setValue("religion", data[0]?.religion);
+            form.setValue("maritalStatus", data[0]?.maritalStatus);
           }
         }
-        setIsLoading(false);
       } catch (e) {
         console.log(e);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     if (id) {
       fetchUserPersonalById();
     }
-  }, [id]);
+  }, [id, form]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     // return console.log(data);
@@ -123,11 +148,54 @@ const UserSettingPersoalFormPage: React.FC = () => {
         }>(`${baseAPI.dev}/user/data`, dataForm);
       }
 
-      console.log(response);
-
-      setIsLoading(false);
+      setModalAlert(true);
+      setModalAlertData({
+        title: "Berhasil",
+        description: response.data.message,
+        status: "success",
+      });
     } catch (error) {
-      console.log(error);
+      const errorResponse = error as AxiosError;
+      setModalAlert(true);
+      setModalAlertData({
+        title: "Gagal",
+        description: errorResponse.message,
+        status: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const changeAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      try {
+        setIsLoading(true);
+        const response = await axios.post(
+          `${baseAPI.dev}/users/avatar/${id}`,
+          formData
+        );
+
+        if (response.data.code === 200) {
+          // reload browser
+          window.location.reload();
+        }
+      } catch (error) {
+        const errorResponse = error as AxiosError;
+
+        setModalAlert(true);
+        setModalAlertData({
+          title: "Gagal",
+          description: errorResponse.message,
+          status: "error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -136,6 +204,35 @@ const UserSettingPersoalFormPage: React.FC = () => {
       <div className="mb-5">
         <h1 className="text-lg">Form Personal</h1>
         <p className="text-sm text-gray-500">Lengkapi form dibawah ini</p>
+      </div>
+
+      <div className="my-5 w-24 h-24 relative">
+        <label
+          htmlFor="avatarImg"
+          onClick={() => ref.current?.click()}
+          className="cursor-pointer absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 text-transparent transition-all hover:text-white hover:bg-black/50 rounded-full p-4 flex items-center justify-center">
+          <Pencil />
+        </label>
+
+        <Avatar className="w-24 h-24">
+          {avatarUrl !== null ? (
+            <AvatarImage
+              className="object-cover"
+              src={`${baseAPI.dev}/uploads/avatars/${avatarUrl}`}
+              alt="@user"
+            />
+          ) : null}
+          <AvatarFallback>?</AvatarFallback>
+        </Avatar>
+
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          ref={ref}
+          name="avatarImg"
+          onChange={changeAvatar}
+        />
       </div>
 
       {isLoading ? (
@@ -210,65 +307,33 @@ const UserSettingPersoalFormPage: React.FC = () => {
                 />
               )}
 
-              {id ? (
-                !isLoading ? (
-                  <FormField
-                    control={form.control}
-                    name="religion"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Agama</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value ? field.value : "0"}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Pilih agama" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="0">Pilih agama</SelectItem>
-                            <SelectItem value="islam">Islam</SelectItem>
-                            <SelectItem value="kristen">Kristen</SelectItem>
-                            <SelectItem value="hindu">Hindu</SelectItem>
-                            <SelectItem value="budha">Budha</SelectItem>
-                            <SelectItem value="konghucu">Konghucu</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ) : null
-              ) : (
-                <FormField
-                  control={form.control}
-                  name="religion"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Agama</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Pilih agama" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="0">Pilih agama</SelectItem>
-                          <SelectItem value="islam">Islam</SelectItem>
-                          <SelectItem value="kristen">Kristen</SelectItem>
-                          <SelectItem value="hindu">Hindu</SelectItem>
-                          <SelectItem value="budha">Budha</SelectItem>
-                          <SelectItem value="konghucu">Konghucu</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+              <FormField
+                control={form.control}
+                name="religion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Agama</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih agama" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="0">Pilih agama</SelectItem>
+                        <SelectItem value="islam">Islam</SelectItem>
+                        <SelectItem value="kristen">Kristen</SelectItem>
+                        <SelectItem value="hindu">Hindu</SelectItem>
+                        <SelectItem value="budha">Budha</SelectItem>
+                        <SelectItem value="konghucu">Konghucu</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
               <FormField
@@ -325,6 +390,17 @@ const UserSettingPersoalFormPage: React.FC = () => {
           </form>
         </Form>
       )}
+
+      <NotificationDialog
+        isOpen={modalAlert}
+        onClose={() => {
+          setModalAlert(false);
+          resetSate();
+        }}
+        message={modalAlertData.description}
+        title={modalAlertData.title}
+        type={modalAlertData.status}
+      />
     </UserSettingLayout>
   );
 };

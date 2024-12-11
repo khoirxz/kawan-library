@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import { useReactToPrint } from "react-to-print";
 
 import { baseAPI } from "@/api";
 import UserLayout from "@/layouts/user";
@@ -14,6 +15,11 @@ const UserPortfolioPage: React.FC = () => {
   const [portfolio, setPortfolio] = useState<userPortfolioProps | null>(null);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const reactToPrintFn = useReactToPrint({
+    contentRef,
+    bodyClass: "shadow-none p-4 border-0",
+  });
 
   useEffect(() => {
     const getPortfolio = async () => {
@@ -41,7 +47,7 @@ const UserPortfolioPage: React.FC = () => {
   }, [id]);
 
   return (
-    <UserLayout>
+    <UserLayout isRestricted>
       <div className="container mx-auto px-4 py-8 max-w-screen-md flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <Button
@@ -49,13 +55,28 @@ const UserPortfolioPage: React.FC = () => {
             onClick={() => navigate(`/user/profile/${id}`, { replace: true })}>
             Kembali
           </Button>
-          <Button>Cetak portofolio</Button>
+          <Button
+            onClick={(_) =>
+              contentRef.current && reactToPrintFn(() => contentRef.current)
+            }>
+            Cetak portofolio
+          </Button>
         </div>
 
-        <div className="shadow-md p-5 rounded-md box-border border flex flex-col gap-4">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>CN</AvatarFallback>
+        <div
+          ref={contentRef}
+          className="shadow-md p-5 rounded-md box-border border flex flex-col gap-4">
+          <Avatar className="w-24 h-24">
+            {portfolio?.avatarImg === null ? (
+              <AvatarFallback>{portfolio?.username}</AvatarFallback>
+            ) : (
+              <AvatarImage
+                src={`${baseAPI.dev}/uploads/avatars/${portfolio?.avatarImg}`}
+                alt={portfolio?.username}
+              />
+            )}
+
+            <AvatarFallback>{portfolio?.username}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl">
