@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,11 +37,12 @@ import { NotificationDialog } from "@/components/notification-dialog";
 const formSchema = z.object({
   user_id: z.string(),
   position: z.string().min(2, { message: "Title minimal 2 karakter" }),
-  status: z.enum(["active", "inactive", "0"]),
-  salary: z.number().min(2, { message: "Description minimal 2 karakter" }),
+  status: z.enum(["active", "inactive"]),
+  salary: z.string().min(2, { message: "Description minimal 2 karakter" }),
 });
 
 const EmployeFormPage: React.FC = () => {
+  const [isAvailable, setIsAvailable] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<userProp | null>(null);
@@ -50,12 +51,11 @@ const EmployeFormPage: React.FC = () => {
     defaultValues: {
       user_id: "",
       position: "",
-      status: "0",
-      salary: 0,
+      status: "active",
+      salary: "0",
     },
   });
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { users } = useEmployee();
   const {
     modalAlert,
@@ -79,17 +79,20 @@ const EmployeFormPage: React.FC = () => {
         if (response.data.code === 200 && response.data.data) {
           const data = response.data.data[0];
 
+          setIsAvailable(true);
           form.setValue("user_id", data.user_id || "");
           form.setValue("position", data.position || "");
           form.setValue("status", data.status);
-          form.setValue("salary", data.salary || 0);
-          setSelectedUser({
-            id: data.supervisor_info?.id || "",
-            role: data.supervisor_info?.role || "admin",
-            username: data.supervisor_info?.username || "",
-            avatarImg: data.supervisor_info?.avatarImg || "",
-            verified: data.supervisor_info?.verified || false,
-          });
+          form.setValue("salary", data.salary.toString() || "0");
+          if (data.supervisor_info) {
+            setSelectedUser({
+              id: data.supervisor_info?.id,
+              role: data.supervisor_info?.role,
+              username: data.supervisor_info?.username,
+              avatarImg: data.supervisor_info?.avatarImg,
+              verified: data.supervisor_info?.verified,
+            });
+          }
         }
       } catch (error) {
         console.log(error);
@@ -107,24 +110,28 @@ const EmployeFormPage: React.FC = () => {
     // console.log(data);
     try {
       const formData = {
-        user_id: data.user_id,
-        supervisor_id: selectedUser?.id,
+        user_id: id,
+        supervisor_id: selectedUser?.id ? selectedUser.id : null,
         position: data.position,
         status: data.status,
-        salary: data.salary,
+        salary: parseInt(data.salary, 10),
       };
 
       let response;
-      if (id) {
-        response = await axios.put(
-          `${baseAPI.dev}/user/data/employe/`,
-          formData
-        );
+      if (isAvailable) {
+        response = await axios.put<{
+          code: number;
+          status: string;
+          message: string;
+          data: userEmployeProps;
+        }>(`${baseAPI.dev}/user/data/employe`, formData);
       } else {
-        response = await axios.post(
-          `${baseAPI.dev}/user/data/employe/`,
-          formData
-        );
+        response = await axios.post<{
+          code: number;
+          status: string;
+          message: string;
+          data: userEmployeProps;
+        }>(`${baseAPI.dev}/user/data/employe`, formData);
       }
 
       if (response.data.code === 201 || response.data.code === 200) {
@@ -236,7 +243,6 @@ const EmployeFormPage: React.FC = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="0">Pilih status</SelectItem>
                           <SelectItem value="active">Aktif</SelectItem>
                           <SelectItem value="inactive">Tidak Aktif</SelectItem>
                         </SelectContent>
@@ -252,7 +258,11 @@ const EmployeFormPage: React.FC = () => {
                     <FormItem>
                       <FormLabel>Gaji</FormLabel>
                       <FormControl>
-                        <Input placeholder="Masukan nominal gaji" {...field} />
+                        <Input
+                          placeholder="Masukan nominal gaji"
+                          {...field}
+                          type="number"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -270,7 +280,6 @@ const EmployeFormPage: React.FC = () => {
           onClose={() => {
             setModalAlert(false);
             resetSate();
-            navigate("/admin/certificate/list", { replace: true });
           }}
           message={modalAlertData.description}
           title={modalAlertData.title}
