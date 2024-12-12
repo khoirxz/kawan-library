@@ -21,7 +21,7 @@ const columns: ColumnDef<certificationListProps>[] = [
     header: "Nama Sertifikat",
     cell: ({ row }) => (
       <div className="space-y-2">
-        <p className="font-semibold text-lg">{row.original.name}</p>
+        <p className="font-semibold text-lg">{row.original.title}</p>
         <p className="text-sm bg-gray-300 rounded-md py-1 px-2 inline-block text-gray-500">
           {dayjs(row.original.date).format("DD/MMMM/YYYY")}
         </p>

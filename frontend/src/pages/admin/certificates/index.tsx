@@ -14,13 +14,13 @@ import { certificationListProps } from "@/types/certificate";
 
 const columns: ColumnDef<certificationListProps>[] = [
   {
-    accessorKey: "name",
+    accessorKey: "title",
     header: "Nama Sertifikat",
     cell: ({ row }) => (
       <div className="flex flex-col justify-start items-start gap-1">
         <p className="font-semibold">{row.original.user?.username}</p>
         <Link to={`/profile/${row.original.id}`}>
-          <span className="font-semibold text-md">{row.original.name}</span>
+          <span className="font-semibold text-md">{row.original.title}</span>
         </Link>
         <span className="text-gray-500">{row.original.description}</span>
       </div>

@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,9 +32,15 @@ import { userProp } from "@/types/user";
 import { baseAPI } from "@/api";
 
 const formSchema = z.object({
-  username: z.string().min(2).max(20),
+  username: z
+    .string()
+    .regex(/^[a-zA-Z0-9]+$/, {
+      message: "Username harus berupa huruf dan angka",
+    })
+    .min(2)
+    .max(20),
   password: z.string().max(20).optional(),
-  role: z.enum(["user", "admin", "0"]),
+  role: z.enum(["user", "admin"]),
   verified: z.boolean().default(false),
 });
 
@@ -45,7 +51,7 @@ const UserFormPage: React.FC = () => {
     defaultValues: {
       username: "",
       password: "",
-      role: "0",
+      role: "user",
       verified: false,
     },
   });
@@ -57,7 +63,6 @@ const UserFormPage: React.FC = () => {
     modalAlertData,
     resetSate,
   } = useContext(Context);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const getUserById = async () => {
@@ -118,6 +123,7 @@ const UserFormPage: React.FC = () => {
           title: "Berhasil",
           description: response.data.message,
           status: "success",
+          redirect: "/admin/user/list",
         });
       }
     } catch (error) {
@@ -194,7 +200,6 @@ const UserFormPage: React.FC = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="0">Pilih role</SelectItem>
                             <SelectItem value="user">User</SelectItem>
                             <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
@@ -220,7 +225,6 @@ const UserFormPage: React.FC = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="0">Pilih role</SelectItem>
                           <SelectItem value="user">User</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
                         </SelectContent>
@@ -258,11 +262,11 @@ const UserFormPage: React.FC = () => {
           onClose={() => {
             setModalAlert(false);
             resetSate();
-            navigate("/admin/user/list", { replace: true });
           }}
           message={modalAlertData.description}
           title={modalAlertData.title}
           type={modalAlertData.status}
+          redirect={modalAlertData.redirect}
         />
       </div>
     </AdminLayout>

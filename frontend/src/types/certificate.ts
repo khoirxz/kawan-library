@@ -2,7 +2,7 @@ import { userProp } from "./user";
 
 export interface certificationListProps {
   id: string;
-  name: string;
+  title: string;
   description: string;
   date: string;
   file_path: string;
@@ -13,7 +13,7 @@ export interface certificationListProps {
 
 export interface categoryListProps {
   id: number;
-  name: string;
+  title: string;
   description: string;
   createdAt: string;
   updatedAt: string;

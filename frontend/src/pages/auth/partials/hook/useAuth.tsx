@@ -50,7 +50,8 @@ const useAuth = () => {
 
   useEffect(() => {
     if (login.code === 200) {
-      navigate("/home");
+      // redirect to home pag
+      window.location.href = "/home";
     }
   }, [login]);
 

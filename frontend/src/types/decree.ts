@@ -17,3 +17,11 @@ export interface decreeListProps {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface decreeCategoryListProps {
+  id: number;
+  title: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}

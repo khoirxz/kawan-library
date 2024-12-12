@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
+import dayjs from "dayjs";
 
 import {
   MapPin,
@@ -10,10 +12,17 @@ import {
 
 import useProfileHook from "../../hook/profileHook";
 import UserProfileLayout from "../..";
+import { userJobHistoryProps } from "@/types/user";
 
 const UserProfilePage: React.FC = () => {
-  const { userProfile } = useProfileHook();
+  const { userProfile, userJobHistory, getUserJobHistory } = useProfileHook();
   const { id } = useParams<{ id: string }>();
+
+  useEffect(() => {
+    if (id) {
+      getUserJobHistory({ idUser: id });
+    }
+  }, []);
 
   return (
     <UserProfileLayout>
@@ -56,15 +65,16 @@ const UserProfilePage: React.FC = () => {
             <h1 className="text-xl font-semibold">Riwayat Pekerjaan</h1>
 
             <Link
-              to={`/user/work-experience/${id}`}
+              to={`/user/setting/work/${id}`}
               className="text-sm text-blue-600">
               Edit
             </Link>
           </div>
 
           <div className="border p-6 rounded-md bg-white shadow space-y-6">
-            <ListItemWorkExperience />
-            <ListItemWorkExperience />
+            {userJobHistory?.map((item) => (
+              <ListItemWorkExperience key={item.id} {...item} />
+            ))}
           </div>
         </div>
       </div>
@@ -88,23 +98,30 @@ const ListItemProfile: React.FC<{
   );
 };
 
-const ListItemWorkExperience: React.FC = () => {
+const ListItemWorkExperience: React.FC<userJobHistoryProps> = ({
+  company_name,
+  job_description,
+  start_date,
+  end_date,
+  position,
+  location,
+}) => {
   return (
     <div className="space-y-1 flex flex-row items-start">
       <div className="py-2 pr-3">
         <BriefcaseBusiness className="text-blue-500" />
       </div>
       <div className="space-y-1">
-        <h1 className="font-semibold">Hello World</h1>
+        <h1 className="font-semibold">{company_name}</h1>
         <p className="text-sm text-gray-500 flex flex-row gap-4">
-          <span className="text-black">Staf IT</span> <span>2022-2024</span>{" "}
-          <span>PT. XYZ</span>
-          <span>Surabaya</span>
+          <span className="text-black">{position}</span>
+          <span>
+            {dayjs(start_date).format("DD MMMM YYYY")} -
+            {dayjs(end_date).format("DD MMMM YYYY")}
+          </span>
+          <span>{location}</span>
         </p>
-        <p className="text-gray-500 text-sm">
-          Lorem ipsum, dolor sit amet consectetur adipisicing elit. Neque
-          repellendus voluptates ut.
-        </p>
+        <p className="text-gray-500 text-sm">{job_description}</p>
       </div>
     </div>
   );

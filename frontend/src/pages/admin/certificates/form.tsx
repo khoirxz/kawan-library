@@ -37,7 +37,7 @@ import { NotificationDialog } from "@/components/notification-dialog";
 
 const formSchema = z.object({
   user_id: z.string().optional().nullable(),
-  name: z.string().min(2, { message: "Title minimal 2 karakter" }),
+  title: z.string().min(2, { message: "Title minimal 2 karakter" }),
   description: z.string().min(2, { message: "Description minimal 2 karakter" }),
   date: z.date(),
 });
@@ -51,7 +51,7 @@ const CertificateFormPage: React.FC = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       user_id: null,
-      name: "",
+      title: "",
       description: "",
       date: new Date(Date.now()),
     },
@@ -89,7 +89,7 @@ const CertificateFormPage: React.FC = () => {
             verified: response.data.data.user.verified,
           });
         }
-        form.setValue("name", response.data.data.name);
+        form.setValue("title", response.data.data.title);
         form.setValue("description", response.data.data.description);
         form.setValue("date", new Date(response.data.data.date));
       } catch (error) {
@@ -121,7 +121,7 @@ const CertificateFormPage: React.FC = () => {
         formData.append("certificateFile", certificateFile);
       }
 
-      formData.append("name", data.name);
+      formData.append("title", data.title);
       formData.append("description", data.description);
       formData.append("date", data.date.toString());
 
@@ -251,7 +251,7 @@ const CertificateFormPage: React.FC = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
-                name="name"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Title</FormLabel>

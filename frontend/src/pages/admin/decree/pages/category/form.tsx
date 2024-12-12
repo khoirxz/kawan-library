@@ -21,25 +21,18 @@ import { NotificationDialog } from "@/components/notification-dialog";
 import { Context } from "@/context";
 import { AdminLayout } from "@/layouts/admin";
 import { baseAPI } from "@/api";
+import { decreeCategoryListProps } from "@/types/decree";
 
 const formSchema = z.object({
-  name: z.string(),
+  title: z.string(),
   description: z.string(),
 });
-
-type decreeCategoriesProps = {
-  id: number;
-  name: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-};
 
 const DecreeCategoryFormPage: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      title: "",
       description: "",
     },
   });
@@ -60,10 +53,10 @@ const DecreeCategoryFormPage: React.FC = () => {
           code: number;
           status: string;
           message: string;
-          data: decreeCategoriesProps;
+          data: decreeCategoryListProps;
         }>(`${baseAPI.dev}/decree/category/${id}`);
 
-        form.setValue("name", response.data.data.name);
+        form.setValue("title", response.data.data.title);
         form.setValue("description", response.data.data.description);
       } catch (error) {
         console.log(error);
@@ -89,7 +82,7 @@ const DecreeCategoryFormPage: React.FC = () => {
           code: number;
           status: string;
           message: string;
-          data: decreeCategoriesProps;
+          data: decreeCategoryListProps;
         }>(`${baseAPI.dev}/decree/category`, data);
       } else {
         response = await axios.put<{
@@ -135,7 +128,7 @@ const DecreeCategoryFormPage: React.FC = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
-                name="name"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nama kategori</FormLabel>

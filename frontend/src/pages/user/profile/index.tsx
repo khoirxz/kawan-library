@@ -82,11 +82,6 @@ const UserProfileLayout: React.FC<{ children: React.ReactNode }> = ({
               variant="ghost">
               Personal
             </Button>
-            <Button
-              className="font-semibold border-b border-black rounded-none"
-              variant="ghost">
-              Pegawai
-            </Button>
           </div>
         </div>
 

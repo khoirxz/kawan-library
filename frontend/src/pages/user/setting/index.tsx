@@ -84,8 +84,8 @@ const UserSettingLayout: React.FC<{ children: React.ReactNode }> = ({
           <h1>Profile Setting</h1>
         </div>
 
-        <div className="flex mt-4 gap-3">
-          <div className="hidden lg:flex flex-col gap-2 min-w-48">
+        <div className="flex flex-row mt-4 gap-3 w-full">
+          <div className="hidden lg:flex flex-col gap-2 ">
             <CustomLink to={`/user/setting/personal/${id}`}>
               <User />
               Personal
@@ -103,7 +103,7 @@ const UserSettingLayout: React.FC<{ children: React.ReactNode }> = ({
               Kontak
             </CustomLink>
           </div>
-          <div className="flex-1 bg-white shadow-md rounded-md border p-5 container">
+          <div className="flex-1 bg-white shadow-md rounded-md border p-5 w-full">
             {children}
           </div>
         </div>

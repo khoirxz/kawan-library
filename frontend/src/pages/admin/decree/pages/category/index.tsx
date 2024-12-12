@@ -11,9 +11,9 @@ import { ResponsiveTable, ActionButton } from "@/components/responsive-table";
 
 import { baseAPI } from "@/api";
 import { AdminLayout } from "@/layouts/admin";
-import { categoryListProps } from "@/types/certificate";
+import { decreeCategoryListProps } from "@/types/decree";
 
-const columns: ColumnDef<categoryListProps>[] = [
+const columns: ColumnDef<decreeCategoryListProps>[] = [
   {
     accessorKey: "id",
     header: () => <p className="text-center">ID</p>,
@@ -28,7 +28,7 @@ const columns: ColumnDef<categoryListProps>[] = [
     header: "Nama",
     cell: ({ row }) => (
       <div className="flex flex-col gap-1">
-        <span className="font-semibold">{row.original.name}</span>
+        <span className="font-semibold">{row.original.title}</span>
         <span className="text-sm text-gray-500">
           {row.original.description}
         </span>
@@ -46,7 +46,7 @@ const columns: ColumnDef<categoryListProps>[] = [
 
 const DecreeCategoryListPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [listUser, setListUser] = useState<categoryListProps[]>([]);
+  const [listUser, setListUser] = useState<decreeCategoryListProps[]>([]);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -55,7 +55,7 @@ const DecreeCategoryListPage: React.FC = () => {
           code: number | null;
           status: string | null;
           message: string | null;
-          data: categoryListProps[];
+          data: decreeCategoryListProps[];
         }>(`${baseAPI.dev}/decree/category/`);
 
         setIsLoading(false);

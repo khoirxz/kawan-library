@@ -19,6 +19,7 @@ interface modalDataProps {
   title: string;
   description: string;
   status: "success" | "error" | "info";
+  redirect?: string;
 }
 
 const Provider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

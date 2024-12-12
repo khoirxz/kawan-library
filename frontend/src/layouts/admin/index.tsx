@@ -78,12 +78,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                             />
                           </Avatar>
                         ) : (
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="rounded-full">
+                          <div className="bg-gray-200 w-10 h-10 rounded-full flex items-center justify-center mr-2 text-gray-400">
                             <User />
-                          </Button>
+                          </div>
                         )}
                         <span className="font-semibold">{data?.username}</span>
                         <ChevronUp className="ml-auto" />
@@ -92,7 +89,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                     <DropdownMenuContent
                       side="top"
                       className="w-[--radix-popper-anchor-width]">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem asChild>
                         <Link to={`/user/setting/personal/${data?.userId}`}>
                           Pengaturan Akun
                         </Link>

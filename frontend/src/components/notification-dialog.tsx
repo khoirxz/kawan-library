@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AlertCircle, CheckCircle2, XCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 type NotificationType = "success" | "error" | "info";
 
@@ -16,6 +17,7 @@ interface NotificationDialogProps {
   message: string;
   isOpen: boolean;
   onClose: () => void;
+  redirect?: string;
 }
 
 export function NotificationDialog({
@@ -24,8 +26,10 @@ export function NotificationDialog({
   message,
   isOpen,
   onClose,
+  redirect,
 }: NotificationDialogProps) {
   const [open, setOpen] = useState(isOpen);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setOpen(isOpen);
@@ -34,6 +38,10 @@ export function NotificationDialog({
   const handleClose = () => {
     setOpen(false);
     onClose();
+
+    if (redirect) {
+      navigate(redirect, { replace: true });
+    }
   };
 
   const getIcon = () => {
