@@ -101,7 +101,7 @@ const createCertificate = async (req, res) => {
     }
 
     const schema = Joi.object({
-      user_id: Joi.string().required(),
+      user_id: Joi.string().optional().allow(null, ""),
       title: Joi.string().required(),
       description: Joi.string().required(),
       date: Joi.date().required(),
@@ -116,7 +116,7 @@ const createCertificate = async (req, res) => {
     }
 
     const data = await CertificationsModel.create({
-      user_id: user_id,
+      user_id: user_id ? user_id : null,
       title: title,
       description: description,
       date: date,

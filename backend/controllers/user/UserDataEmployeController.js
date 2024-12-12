@@ -62,7 +62,7 @@ const create = async (req, res) => {
 
   const schema = Joi.object({
     user_id: Joi.string().required(),
-    supervisor_id: Joi.string().allow("", null),
+    supervisor_id: Joi.string().allow("", null).optional(),
     position: Joi.string().required(),
     status: Joi.string().required(),
     salary: Joi.number().required(),

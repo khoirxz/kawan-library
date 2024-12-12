@@ -1,9 +1,9 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -57,7 +57,6 @@ const CertificateFormPage: React.FC = () => {
     },
   });
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { users } = useCertificate();
   const {
     modalAlert,
@@ -66,6 +65,7 @@ const CertificateFormPage: React.FC = () => {
     modalAlertData,
     resetSate,
   } = useContext(Context);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const getCertificateById = async () => {
@@ -74,13 +74,14 @@ const CertificateFormPage: React.FC = () => {
           code: number;
           status: string;
           data: certificationListProps;
-        }>(`${baseAPI.dev}/certifications/${id}`);
+        }>(`${baseAPI.dev}/certifications/id/${id}`);
 
         setBlobUrl(
           `${baseAPI.dev}/uploads/certificates/${response.data.data.file_path}`
         );
         if (response.data.data.user) {
           form.setValue("user_id", response.data.data.user.id);
+
           setSelectedUser({
             id: response.data.data.user.id,
             role: response.data.data.user.role,
@@ -113,9 +114,7 @@ const CertificateFormPage: React.FC = () => {
     try {
       const formData = new FormData();
 
-      if (data.user_id) {
-        formData.append("user_id", data.user_id);
-      }
+      formData.append("user_id", data.user_id || "");
 
       if (certificateFile) {
         formData.append("certificateFile", certificateFile);
@@ -141,6 +140,7 @@ const CertificateFormPage: React.FC = () => {
           title: "Berhasil",
           description: response.data.message,
           status: "success",
+          redirect: "/admin/certificate/list",
         });
       }
     } catch (error) {
@@ -182,7 +182,7 @@ const CertificateFormPage: React.FC = () => {
       <div className="p-4 lg:p-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">
-            {id ? "Edit SK" : "Tambah SK"}
+            {id ? "Edit Sertifikat" : "Tambah Sertifikat"}
           </h1>
           <Button asChild>
             <Link to="/admin/certificate/list">Kembali</Link>
@@ -194,7 +194,7 @@ const CertificateFormPage: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold">Pilih user</h3>
               <p className="text-sm text-muted-foreground mb-2">
-                Kosongi jika SK tidak berkaitan dengan user
+                Kosongi jika Sertifikat tidak berkaitan dengan user
               </p>
               {selectedUser ? (
                 <SelectedUserDisplay
@@ -230,7 +230,9 @@ const CertificateFormPage: React.FC = () => {
                 title="Preview PDF"
               />
             ) : (
-              <div className="flex flex-col items-center gap-3 border-dotted border-4 rounded-md w-full h-72 justify-center">
+              <div
+                onClick={() => inputRef.current?.click()}
+                className="flex flex-col items-center gap-3 border-dotted border-4 rounded-md w-full h-72 justify-center">
                 <FileText />
                 <p className="text-sm font-light">Maksimal file 8MB PDF</p>
               </div>
@@ -240,6 +242,7 @@ const CertificateFormPage: React.FC = () => {
           <div className="mb-3">
             <Label htmlFor="picture">File Sertifikat</Label>
             <Input
+              ref={inputRef}
               id="picture"
               type="file"
               accept="application/pdf"
@@ -321,11 +324,11 @@ const CertificateFormPage: React.FC = () => {
           onClose={() => {
             setModalAlert(false);
             resetSate();
-            navigate("/admin/certificate/list", { replace: true });
           }}
           message={modalAlertData.description}
           title={modalAlertData.title}
           type={modalAlertData.status}
+          redirect={modalAlertData.redirect}
         />
       </div>
     </AdminLayout>

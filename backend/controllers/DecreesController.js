@@ -106,11 +106,7 @@ const createDecree = async (req, res) => {
     } = req.body;
 
     if (!req.file) {
-      return res.status(400).json({
-        code: 400,
-        status: "failed",
-        message: "File required",
-      });
+      return responseHandler(res, 400, { message: "File is required" });
     }
 
     const schema = Joi.object({
@@ -125,11 +121,7 @@ const createDecree = async (req, res) => {
 
     const { error } = schema.validate(req.body);
     if (error) {
-      return res.status(400).json({
-        code: 400,
-        status: "failed",
-        message: error.message,
-      });
+      return responseHandler(res, 400, { message: error.message });
     }
 
     const data = await DecreesModel.create({
@@ -143,17 +135,12 @@ const createDecree = async (req, res) => {
       file_path: req.file.filename,
     });
 
-    return res.status(200).json({
-      code: 200,
-      status: "success",
+    responseHandler(res, 201, {
+      message: "Success create decree",
       data: data,
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
-      message: error.message,
-    });
+    responseHandler(res, 500, { message: error.message });
   }
 };
 
@@ -185,11 +172,7 @@ const updateDecreeById = async (req, res) => {
 
     const { error } = schema.validate(req.body);
     if (error) {
-      return res.status(400).json({
-        code: 400,
-        status: "failed",
-        message: error.message,
-      });
+      return responseHandler(res, 400, { message: error.message });
     }
 
     let data;
@@ -234,17 +217,12 @@ const updateDecreeById = async (req, res) => {
       where: { id: req.params.id },
     });
 
-    return res.status(200).json({
-      code: 200,
-      status: "success",
+    responseHandler(res, 200, {
+      message: "Success update decree",
       data: data,
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
-      message: error.message,
-    });
+    responseHandler(res, 500, { message: error.message });
   }
 };
 
@@ -255,11 +233,7 @@ const deleteDecreeById = async (req, res) => {
     });
 
     if (!data) {
-      return res.status(404).json({
-        code: 404,
-        status: "failed",
-        message: "Decree not found",
-      });
+      return responseHandler(res, 404, { message: "Decree not found" });
     }
 
     fs.unlinkSync("public/uploads/decrees/" + data.file_path);
@@ -268,17 +242,11 @@ const deleteDecreeById = async (req, res) => {
       where: { id: req.params.id },
     });
 
-    res.status(204).json({
-      code: 204,
-      status: "success",
-      data: "Decree deleted successfully",
+    responseHandler(res, 200, {
+      message: "Success delete decree",
     });
   } catch (error) {
-    res.status(500).json({
-      code: 500,
-      status: "failed",
-      message: error.message,
-    });
+    responseHandler(res, 500, { message: error.message });
   }
 };
 

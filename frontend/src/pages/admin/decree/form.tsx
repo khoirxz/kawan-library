@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,13 +42,15 @@ import { FileText, Check, ChevronsUpDown, User } from "lucide-react";
 import { SelectedUserDisplay } from "@/components/selected-user-display";
 import { Label } from "@/components/ui/label";
 import { UserSelectionModal } from "@/components/user-selection-modal";
+import { NotificationDialog } from "@/components/notification-dialog";
 
 import { Context } from "@/context";
 import { AdminLayout } from "@/layouts/admin";
 import useDecree from "./decreeHook";
 import { baseAPI } from "@/api";
 import { userProp } from "@/types/user";
-import { NotificationDialog } from "@/components/notification-dialog";
+import { responseProps } from "@/types/response";
+import { decreeListProps } from "@/types/decree";
 
 const formSchema = z.object({
   user_id: z.string().optional().nullable(),
@@ -87,6 +89,7 @@ const DecreeFormPage: React.FC = () => {
     modalAlertData,
     resetSate,
   } = useContext(Context);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const getDecreeById = async () => {
@@ -170,9 +173,15 @@ const DecreeFormPage: React.FC = () => {
 
       let response;
       if (id) {
-        response = await axios.put(`${baseAPI.dev}/decrees/${id}`, formData);
+        response = await axios.put<responseProps>(
+          `${baseAPI.dev}/decrees/${id}`,
+          formData
+        );
       } else {
-        response = await axios.post(`${baseAPI.dev}/decrees`, formData);
+        response = await axios.post<responseProps & { data: decreeListProps }>(
+          `${baseAPI.dev}/decrees`,
+          formData
+        );
       }
 
       if (response.data.code === 201 || response.data.code === 200) {
@@ -229,252 +238,266 @@ const DecreeFormPage: React.FC = () => {
           </Button>
         </div>
 
-        <div className="mt-10">
-          <div className="py-4">
-            <div>
-              <h3 className="text-lg font-semibold">Pilih user</h3>
-              <p className="text-sm text-muted-foreground mb-2">
-                Kosongi jika SK tidak berkaitan dengan user
-              </p>
-              {selectedUser ? (
-                <SelectedUserDisplay
-                  user={selectedUser}
-                  onRemove={handleUserRemove}
+        {categories.length === 0 ? (
+          <div>
+            Kategori SK belum tersedia, silahkan tambahkan kategori terlebih
+            dahulu
+          </div>
+        ) : (
+          <div className="mt-10">
+            <div className="py-4">
+              <div>
+                <h3 className="text-lg font-semibold">Pilih user</h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Kosongi jika SK tidak berkaitan dengan user
+                </p>
+                {selectedUser ? (
+                  <SelectedUserDisplay
+                    user={selectedUser}
+                    onRemove={handleUserRemove}
+                  />
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={() => setIsModalOpen(true)}
+                    variant="outline">
+                    <User className="mr-2 h-4 w-4" />
+                    Select User
+                  </Button>
+                )}
+              </div>
+
+              <UserSelectionModal
+                users={users}
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSelectUser={handleUserSelect}
+              />
+            </div>
+
+            <div className="mb-3">
+              {blobUrl ? (
+                <iframe
+                  src={blobUrl}
+                  height={"288px"}
+                  width={"100%"}
+                  className="my-3"
+                  title="Preview PDF"
                 />
               ) : (
-                <Button
-                  type="button"
-                  onClick={() => setIsModalOpen(true)}
-                  variant="outline">
-                  <User className="mr-2 h-4 w-4" />
-                  Select User
-                </Button>
+                <div
+                  className="flex flex-col items-center gap-3 border-dotted border-4 rounded-md w-full h-72 justify-center"
+                  onClick={() => inputRef.current?.click()}>
+                  <FileText />
+                  <p className="text-sm font-light">Maksimal file 8MB PDF</p>
+                </div>
               )}
             </div>
 
-            <UserSelectionModal
-              users={users}
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-              onSelectUser={handleUserSelect}
-            />
-          </div>
-
-          <div className="mb-3">
-            {blobUrl ? (
-              <iframe
-                src={blobUrl}
-                height={"288px"}
-                width={"100%"}
-                className="my-3"
-                title="Preview PDF"
+            <div className="mb-3">
+              <Label htmlFor="picture">File Surat Keterangan</Label>
+              <Input
+                ref={inputRef}
+                id="picture"
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => handelFileChange(e)}
               />
-            ) : (
-              <div className="flex flex-col items-center gap-3 border-dotted border-4 rounded-md w-full h-72 justify-center">
-                <FileText />
-                <p className="text-sm font-light">Maksimal file 8MB PDF</p>
-              </div>
-            )}
-          </div>
+            </div>
 
-          <div className="mb-3">
-            <Label htmlFor="picture">File Surat Keterangan</Label>
-            <Input
-              id="picture"
-              type="file"
-              accept="application/pdf"
-              onChange={(e) => handelFileChange(e)}
-            />
-          </div>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Judul SK" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Judul SK" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <div className="grid grid-cols-2 gap-4 items-center">
+                  {!isLoading ? (
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Kategori</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                    "justify-between",
+                                    !field.value && "text-muted-foreground"
+                                  )}>
+                                  {field.value
+                                    ? categories.find(
+                                        (item) => item.value === field.value
+                                      )?.label
+                                    : "Select language"}
+                                  <ChevronsUpDown className="opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="p-0">
+                              <Command>
+                                <CommandInput
+                                  placeholder="Search framework..."
+                                  className="h-9"
+                                />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    No framework found.
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {categories.map((item) => (
+                                      <CommandItem
+                                        value={item.label}
+                                        key={item.value}
+                                        onSelect={() => {
+                                          form.setValue("category", item.value);
+                                        }}>
+                                        {item.label}
+                                        <Check
+                                          className={cn(
+                                            "ml-auto",
+                                            item.value === field.value
+                                              ? "opacity-100"
+                                              : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ) : null}
 
-              <div className="grid grid-cols-2 gap-4 items-center">
-                {!isLoading ? (
                   <FormField
                     control={form.control}
-                    name="category"
+                    name="status"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel>Kategori</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className={cn(
-                                  "justify-between",
-                                  !field.value && "text-muted-foreground"
-                                )}>
-                                {field.value
-                                  ? categories.find(
-                                      (item) => item.value === field.value
-                                    )?.label
-                                  : "Select language"}
-                                <ChevronsUpDown className="opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="p-0">
-                            <Command>
-                              <CommandInput
-                                placeholder="Search framework..."
-                                className="h-9"
-                              />
-                              <CommandList>
-                                <CommandEmpty>No framework found.</CommandEmpty>
-                                <CommandGroup>
-                                  {categories.map((item) => (
-                                    <CommandItem
-                                      value={item.label}
-                                      key={item.value}
-                                      onSelect={() => {
-                                        form.setValue("category", item.value);
-                                      }}>
-                                      {item.label}
-                                      <Check
-                                        className={cn(
-                                          "ml-auto",
-                                          item.value === field.value
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                        )}
-                                      />
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
+                        <FormLabel>Status</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Pilih status surat" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="approved">Approved</SelectItem>
+                            <SelectItem value="canceled">Canceled</SelectItem>
+                            <SelectItem value="draft">Draft</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormItem>
                     )}
                   />
-                ) : null}
+                </div>
 
                 <FormField
                   control={form.control}
-                  name="status"
+                  name="description"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Status</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Pilih status surat" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="approved">Approved</SelectItem>
-                          <SelectItem value="canceled">Canceled</SelectItem>
-                          <SelectItem value="draft">Draft</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <FormItem>
+                      <FormLabel>Deskripsi</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          rows={4}
+                          placeholder="Deskripsi Surat keterangan"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
+                <div className="flex flex-col md:flex-row gap-4">
+                  <FormField
+                    control={form.control}
+                    name="effective_date"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col w-full">
+                        <FormLabel>Effective Date</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button variant={"outline"} className={``}>
+                                {field.value
+                                  ? field.value.toLocaleDateString()
+                                  : "Pilih tanggal"}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) => date < new Date("1900-01-01")}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="expired_date"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col w-full">
+                        <FormLabel>Expired Date</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button variant={"outline"} className={``}>
+                                {field.value
+                                  ? field.value.toLocaleDateString()
+                                  : "Pilih tanggal"}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) => date < new Date("1900-01-01")}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Deskripsi</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        rows={4}
-                        placeholder="Deskripsi Surat keterangan"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex flex-col md:flex-row gap-4">
-                <FormField
-                  control={form.control}
-                  name="effective_date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col w-full">
-                      <FormLabel>Effective Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant={"outline"} className={``}>
-                              {field.value
-                                ? field.value.toLocaleDateString()
-                                : "Pilih tanggal"}
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < new Date("1900-01-01")}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="expired_date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col w-full">
-                      <FormLabel>Expired Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant={"outline"} className={``}>
-                              {field.value
-                                ? field.value.toLocaleDateString()
-                                : "Pilih tanggal"}
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < new Date("1900-01-01")}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Button type="submit">Simpan</Button>
-            </form>
-          </Form>
-        </div>
+                <Button type="submit">Simpan</Button>
+              </form>
+            </Form>
+          </div>
+        )}
 
         <NotificationDialog
           isOpen={modalAlert}

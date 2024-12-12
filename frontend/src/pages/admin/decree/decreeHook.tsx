@@ -2,14 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { baseAPI } from "@/api";
 import { userProp } from "@/types/user";
-
-type categoryListProps = {
-  id: number;
-  name: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-};
+import { decreeCategoryListProps } from "@/types/decree";
 
 const useDecree = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -30,11 +23,11 @@ const useDecree = () => {
           code: number | null;
           status: string | null;
           message: string | null;
-          data: categoryListProps[];
+          data: decreeCategoryListProps[];
         }>(`${baseAPI.dev}/decree/category/`);
 
         const formattedCategories = data.data.map((category) => ({
-          label: category.name,
+          label: category.title,
           value: category.id,
         }));
         setCategories(formattedCategories);

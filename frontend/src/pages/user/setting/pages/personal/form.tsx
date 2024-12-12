@@ -298,6 +298,7 @@ const UserSettingPersoalFormPage: React.FC = () => {
                           placeholder="Tanggal Lahir"
                           type="date"
                           id="dateBirth"
+                          className="inline-block"
                           {...field}
                         />
                       </FormControl>

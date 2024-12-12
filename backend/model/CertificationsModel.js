@@ -11,7 +11,7 @@ const Certifications = db.define("certifications", {
   },
   user_id: {
     type: DataTypes.CHAR,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: "users",
       key: "id",
