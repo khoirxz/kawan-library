@@ -81,13 +81,14 @@ const DecreeFormPage: React.FC = () => {
   });
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { users, categories, isLoading } = useDecree();
+  const { users, categories, isLoading, fetchCategories, fetchUsers } =
+    useDecree();
   const {
     modalAlert,
     setModalAlert,
     setModalAlertData,
     modalAlertData,
-    resetSate,
+    resetStateModal,
   } = useContext(Context);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -146,6 +147,8 @@ const DecreeFormPage: React.FC = () => {
       }
     };
 
+    fetchUsers();
+    fetchCategories();
     if (id) {
       getDecreeById();
     }
@@ -240,8 +243,10 @@ const DecreeFormPage: React.FC = () => {
 
         {categories.length === 0 ? (
           <div>
-            Kategori SK belum tersedia, silahkan tambahkan kategori terlebih
-            dahulu
+            <p className="text-sm text-muted-foreground">
+              Kategori SK belum tersedia, silahkan tambahkan kategori terlebih
+              dahulu
+            </p>
           </div>
         ) : (
           <div className="mt-10">
@@ -286,7 +291,7 @@ const DecreeFormPage: React.FC = () => {
                 />
               ) : (
                 <div
-                  className="flex flex-col items-center gap-3 border-dotted border-4 rounded-md w-full h-72 justify-center"
+                  className="flex flex-col items-center gap-3 border-dotted border-indigo-600/40 border-4 rounded-md w-full h-72 justify-center"
                   onClick={() => inputRef.current?.click()}>
                   <FileText />
                   <p className="text-sm font-light">Maksimal file 8MB PDF</p>
@@ -503,7 +508,7 @@ const DecreeFormPage: React.FC = () => {
           isOpen={modalAlert}
           onClose={() => {
             setModalAlert(false);
-            resetSate();
+            resetStateModal();
             navigate("/admin/decree/list", { replace: true });
           }}
           message={modalAlertData.description}

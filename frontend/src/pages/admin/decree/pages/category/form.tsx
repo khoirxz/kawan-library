@@ -43,7 +43,7 @@ const DecreeCategoryFormPage: React.FC = () => {
     setModalAlert,
     setModalAlertData,
     modalAlertData,
-    resetSate,
+    resetStateModal,
   } = useContext(Context);
 
   useEffect(() => {
@@ -165,7 +165,7 @@ const DecreeCategoryFormPage: React.FC = () => {
           isOpen={modalAlert}
           onClose={() => {
             setModalAlert(false);
-            resetSate();
+            resetStateModal();
             navigate("/admin/decree/category/list", { replace: true });
           }}
           message={modalAlertData.description}

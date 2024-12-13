@@ -39,7 +39,8 @@ const AuthRouter: React.FC<Props> = ({ children, redirectTo = "/" }) => {
       // return to login page with reload
       // We're going to figure out a better way; sorry. :(
       dispatch(resetAll());
-      window.location.href = "/";
+      window.location.href = "/"; // <- development
+      // window.location.href = "/library"; // <- production
     }
   }, [logoutCode, navigate, redirectTo]);
 

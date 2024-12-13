@@ -63,7 +63,7 @@ const CertificateFormPage: React.FC = () => {
     setModalAlert,
     setModalAlertData,
     modalAlertData,
-    resetSate,
+    resetStateModal,
   } = useContext(Context);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -323,7 +323,7 @@ const CertificateFormPage: React.FC = () => {
           isOpen={modalAlert}
           onClose={() => {
             setModalAlert(false);
-            resetSate();
+            resetStateModal();
           }}
           message={modalAlertData.description}
           title={modalAlertData.title}

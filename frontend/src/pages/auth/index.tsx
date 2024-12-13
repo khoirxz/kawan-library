@@ -16,7 +16,7 @@ const AuthPage: React.FC = () => {
   const { isLoading } = useAuth();
 
   return (
-    <div className="flex h-screen w-full items-center justify-center px-4">
+    <div className="flex h-screen w-full items-center justify-center px-4 bg-blue-100/30">
       {isError ? (
         <div className="absolute z-10 top-10 max-w-screen-sm px-3">
           <Alert variant={isError ? "destructive" : "default"}>

@@ -18,7 +18,7 @@ const UserProfileLayout: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <UserLayout isRestricted>
-      <div className="container max-w-screen-md mx-auto px-4 py-8 space-y-5">
+      <div className="container max-w-screen-lg mx-auto px-4 py-8 space-y-5">
         <div className="flex gap-2">
           <Button asChild>
             <Link to={`/user/decree/${id}`}>Lihat SK</Link>

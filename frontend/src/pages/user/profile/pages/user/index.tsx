@@ -72,9 +72,13 @@ const UserProfilePage: React.FC = () => {
           </div>
 
           <div className="border p-6 rounded-md bg-white shadow space-y-6">
-            {userJobHistory?.map((item) => (
-              <ListItemWorkExperience key={item.id} {...item} />
-            ))}
+            {userJobHistory?.length === 0 ? (
+              <p>Tidak ada riwayat pekerjaan</p>
+            ) : (
+              userJobHistory?.map((item) => (
+                <ListItemWorkExperience key={item.id} {...item} />
+              ))
+            )}
           </div>
         </div>
       </div>

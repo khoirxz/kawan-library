@@ -40,6 +40,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { baseAPI } from "@/api";
 
@@ -220,3 +237,62 @@ export function ActionButton({
     </>
   );
 }
+
+export const PaginationBar: React.FC<{
+  total: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
+}> = ({ total, currentPage, onPageChange }) => {
+  const pages = Array.from({ length: total }, (_, i) => i + 1);
+
+  return (
+    <Pagination className="w-full justify-center sm:justify-end">
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            href="#"
+            onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
+          />
+        </PaginationItem>
+
+        {pages.map((page) => (
+          <PaginationItem key={page}>
+            <PaginationLink
+              href="#"
+              onClick={() => onPageChange(page)}
+              className={page === currentPage ? "active" : ""}>
+              {page}
+            </PaginationLink>
+          </PaginationItem>
+        ))}
+
+        <PaginationItem>
+          <PaginationNext
+            href="#"
+            onClick={() => onPageChange(Math.min(currentPage + 1, total))}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
+};
+
+export const RowData: React.FC<{
+  setRow: React.Dispatch<React.SetStateAction<number>>;
+}> = ({ setRow }) => {
+  return (
+    <Select onValueChange={(value) => setRow(parseInt(value) || 10)}>
+      <SelectTrigger className="w-[80px]">
+        <SelectValue placeholder="10" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Row per page</SelectLabel>
+          <SelectItem value="10">10</SelectItem>
+          <SelectItem value="15">15</SelectItem>
+          <SelectItem value="20">20</SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+};

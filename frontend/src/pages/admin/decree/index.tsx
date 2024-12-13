@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios, { AxiosError } from "axios";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import { ColumnDef } from "@tanstack/react-table";
@@ -8,9 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { ResponsiveTable, ActionButton } from "@/components/responsive-table";
 
-import { baseAPI } from "@/api";
+import {
+  ResponsiveTable,
+  ActionButton,
+  PaginationBar,
+  RowData,
+} from "@/components/responsive-table";
+
 import { AdminLayout } from "@/layouts/admin";
 import { decreeListProps } from "@/types/decree";
 import useDecree from "./decreeHook";
@@ -75,42 +79,31 @@ const columns: ColumnDef<decreeListProps>[] = [
 ];
 
 const DecreeListPage: React.FC = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [listUser, setListUser] = useState<decreeListProps[]>([]);
-  const { categories } = useDecree();
+  const [row, setRow] = useState<number>(10);
+  const [search, setSearch] = useState<string>("");
+  const {
+    isLoading,
+    listDecree,
+    categories,
+    setIsLoading,
+    fetchDecree,
+    fetchCategories,
+  } = useDecree();
 
   useEffect(() => {
-    const getUsers = async () => {
-      try {
-        const response = await axios.get<{
-          code: number | null;
-          status: string | null;
-          message: string | null;
-          data: decreeListProps[];
-        }>(`${baseAPI.dev}/decrees`);
+    const abortFetch = fetchDecree({ limit: row, search });
+    fetchCategories();
+    setIsLoading(false);
 
-        setIsLoading(false);
-        setListUser(response.data.data);
-      } catch (error) {
-        setIsLoading(false);
-        const axiosError = error as AxiosError;
-        console.error(axiosError.response?.data || axiosError.message);
-      }
-    };
-
-    getUsers();
-
-    return () => {
-      setListUser([]);
-    };
-  }, [isLoading]);
+    return () => abortFetch();
+  }, [row, search]);
 
   return (
     <AdminLayout>
       <div className="p-4 lg:p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Daftar Surat Keputusan</h1>
-          {categories.length > 0 ? (
+          {categories?.length > 0 ? (
             <Button asChild>
               <Link to="/admin/decree/form">Tambah</Link>
             </Button>
@@ -120,7 +113,10 @@ const DecreeListPage: React.FC = () => {
         </div>
 
         <div className="flex mb-4">
-          <Input placeholder="Cari User" className="max-w-sm" />
+          <Input
+            placeholder="Cari surat keputusan"
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
 
         <div className="border rounded-lg">
@@ -145,7 +141,18 @@ const DecreeListPage: React.FC = () => {
                   ),
                 },
               ]}
-              data={listUser}
+              data={listDecree.data}
+            />
+          )}
+        </div>
+        <div className="mt-2 gap-6 sm:gap-0 flex flex-col sm:flex-row justify-between">
+          <RowData setRow={setRow} />
+
+          {listDecree.data.length === 0 ? null : (
+            <PaginationBar
+              total={listDecree.pagination?.totalItem}
+              currentPage={listDecree.pagination?.currentPage}
+              onPageChange={() => {}}
             />
           )}
         </div>
@@ -153,5 +160,7 @@ const DecreeListPage: React.FC = () => {
     </AdminLayout>
   );
 };
+
+DecreeListPage.displayName = "DecreeListPage";
 
 export default DecreeListPage;

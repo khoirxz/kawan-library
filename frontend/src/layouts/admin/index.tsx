@@ -11,14 +11,14 @@ import {
 import { AppSidebar } from "@/components/app-sidebar";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+// import {
+//   Breadcrumb,
+//   BreadcrumbItem,
+//   BreadcrumbLink,
+//   BreadcrumbList,
+//   BreadcrumbPage,
+//   BreadcrumbSeparator,
+// } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
@@ -27,10 +27,10 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { ChevronUp, User } from "lucide-react";
+import LoadingScreen from "@/components/loadingScreen";
 
 import { useAppSelector, useAppDispatch } from "@/app/store";
 import { LogoutUser } from "@/reducer/authSlice";
-
 import "@/App.css";
 import { baseAPI } from "@/api";
 import { useEffect } from "react";
@@ -55,10 +55,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     dispatch(LogoutUser());
   };
 
-  if (isLoading) return <p>Loading</p>;
+  if (isLoading) return <LoadingScreen />;
 
   if (!data) {
-    return <p>Loading</p>;
+    return <LoadingScreen />;
   } else {
     if (data.role === "admin") {
       return (
@@ -82,7 +82,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                             <User />
                           </div>
                         )}
-                        <span className="font-semibold">{data?.username}</span>
+                        <div className="flex flex-col">
+                          <span className="font-semibold">
+                            {data?.username}
+                          </span>
+                          <span>{data?.role}</span>
+                        </div>
+
                         <ChevronUp className="ml-auto" />
                       </SidebarMenuButton>
                     </DropdownMenuTrigger>
@@ -113,23 +119,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               <div className="flex items-center space-x-4 h-16 p-6">
                 <SidebarTrigger />
                 <Separator orientation="vertical" />
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem>
-                      <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      <BreadcrumbLink href="/components">
-                        Components
-                      </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
               </div>
             </div>
 

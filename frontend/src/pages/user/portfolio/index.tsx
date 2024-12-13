@@ -110,7 +110,7 @@ const UserPortfolioPage: React.FC = () => {
                     className="flex justify-between items-start"
                     key={certs.id}>
                     <div>
-                      <p className="font-semibold">{certs.name}</p>
+                      <p className="font-semibold">{certs.title}</p>
                       <p className="text-gray-500 text-sm">
                         {certs.description}
                       </p>

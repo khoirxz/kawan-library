@@ -65,7 +65,7 @@ const UserSettingPersoalFormPage: React.FC = () => {
     setModalAlert,
     setModalAlertData,
     modalAlertData,
-    resetSate,
+    resetStateModal,
   } = useContext(Context);
 
   useEffect(() => {
@@ -396,7 +396,7 @@ const UserSettingPersoalFormPage: React.FC = () => {
         isOpen={modalAlert}
         onClose={() => {
           setModalAlert(false);
-          resetSate();
+          resetStateModal();
         }}
         message={modalAlertData.description}
         title={modalAlertData.title}

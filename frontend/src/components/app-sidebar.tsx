@@ -78,7 +78,7 @@ export function AppSidebar({ children }: { children?: React.ReactNode }) {
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <FileText />
-                      Surat Keputusan
+                      Modul Surat Keputusan
                       <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
@@ -101,6 +101,13 @@ export function AppSidebar({ children }: { children?: React.ReactNode }) {
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton role="menu" asChild>
+                          <Link to="/admin/decree/category/list">
+                            SK Builder
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
@@ -110,7 +117,7 @@ export function AppSidebar({ children }: { children?: React.ReactNode }) {
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                       <ScrollText />
-                      Sertifikat
+                      Modul Sertifikat
                       <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
