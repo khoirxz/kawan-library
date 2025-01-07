@@ -75,7 +75,7 @@ const UserDecreeListPage: React.FC = () => {
   }, []);
 
   return (
-    <UserLayout>
+    <UserLayout isRestricted>
       <div className="container max-w-2xl mx-auto px-4 py-8">
         <AppHeader
           title="Daftar Dokumen Surat Keputusan"

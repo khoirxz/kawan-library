@@ -9,6 +9,11 @@ const DecreeCategory = db.define("decrees_category", {
     primaryKey: true,
     autoIncrement: true,
   },
+  isPublic: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
+  },
   title: {
     type: DataTypes.STRING,
     allowNull: false,

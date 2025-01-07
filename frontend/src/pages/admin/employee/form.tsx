@@ -29,16 +29,15 @@ import { UserSelectionModal } from "@/components/user-selection-modal";
 import { Context } from "@/context";
 import { AdminLayout } from "@/layouts/admin";
 import { baseAPI } from "@/api";
-import { userProp } from "@/types/user";
+import { userProp, userEmployeProps } from "@/types/user";
 import useEmployee from "./employeHook";
-import { userEmployeProps } from "@/types/user";
 import { NotificationDialog } from "@/components/notification-dialog";
 
 const formSchema = z.object({
   user_id: z.string(),
   position: z.string().min(2, { message: "Title minimal 2 karakter" }),
   status: z.enum(["active", "inactive"]),
-  salary: z.string().min(2, { message: "Description minimal 2 karakter" }),
+  id_salary: z.string().min(2, { message: "Description minimal 2 karakter" }),
 });
 
 const EmployeFormPage: React.FC = () => {
@@ -52,7 +51,7 @@ const EmployeFormPage: React.FC = () => {
       user_id: "",
       position: "",
       status: "active",
-      salary: "0",
+      id_salary: "0",
     },
   });
   const { id } = useParams<{ id: string }>();
@@ -83,7 +82,7 @@ const EmployeFormPage: React.FC = () => {
           form.setValue("user_id", data.user_id || "");
           form.setValue("position", data.position || "");
           form.setValue("status", data.status);
-          form.setValue("salary", data.salary.toString() || "0");
+          form.setValue("id_salary", data.id_salary.toString() || "0");
           if (data.supervisor_info) {
             setSelectedUser({
               id: data.supervisor_info?.id,
@@ -107,14 +106,13 @@ const EmployeFormPage: React.FC = () => {
   }, [id]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    // console.log(data);
     try {
       const formData = {
         user_id: id,
         supervisor_id: selectedUser?.id ? selectedUser.id : null,
         position: data.position,
         status: data.status,
-        salary: parseInt(data.salary, 10),
+        id_salary: parseInt(data.id_salary, 10),
       };
 
       let response;
@@ -253,10 +251,10 @@ const EmployeFormPage: React.FC = () => {
 
                 <FormField
                   control={form.control}
-                  name="salary"
+                  name="id_salary"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Gaji</FormLabel>
+                      <FormLabel>ID Gaji</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Masukan nominal gaji"

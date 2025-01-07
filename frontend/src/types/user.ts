@@ -57,7 +57,7 @@ export interface userEmployeProps {
   user_id: string;
   position: string;
   status: "active" | "inactive";
-  salary: number;
+  id_salary: number;
   supervisor_info: {
     id: string;
     username: string;
@@ -81,6 +81,27 @@ export interface userJobHistoryProps {
   is_current: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface USERINVOICEPROPS {
+  gaji_id: number;
+  kary_id: number;
+  kode_gaji: string;
+  gaji_utama: number;
+  tun_jbt: number;
+  tun_trans: number;
+  tun_makan: number;
+  tun_jams: number;
+  tun_pph: number;
+  pot_krd: number;
+  pot_kop: number;
+  hadir: number;
+  bulan_transfer: string;
+  tgl_transfer: string;
+  jam_transfer: string;
+  tgl_slip: string;
+  status: number;
+  bonus: number;
 }
 
 export interface userProfileProps extends userProp {

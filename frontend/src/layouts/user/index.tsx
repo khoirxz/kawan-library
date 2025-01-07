@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -26,12 +26,26 @@ const UserLayout: React.FC<{
     },
   } = useAppSelector((state) => state.authState);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const { id } = useParams<{ id: string }>();
 
   const handleLogout = () => {
     dispatch(LogoutUser());
   };
+
+  if (isRestricted) {
+    if (!data || (data.userId !== id && data.role !== "admin")) {
+      return (
+        <div className="font-public flex items-center h-screen flex-col justify-center space-y-10">
+          <p>Anda tidak memiliki hak untuk mengakses halaman ini</p>
+          <Button onClick={() => navigate("/home", { replace: true })}>
+            Kembali ke halaman
+          </Button>
+        </div>
+      );
+    }
+  }
 
   return (
     <div className="font-public">
@@ -64,7 +78,8 @@ const UserLayout: React.FC<{
                 <Avatar>
                   <AvatarImage
                     src={`${baseAPI.dev}/uploads/avatars/${data?.avatarImg}`}
-                    alt="@shadcn"
+                    alt="profile"
+                    className="object-cover"
                   />
                 </Avatar>
               ) : (

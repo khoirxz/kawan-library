@@ -29,7 +29,9 @@ const items = [
   },
 ];
 
-export function AppSidebar({ children }: { children?: React.ReactNode }) {
+export function AppSidebar({
+  children,
+}: Readonly<{ children?: React.ReactNode }>) {
   return (
     <Sidebar aria-describedby="sidebar">
       <SidebarContent aria-describedby="sidebar">
@@ -103,7 +105,7 @@ export function AppSidebar({ children }: { children?: React.ReactNode }) {
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton role="menu" asChild>
-                          <Link to="/admin/decree/category/list">
+                          <Link to="/admin/decree/builder/form/">
                             SK Builder
                           </Link>
                         </SidebarMenuSubButton>

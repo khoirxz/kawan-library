@@ -8,21 +8,33 @@ import {
   FileText,
   Medal,
   BriefcaseBusiness,
+  DollarSign,
 } from "lucide-react";
 
 import useProfileHook from "../../hook/profileHook";
 import UserProfileLayout from "../..";
-import { userJobHistoryProps } from "@/types/user";
+import { userJobHistoryProps, USERINVOICEPROPS } from "@/types/user";
+import { Badge } from "@/components/ui/badge";
 
 const UserProfilePage: React.FC = () => {
-  const { userProfile, userJobHistory, getUserJobHistory } = useProfileHook();
+  const {
+    userProfile,
+    userJobHistory,
+    getUserJobHistory,
+    getInvoices,
+    invoices,
+  } = useProfileHook();
   const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
     if (id) {
       getUserJobHistory({ idUser: id });
+
+      if (userProfile?.user_data_employe?.id_salary) {
+        getInvoices({ idSalary: userProfile?.user_data_employe?.id_salary });
+      }
     }
-  }, []);
+  }, [userProfile?.user_data_employe?.id_salary, id]);
 
   return (
     <UserProfileLayout>
@@ -59,7 +71,7 @@ const UserProfilePage: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div>
           <div className="flex justify-between items-end mb-3 my-5">
             <h1 className="text-xl font-semibold">Riwayat Pekerjaan</h1>
@@ -78,6 +90,23 @@ const UserProfilePage: React.FC = () => {
               userJobHistory?.map((item) => (
                 <ListItemWorkExperience key={item.id} {...item} />
               ))
+            )}
+          </div>
+        </div>
+        <div>
+          <div className="flex justify-between items-end mb-3 my-5">
+            <h1 className="text-xl font-semibold">Salary</h1>
+
+            <Link to={`/user/salary/${id}`} className="text-sm text-blue-600">
+              Lihat semua
+            </Link>
+          </div>
+
+          <div className="border p-6 rounded-md bg-white shadow space-y-6">
+            {invoices?.length === 0 ? (
+              <p>Belum ada invoice</p>
+            ) : (
+              <ListItemInvoice invoices={invoices} />
             )}
           </div>
         </div>
@@ -126,6 +155,37 @@ const ListItemWorkExperience: React.FC<userJobHistoryProps> = ({
           <span>{location}</span>
         </p>
         <p className="text-gray-500 text-sm">{job_description}</p>
+      </div>
+    </div>
+  );
+};
+
+const ListItemInvoice: React.FC<{ invoices: USERINVOICEPROPS[] }> = ({
+  invoices,
+}) => {
+  const data = invoices[0];
+
+  return (
+    <div className="flex justify-between">
+      <div className="flex flex-row gap-2 items-start">
+        <DollarSign className="text-blue-500" />
+        <div>
+          <p className="text-sm text-gray-500">
+            Rp.{" "}
+            {data.gaji_utama +
+              data.tun_jbt +
+              data.tun_trans +
+              data.tun_jams +
+              data.tun_makan +
+              data.tun_pph -
+              data.pot_kop -
+              data.pot_krd}
+          </p>
+          <h1 className="font-semibold">SLIP GAJI - {data.tgl_transfer}</h1>
+        </div>
+      </div>
+      <div>
+        <Badge>{data.status === 1 ? "Sukses" : "Pending"}</Badge>
       </div>
     </div>
   );

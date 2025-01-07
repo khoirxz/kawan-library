@@ -46,33 +46,53 @@ const columns: ColumnDef<decreeCategoryListProps>[] = [
 
 const DecreeCategoryListPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [listUser, setListUser] = useState<decreeCategoryListProps[]>([]);
+  const [listCategory, setListCategory] = useState<decreeCategoryListProps[]>(
+    []
+  );
+  const [search, setSearch] = useState<string>("");
 
   useEffect(() => {
-    const getUsers = async () => {
-      try {
-        const response = await axios.get<{
-          code: number | null;
-          status: string | null;
-          message: string | null;
-          data: decreeCategoryListProps[];
-        }>(`${baseAPI.dev}/decree/category/`);
+    const source = axios.CancelToken.source();
 
-        setIsLoading(false);
-        setListUser(response.data.data);
-      } catch (error) {
-        setIsLoading(false);
-        const axiosError = error as AxiosError;
-        console.error(axiosError.response?.data || axiosError.message);
-      }
-    };
+    const delayDebounceFn = setTimeout(
+      () => {
+        const getCategory = async () => {
+          const urlParam = search ? `?search=${search}` : "";
 
-    getUsers();
+          try {
+            const response = await axios.get<{
+              code: number | null;
+              status: string | null;
+              message: string | null;
+              data: decreeCategoryListProps[];
+            }>(`${baseAPI.dev}/decree/category${urlParam}`, {
+              cancelToken: source.token,
+            });
+
+            setIsLoading(false);
+            setListCategory(response.data.data);
+          } catch (error) {
+            if (axios.isCancel(error)) {
+              console.log("Request canceled", error.message);
+            } else {
+              setIsLoading(false);
+              const axiosError = error as AxiosError;
+              console.error(axiosError.response?.data || axiosError.message);
+            }
+          }
+        };
+
+        getCategory();
+      },
+      search ? 1000 : 0
+    );
 
     return () => {
-      setListUser([]);
+      clearTimeout(delayDebounceFn);
+      source.cancel();
+      setListCategory([]);
     };
-  }, [isLoading]);
+  }, [isLoading, search]);
 
   return (
     <AdminLayout>
@@ -85,7 +105,10 @@ const DecreeCategoryListPage: React.FC = () => {
         </div>
 
         <div className="flex mt-10 gap-2 mb-3">
-          <Input placeholder="Cari User" />
+          <Input
+            placeholder="Cari User"
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
 
         <div className="max-h-[400px] overflow-y-auto overflow-x-auto rounded-md border">
@@ -110,7 +133,7 @@ const DecreeCategoryListPage: React.FC = () => {
                       ),
                     },
                   ]}
-                  data={listUser}
+                  data={listCategory}
                 />
               </div>
             </div>

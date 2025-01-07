@@ -35,7 +35,7 @@ const formSchema = z.object({
   username: z
     .string()
     .regex(/^[a-zA-Z0-9]+$/, {
-      message: "Username harus berupa huruf dan angka",
+      message: "Username harus berupa huruf dan angka, tidak boleh spasi",
     })
     .min(2)
     .max(20),

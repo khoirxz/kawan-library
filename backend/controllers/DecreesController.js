@@ -20,12 +20,18 @@ const getAllDecrees = async (req, res) => {
       : {};
 
     // Filter user berdasarkan role
-    const userFilter =
-      req.decoded.role === "admin"
-        ? userId === undefined || userId === null || userId === ""
-          ? {}
-          : { user_id: userId }
-        : { user_id: req.decoded.userId };
+    let userFilter = {};
+    if (req.decoded.role === "admin") {
+      userFilter = userId ? { user_id: userId } : {};
+    } else {
+      // Non-admin dapat mengakses data dengan user_id mereka atau kategori isPublic
+      userFilter = {
+        [Op.or]: [
+          { user_id: req.decoded.userId }, // Data milik mereka
+          { "$category.isPublic$": true }, // Data kategori publik
+        ],
+      };
+    }
 
     // Gabungkan filter pencarian dan user
     const where = {
@@ -45,7 +51,8 @@ const getAllDecrees = async (req, res) => {
         },
         {
           association: "category",
-          attributes: ["id", "title", "description"],
+          attributes: ["id", "isPublic", "title", "description"],
+          required: false, // Tetap tampilkan meskipun kategori null
         },
       ],
       attributes: { exclude: ["user_id", "category_id"] },
@@ -54,7 +61,7 @@ const getAllDecrees = async (req, res) => {
     responseHandler(res, 200, {
       message: `Success get ${userId ? "user" : "all"} decrees`,
       data: result.data,
-      pagination: result.pagination,
+      attributes: { exclude: ["user_id", "category_id"] },
     });
   } catch (error) {
     responseHandler(res, 500, {

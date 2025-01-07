@@ -10,6 +10,8 @@ const DecreesModel = require("./DecreesModel");
 const DecreeCategoryModel = require("./DecreeCategoryModel");
 const CertificationsModel = require("./CertificationsModel");
 
+const OfficeModel = require("./OfficeModel");
+
 UsersModel.hasOne(UserDataModel, {
   foreignKey: "user_id", // Sesuai kolom foreign key di tabel user data
   as: "user_data", // Alias untuk relasi
@@ -80,4 +82,5 @@ module.exports = {
   DecreesModel,
   DecreeCategoryModel,
   CertificationsModel,
+  OfficeModel,
 };

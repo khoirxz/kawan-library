@@ -11,6 +11,7 @@ import DecreeListPage from "@/pages/admin/decree";
 import DecreeFormPage from "@/pages/admin/decree/form";
 import DecreeCategoryListPage from "@/pages/admin/decree/pages/category";
 import DecreeCategoryFormPage from "@/pages/admin/decree/pages/category/form";
+import DecreeBuilderFormPage from "@/pages/admin/decree/pages/builder";
 import CertificateListPage from "@/pages/admin/certificates";
 import CertificateFormPage from "@/pages/admin/certificates/form";
 import EmployeFormPage from "@/pages/admin/employee/form";
@@ -24,6 +25,8 @@ import UserSettingWorkListPage from "./pages/user/setting/pages/work";
 import UserSettingWorkFormPage from "./pages/user/setting/pages/work/form";
 import UserCertificateListPage from "@/pages/user/certificates";
 import UserDecreeListPage from "@/pages/user/decree";
+import UserSalaryListPage from "@/pages/user/salary";
+import UserSalaryShowPage from "@/pages/user/salary/show";
 
 const router = createBrowserRouter(
   [
@@ -116,6 +119,14 @@ const router = createBrowserRouter(
       element: (
         <AuthRouter>
           <DecreeCategoryFormPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/admin/decree/builder/form/",
+      element: (
+        <AuthRouter>
+          <DecreeBuilderFormPage />
         </AuthRouter>
       ),
     },
@@ -238,6 +249,22 @@ const router = createBrowserRouter(
       element: (
         <AuthRouter>
           <UserDecreeListPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/user/salary/:id",
+      element: (
+        <AuthRouter>
+          <UserSalaryListPage />
+        </AuthRouter>
+      ),
+    },
+    {
+      path: "/user/salary/:id/:idSalary",
+      element: (
+        <AuthRouter>
+          <UserSalaryShowPage />
         </AuthRouter>
       ),
     },

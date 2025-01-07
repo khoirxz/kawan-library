@@ -4,8 +4,10 @@ export interface decreeListProps {
   id: string;
   user: userProp | null;
   category: {
-    name: string;
+    title: string;
     id: number;
+    description: string;
+    isPublic: boolean;
   };
   title: string;
   description: string;
@@ -22,6 +24,7 @@ export interface decreeCategoryListProps {
   id: number;
   title: string;
   description: string;
+  isPublic: boolean;
   createdAt: string;
   updatedAt: string;
 }

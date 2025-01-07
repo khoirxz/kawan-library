@@ -1,14 +1,36 @@
 const Joi = require("joi");
+const Op = require("sequelize").Op;
 const { DecreeCategoryModel } = require("../model/index");
 const responseHandler = require("../helpers/responseHandler");
+const { Paginate } = require("../helpers/paginationHandler");
 
 const getAllDecreeCategory = async (req, res) => {
   try {
-    const data = await DecreeCategoryModel.findAll();
+    const { search, page, limit } = req.query;
+
+    // Filter pencarian
+    const whereClause = search
+      ? {
+          [Op.or]: [{ title: { [Op.like]: `%${search}%` } }],
+        }
+      : {};
+
+    const where = {
+      ...whereClause,
+    };
+
+    // Pagination
+    const result = await Paginate(DecreeCategoryModel, {
+      page,
+      limit,
+      where,
+      attributes: ["id", "title", "description", "createdAt", "updatedAt"],
+    });
 
     responseHandler(res, 200, {
       message: "Success get all decree category",
-      data: data,
+      data: result.data,
+      pagination: result.pagination,
     });
   } catch (error) {
     responseHandler(res, 500, { message: error.message });
@@ -32,14 +54,15 @@ const getDecreeCategoryById = async (req, res) => {
 };
 
 const createDecreeCategory = async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, isPublic } = req.body;
 
   const schema = Joi.object({
     title: Joi.string().required(),
     description: Joi.string().required(),
+    isPublic: Joi.boolean().required(),
   });
 
-  const { error } = schema.validate({ title, description });
+  const { error } = schema.validate({ title, description, isPublic });
 
   if (error) {
     return responseHandler(res, 400, { message: error.message });
@@ -61,6 +84,7 @@ const createDecreeCategory = async (req, res) => {
     const data = await DecreeCategoryModel.create({
       title,
       description,
+      isPublic,
     });
 
     responseHandler(res, 200, {

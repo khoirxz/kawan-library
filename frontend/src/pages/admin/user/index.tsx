@@ -143,6 +143,7 @@ const columns: ColumnDef<userProp>[] = [
 const UserListPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [listUser, setListUser] = useState<userProp[]>([]);
+  const [search, setSearch] = useState<string>("");
   const {
     main: {
       verify: { data },
@@ -150,30 +151,47 @@ const UserListPage: React.FC = () => {
   } = useAppSelector((state) => state.authState);
 
   useEffect(() => {
-    const getUsers = async () => {
-      try {
-        const response = await axios.get<{
-          code: number | null;
-          status: string | null;
-          message: string | null;
-          data: userProp[];
-        }>(`${baseAPI.dev}/users`);
+    const source = axios.CancelToken.source();
 
-        setIsLoading(false);
-        setListUser(response.data.data);
-      } catch (error) {
-        setIsLoading(false);
-        const axiosError = error as AxiosError;
-        console.error(axiosError.response?.data || axiosError.message);
-      }
-    };
+    const delayDebounceFn = setTimeout(
+      () => {
+        const getUsers = async () => {
+          const urlParam = search ? `?search=${search}` : "";
 
-    getUsers();
+          try {
+            const response = await axios.get<{
+              code: number | null;
+              status: string | null;
+              message: string | null;
+              data: userProp[];
+            }>(`${baseAPI.dev}/users${urlParam}`, {
+              cancelToken: source.token,
+            });
+
+            setIsLoading(false);
+            setListUser(response.data.data);
+          } catch (error) {
+            if (axios.isCancel(error)) {
+              console.log("Request canceled", error.message);
+            } else {
+              setIsLoading(false);
+              const axiosError = error as AxiosError;
+              console.error(axiosError.response?.data || axiosError.message);
+            }
+          }
+        };
+
+        getUsers();
+      },
+      search ? 1000 : 0
+    );
 
     return () => {
+      clearTimeout(delayDebounceFn);
+      source.cancel("Operation canceled by the user.");
       setListUser([]);
     };
-  }, [isLoading]);
+  }, [isLoading, search]);
 
   return (
     <AdminLayout>
@@ -186,7 +204,10 @@ const UserListPage: React.FC = () => {
         </div>
 
         <div className="flex mt-10 gap-2 mb-3">
-          <Input placeholder="Cari User" />
+          <Input
+            placeholder="Cari User"
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
 
         <div className="max-h-[400px] overflow-y-auto overflow-x-auto rounded-md border">
@@ -205,7 +226,7 @@ const UserListPage: React.FC = () => {
                       setIsLoading={setIsLoading}
                       linkAction={`/admin/user/form`}
                       linkDelete={`users`}
-                      isDelete={data?.userId === row.original.id ? false : true}
+                      isDelete={data?.userId !== row.original.id}
                     />
                   ),
                 },
@@ -225,13 +246,13 @@ export function ActionButton({
   linkAction,
   linkDelete,
   isDelete = true,
-}: {
+}: Readonly<{
   id: string | number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   linkAction: string;
   linkDelete: string;
   isDelete?: boolean;
-}) {
+}>) {
   const navigate = useNavigate();
   const [openAlert, setOpenAlert] = useState<boolean>(false);
 
@@ -255,7 +276,7 @@ export function ActionButton({
     <>
       <div className="flex justify-end items-center gap-3">
         <Button variant="outline" size="icon" asChild>
-          <a href={`#`} target="_blank">
+          <a href={`/user/profile/${id}`} target="_blank">
             <Eye className="w-4 h-4" />
           </a>
         </Button>

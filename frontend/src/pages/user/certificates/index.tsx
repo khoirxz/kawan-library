@@ -52,7 +52,7 @@ const UserCertificateListPage: React.FC = () => {
           status: string | null;
           message: string | null;
           data: certificationListProps[];
-        }>(`${baseAPI.dev}/certifications/search/${id}`);
+        }>(`${baseAPI.dev}/certifications?userId=${id}`);
 
         setIsLoading(false);
         setListCerts(response.data.data);
@@ -96,7 +96,7 @@ const UserCertificateListPage: React.FC = () => {
   }, [isLoading]);
 
   return (
-    <UserLayout>
+    <UserLayout isRestricted>
       <div className="container max-w-2xl mx-auto px-4 py-8">
         <AppHeader
           title="Daftar Sertifikat"

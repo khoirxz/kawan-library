@@ -12,10 +12,7 @@ const getUsers = async (req, res) => {
     // Filter pencarian
     const whereClause = search
       ? {
-          [Op.or]: [
-            { title: { [Op.like]: `%${search}%` } },
-            { description: { [Op.like]: `%${search}%` } },
-          ],
+          [Op.or]: [{ username: { [Op.like]: `%${search}%` } }],
         }
       : {};
 
@@ -127,13 +124,14 @@ const updateUser = async (req, res) => {
       }
     }
 
-    // encrypt password
-    const newPassword =
-      password === ""
-        ? oldData[0].password
-        : password
-        ? await argon2.hash(password)
-        : undefined;
+    let newPassword;
+    if (password === "") {
+      newPassword = oldData[0].password;
+    } else if (password) {
+      newPassword = await argon2.hash(password);
+    } else {
+      newPassword = undefined;
+    }
 
     // update user
     await UsersModel.update(

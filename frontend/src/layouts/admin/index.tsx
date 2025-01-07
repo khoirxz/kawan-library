@@ -75,6 +75,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                             <AvatarImage
                               src={`${baseAPI.dev}/uploads/avatars/${data?.avatarImg}`}
                               alt={data?.username}
+                              className="object-cover"
                             />
                           </Avatar>
                         ) : (

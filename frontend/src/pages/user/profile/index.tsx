@@ -2,8 +2,9 @@ import { Link, useParams } from "react-router-dom";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Verified } from "lucide-react";
+import { Verified, AlertCircle } from "lucide-react";
 
 import useProfileHook from "./hook/profileHook";
 import UserLayout from "@/layouts/user";
@@ -28,12 +29,25 @@ const UserProfileLayout: React.FC<{ children: React.ReactNode }> = ({
           </Button>
         </div>
 
+        {!userProfile?.user_contact &&
+        !userProfile?.user_geography &&
+        !userProfile?.user_data ? (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Data diri belum lengkap!</AlertTitle>
+            <AlertDescription>
+              Lengkapi data diri anda terlebih dahulu untuk menikmati layanan.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
         <div className="border rounded-md shadow-sm">
           <div className="relative h-[200px]">
             <Button className="absolute top-4 right-4 z-20" asChild>
               <Link to={`/user/setting/personal/${id}`}>Edit</Link>
             </Button>
             <img
+              alt="background"
               src={gradientImg}
               className="object-cover filter brightness-75 w-full h-full absolute z-0 rounded-t-md"
             />
@@ -44,14 +58,15 @@ const UserProfileLayout: React.FC<{ children: React.ReactNode }> = ({
               ) : (
                 <div className="w-24 h-24 relative z-0">
                   <Avatar className="w-full h-full border-2 border-blue-500 bg-white">
-                    {userProfile?.avatarImg === null ? (
-                      <AvatarFallback>{userProfile?.username}</AvatarFallback>
-                    ) : (
-                      <AvatarImage
-                        src={`${baseAPI.dev}/uploads/avatars/${userProfile?.avatarImg}`}
-                        alt={userProfile?.username}
-                      />
-                    )}
+                    <AvatarImage
+                      src={
+                        userProfile?.avatarImg === null
+                          ? "/profile.png"
+                          : `${baseAPI.dev}/uploads/avatars/${userProfile?.avatarImg}`
+                      }
+                      className="object-cover"
+                      alt={userProfile?.username}
+                    />
 
                     <AvatarFallback>{userProfile?.username}</AvatarFallback>
                   </Avatar>

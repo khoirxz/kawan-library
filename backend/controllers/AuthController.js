@@ -185,9 +185,6 @@ const verifyUser = async function (req, res) {
   try {
     const token = req.cookies.token;
 
-    // debug
-    console.log(req.cookies);
-
     if (!token) {
       return responseHandler(res, 401, {
         message: "Operation failed, invalid authorization!",

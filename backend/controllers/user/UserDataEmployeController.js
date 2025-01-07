@@ -58,14 +58,14 @@ const getById = async (req, res) => {
 };
 
 const create = async (req, res) => {
-  const { user_id, supervisor_id, position, status, salary } = req.body;
+  const { user_id, supervisor_id, position, status, id_salary } = req.body;
 
   const schema = Joi.object({
     user_id: Joi.string().required(),
     supervisor_id: Joi.string().allow("", null).optional(),
     position: Joi.string().required(),
     status: Joi.string().required(),
-    salary: Joi.number().required(),
+    id_salary: Joi.number().required(),
     // start_date: Joi.date().required(),
     // end_date: Joi.date().allow(null).required(),
   });
@@ -91,10 +91,10 @@ const create = async (req, res) => {
 
     const data = await UserDataEmployeModel.create({
       user_id: user_id,
-      supervisor: supervisor_id ? supervisor_id : null,
+      supervisor: supervisor_id || null,
       position: position,
       status: status,
-      salary: salary,
+      id_salary: id_salary,
       // start_date: start_date,
       // end_date: end_date,
     });
@@ -116,7 +116,7 @@ const update = async (req, res) => {
     supervisor_id,
     position,
     status,
-    salary,
+    id_salary,
     // start_date,
     // end_date,
   } = req.body;
@@ -126,7 +126,7 @@ const update = async (req, res) => {
     supervisor_id: Joi.string().allow("", null),
     position: Joi.string().required(),
     status: Joi.string().required(),
-    salary: Joi.number().required(),
+    id_salary: Joi.number().required(),
     // start_date: Joi.date().required(),
     // end_date: Joi.date().allow(null).required(),
   });
@@ -143,10 +143,10 @@ const update = async (req, res) => {
     const data = await UserDataEmployeModel.update(
       {
         user_id: user_id,
-        supervisor: supervisor_id ? supervisor_id : null,
+        supervisor: supervisor_id || null,
         position: position,
         status: status,
-        salary: salary,
+        id_salary: id_salary,
         // start_date: start_date,
         // end_date: end_date,
       },

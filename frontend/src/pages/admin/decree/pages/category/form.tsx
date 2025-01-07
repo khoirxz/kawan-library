@@ -14,6 +14,7 @@ import {
   FormMessage,
   FormLabel,
 } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { NotificationDialog } from "@/components/notification-dialog";
@@ -26,6 +27,7 @@ import { decreeCategoryListProps } from "@/types/decree";
 const formSchema = z.object({
   title: z.string(),
   description: z.string(),
+  isPublic: z.boolean(),
 });
 
 const DecreeCategoryFormPage: React.FC = () => {
@@ -34,6 +36,7 @@ const DecreeCategoryFormPage: React.FC = () => {
     defaultValues: {
       title: "",
       description: "",
+      isPublic: true,
     },
   });
   const { id } = useParams<{ id: string }>();
@@ -58,6 +61,7 @@ const DecreeCategoryFormPage: React.FC = () => {
 
         form.setValue("title", response.data.data.title);
         form.setValue("description", response.data.data.description);
+        form.setValue("isPublic", response.data.data.isPublic);
       } catch (error) {
         console.log(error);
         setModalAlert(true);
@@ -126,6 +130,25 @@ const DecreeCategoryFormPage: React.FC = () => {
         <div className="mt-10">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="isPublic"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex flex-col gap-2">
+                      <FormLabel>Tersedia untuk publik ?</FormLabel>
+
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="title"

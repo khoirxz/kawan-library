@@ -26,7 +26,7 @@ const columns: ColumnDef<decreeListProps>[] = [
     cell: ({ row }) => (
       <div className="flex flex-col gap-1">
         <p className="font-semibold underline">{row.original.title}</p>
-        <p className="font-semibold">{row.original.category.name}</p>
+        <p className="font-semibold">{row.original.category.title}</p>
         {row.original.user ? <p>{row.original.user.username}</p> : null}
       </div>
     ),

@@ -10,21 +10,25 @@ import { baseAPI } from "@/api";
 import UserLayout from "@/layouts/user";
 import { userProfileProps } from "@/types/user";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "react-router-dom";
 
 const items: {
   id: number;
   title: string;
+  href: string;
   icon: React.ReactElement;
 }[] = [
   {
     id: 1,
     title: "Surat Keputusan",
     icon: <FcDocument className="w-8 h-8" />,
+    href: "/user/decree",
   },
   {
     id: 2,
     title: "Sertifikat",
     icon: <FcDiploma1 className="w-8 h-8" />,
+    href: "/user/certificate",
   },
 ];
 const UserHomePage: React.FC = () => {
@@ -119,7 +123,9 @@ const UserHomePage: React.FC = () => {
                 key={item.id}
                 className="bg-white rounded-md border p-4 flex flex-col items-start gap-3">
                 {item.icon}
-                <p>{item.title}</p>
+                <Link to={item.href + "/" + profile?.id}>
+                  <p>{item.title}</p>
+                </Link>
               </div>
             ))}
           </div>

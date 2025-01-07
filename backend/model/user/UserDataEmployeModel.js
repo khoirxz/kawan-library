@@ -35,7 +35,9 @@ const UserDataEmploye = db.define("user_data_employe", {
     type: DataTypes.ENUM("active", "inactive"),
     allowNull: false,
   },
-  salary: {
+  // "id_salary" adalah id dari tabel u5126114_gaji
+  // id_salary diisi dengan nilai id dari tb_karyawan
+  id_salary: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
