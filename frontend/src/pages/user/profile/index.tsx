@@ -36,7 +36,11 @@ const UserProfileLayout: React.FC<{ children: React.ReactNode }> = ({
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Data diri belum lengkap!</AlertTitle>
             <AlertDescription>
-              Lengkapi data diri anda terlebih dahulu untuk menikmati layanan.
+              Lengkapi data diri{" "}
+              <Link to={`/user/setting/personal/${id}`} className="underline">
+                disini
+              </Link>{" "}
+              anda terlebih dahulu untuk menikmati layanan.
             </AlertDescription>
           </Alert>
         ) : null}

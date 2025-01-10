@@ -15,8 +15,8 @@ const signup = async (req, res) => {
         .valid(Joi.ref("password"))
         .required()
         .messages({
-          "any.only": "Passwords do not match",
-          "string.empty": "Please confirm your password",
+          "any.only": "Kata santi tidak sama",
+          "string.empty": "Konfirmasi kata sandi anda",
         }),
     }).with("password", "confirmPassword");
 
@@ -36,7 +36,7 @@ const signup = async (req, res) => {
 
     if (data.length !== 0) {
       return responseHandler(res, 400, {
-        message: "Username already exist",
+        message: "Username sudah ada, silahkan gunakan username lain",
       });
     }
 
@@ -44,7 +44,7 @@ const signup = async (req, res) => {
     const encryptedPassword = await argon2.hash(password);
 
     // create user
-    data = await UsersModel.create(
+    await UsersModel.create(
       {
         username: username,
         password: encryptedPassword,
@@ -57,8 +57,8 @@ const signup = async (req, res) => {
     );
 
     responseHandler(res, 201, {
-      message: "Success create user",
-      data,
+      message:
+        "Pendaftaran Berhasil, silahkan hubungi administrator untuk mengverifikasi data anda",
     });
   } catch (error) {
     responseHandler(res, 500, {
@@ -93,14 +93,14 @@ const login = async (req, res) => {
 
     if (data.length === 0) {
       return responseHandler(res, 401, {
-        message: "Incorrect username",
+        message: "Username salah",
       });
     }
 
     // check if user verified
     if (data[0].dataValues.verified === false) {
       return responseHandler(res, 401, {
-        message: "Please contact admin to verify your account",
+        message: "Hubungi admin untuk mengverifikasi akun anda",
       });
     }
 
@@ -108,13 +108,13 @@ const login = async (req, res) => {
     const match = await argon2.verify(data[0].dataValues.password, password);
     if (!match) {
       return responseHandler(res, 401, {
-        message: "Incorrect password",
+        message: "Password salah",
       });
     }
 
     if (data[0].dataValues.verified === false) {
       return responseHandler(res, 401, {
-        message: "Please contact admin to verify your account",
+        message: "Hubungi admin untuk mengverifikasi akun anda",
       });
     }
 
@@ -140,7 +140,7 @@ const login = async (req, res) => {
     });
 
     responseHandler(res, 200, {
-      message: "Login success",
+      message: "Berhasil",
     });
   } catch (error) {
     responseHandler(res, 500, { message: error.message });
@@ -174,7 +174,7 @@ const logout = async function (req, res) {
     res.clearCookie("token");
 
     responseHandler(res, 200, {
-      message: "Logout success",
+      message: "Berhasil keluar",
     });
   } catch (error) {
     responseHandler(res, 500, { message: error.message });

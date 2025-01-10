@@ -103,13 +103,6 @@ export function AppSidebar({
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton role="menu" asChild>
-                          <Link to="/admin/decree/builder/form/">
-                            SK Builder
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>

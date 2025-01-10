@@ -122,7 +122,6 @@ const UserSettingPersoalFormPage: React.FC = () => {
   }, [id, form]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    // return console.log(data);
     const dataForm = {
       user_id: id,
       nik: data.nik,
@@ -219,7 +218,7 @@ const UserSettingPersoalFormPage: React.FC = () => {
             <AvatarImage
               className="object-cover"
               src={`${baseAPI.dev}/uploads/avatars/${avatarUrl}`}
-              alt="@user"
+              alt="profile"
             />
           ) : null}
           <AvatarFallback>?</AvatarFallback>

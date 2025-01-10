@@ -19,7 +19,9 @@ const AuthPage: React.FC = () => {
     <div className="flex h-screen w-full items-center justify-center px-4 bg-blue-100/30">
       {isError ? (
         <div className="absolute z-10 top-10 max-w-screen-sm px-3">
-          <Alert variant={isError ? "destructive" : "default"}>
+          <Alert
+            variant={isError ? "destructive" : "default"}
+            className="bg-white">
             <TriangleAlert className="h-4 w-4" />
             <AlertTitle>Peringatan</AlertTitle>
             <AlertDescription>{message}</AlertDescription>

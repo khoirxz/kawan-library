@@ -26,9 +26,13 @@ const getAllCertificates = async (req, res) => {
     // Filter user berdasarkan role
     const userFilter =
       req.decoded.role === "admin"
-        ? userId === undefined || userId === null || userId === ""
-          ? {}
-          : { user_id: userId }
+        ? (() => {
+            if (userId === undefined || userId === null || userId === "") {
+              return {};
+            } else {
+              return { user_id: userId };
+            }
+          })()
         : { user_id: req.decoded.userId };
 
     // Gabungkan filter pencarian dan user
@@ -116,7 +120,7 @@ const createCertificate = async (req, res) => {
     }
 
     const data = await CertificationsModel.create({
-      user_id: user_id ? user_id : null,
+      user_id: user_id || null,
       title: title,
       description: description,
       date: date,

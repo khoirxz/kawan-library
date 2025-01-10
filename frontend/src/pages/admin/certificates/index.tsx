@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 import { Link } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
+import dayjs from "dayjs";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,14 @@ const columns: ColumnDef<certificationListProps>[] = [
   {
     accessorKey: "createdAt",
     header: "Dibuat pada",
+    cell: ({ row }) => (
+      <div className="flex flex-col justify-start items-start gap-1">
+        <p className="font-semibold">{row.original.user?.username}</p>
+        <span className="text-gray-500">
+          {dayjs(row.original.createdAt).format("DD-MMM-YYYY")}
+        </span>
+      </div>
+    ),
   },
 ];
 

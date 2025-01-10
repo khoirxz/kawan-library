@@ -26,10 +26,19 @@ import { decreeCategoryListProps } from "@/types/decree";
 
 const formSchema = z.object({
   title: z.string(),
-  description: z.string(),
+  description: z.string().max(50).min(2),
   isPublic: z.boolean(),
 });
 
+/**
+ * Halaman untuk menambah atau mengedit kategori SK
+ *
+ * Halaman ini akan menampilkan form untuk menginputkan data kategori SK
+ * dan akan menampilkan notifikasi apabila data berhasil disimpan atau gagal
+ * disimpan
+ *
+ * @returns {React.ReactElement}
+ */
 const DecreeCategoryFormPage: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -175,6 +184,9 @@ const DecreeCategoryFormPage: React.FC = () => {
                         {...field}
                       />
                     </FormControl>
+                    <p className="text-xs text-gray-500">
+                      Maksimal 50 karakter
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

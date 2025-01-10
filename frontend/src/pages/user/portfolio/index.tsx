@@ -52,7 +52,9 @@ const UserPortfolioPage: React.FC = () => {
         <div className="flex justify-between items-center">
           <Button
             variant="outline"
-            onClick={() => navigate(`/user/profile/${id}`, { replace: true })}>
+            onClick={() =>
+              navigate(`/user/certificate/${id}`, { replace: true })
+            }>
             Kembali
           </Button>
           <Button
@@ -73,6 +75,7 @@ const UserPortfolioPage: React.FC = () => {
               <AvatarImage
                 src={`${baseAPI.dev}/uploads/avatars/${portfolio?.avatarImg}`}
                 alt={portfolio?.username}
+                className="object-cover aspect-square"
               />
             )}
 
@@ -110,7 +113,11 @@ const UserPortfolioPage: React.FC = () => {
                     className="flex justify-between items-start"
                     key={certs.id}>
                     <div>
-                      <p className="font-semibold">{certs.title}</p>
+                      <a
+                        target="_blank"
+                        href={`${baseAPI.dev}/uploads/certificates/${certs.file_path}`}>
+                        <p className="font-semibold">{certs.title}</p>
+                      </a>
                       <p className="text-gray-500 text-sm">
                         {certs.description}
                       </p>

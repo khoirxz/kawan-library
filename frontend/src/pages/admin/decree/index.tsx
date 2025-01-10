@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import { ColumnDef } from "@tanstack/react-table";
 
+import { Tag, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -26,8 +27,16 @@ const columns: ColumnDef<decreeListProps>[] = [
     cell: ({ row }) => (
       <div className="flex flex-col gap-1">
         <p className="font-semibold underline">{row.original.title}</p>
-        <p className="font-semibold">{row.original.category.title}</p>
-        {row.original.user ? <p>{row.original.user.username}</p> : null}
+        <p className="font-semibold flex items-center">
+          <Tag className="mr-2 w-3 h-3" />
+          {row.original.category.title}
+        </p>
+        {row.original.user ? (
+          <p className="flex items-center">
+            <User className="mr-2 w-3 h-3" />
+            {row.original.user.username}
+          </p>
+        ) : null}
       </div>
     ),
   },
