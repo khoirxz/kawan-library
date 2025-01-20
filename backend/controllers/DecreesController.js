@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const fs = require("fs");
 const Op = require("sequelize").Op;
-const { DecreesModel } = require("../model/index");
+const { DecreesModel, DecreeCategoryModel } = require("../model/index");
 const responseHandler = require("../helpers/responseHandler");
 const { Paginate } = require("../helpers/paginationHandler");
 
@@ -14,6 +14,7 @@ const getAllDecrees = async (req, res) => {
       ? {
           [Op.or]: [
             { title: { [Op.like]: `%${search}%` } },
+            { number: { [Op.like]: `%${search}%` } },
             { description: { [Op.like]: `%${search}%` } },
           ],
         }
@@ -104,10 +105,10 @@ const createDecree = async (req, res) => {
   try {
     const {
       user_id,
-      category_id,
+      categories,
       title,
+      number,
       description,
-      status,
       effective_date,
       expired_date,
     } = req.body;
@@ -118,10 +119,10 @@ const createDecree = async (req, res) => {
 
     const schema = Joi.object({
       user_id: Joi.string().optional().allow(null, ""),
-      category_id: Joi.number().required(),
+      categories: Joi.string().optional().allow(null, ""),
       title: Joi.string().required(),
+      number: Joi.string().allow(null),
       description: Joi.string().required(),
-      status: Joi.string().required(),
       effective_date: Joi.date().required(),
       expired_date: Joi.date().allow(null),
     });
@@ -131,16 +132,52 @@ const createDecree = async (req, res) => {
       return responseHandler(res, 400, { message: error.message });
     }
 
+    // parsing categories
+
+    let parsedCategories = [];
+    if (categories) {
+      try {
+        parsedCategories = JSON.parse(categories); // convert string to array
+        if (!Array.isArray(parsedCategories)) {
+          return responseHandler(res, 400, {
+            message: "Categories must be an array",
+          });
+        }
+      } catch {
+        return responseHandler(res, 400, {
+          message: "Categories must be an array",
+        });
+      }
+    }
+
     const data = await DecreesModel.create({
       user_id: user_id || null,
       title,
+      number,
       description,
-      category_id,
-      status,
       effective_date,
       expired_date: expired_date || null,
       file_path: req.file.filename,
     });
+
+    // validate categories
+    if (parsedCategories.length > 0) {
+      const categoryInstance = await DecreeCategoryModel.findAll({
+        where: { id: parsedCategories },
+      });
+
+      if (categoryInstance.length !== parsedCategories.length) {
+        const validIds = categoryInstance.map((category) => category.id);
+        const invalidIds = parsedCategories.filter(
+          (id) => !validIds.includes(id)
+        );
+        responseHandler(res, 500, {
+          message: "Invalid category ids: " + invalidIds.join(", "),
+        });
+      }
+
+      await data.addDecreeCategories(parsedCategories);
+    }
 
     responseHandler(res, 201, {
       message: "Success create decree",
@@ -162,7 +199,6 @@ const updateDecreeById = async (req, res) => {
       title,
       description,
       category_id,
-      status,
       effective_date,
       expired_date,
     } = req.body;
@@ -172,7 +208,6 @@ const updateDecreeById = async (req, res) => {
       title: Joi.string().required(),
       description: Joi.string().required(),
       category_id: Joi.string().required(),
-      status: Joi.string().required(),
       effective_date: Joi.date().required(),
       expired_date: Joi.date().allow(null),
     });
@@ -191,7 +226,6 @@ const updateDecreeById = async (req, res) => {
           title,
           description,
           category_id,
-          status,
           effective_date,
           expired_date,
           file_path: req.file.filename,
@@ -210,7 +244,6 @@ const updateDecreeById = async (req, res) => {
           title,
           description,
           category_id,
-          status,
           effective_date,
           expired_date,
         },

@@ -62,6 +62,16 @@ DecreesModel.belongsTo(UsersModel, {
   as: "user", // Alias untuk relasi
 });
 
+DecreesModel.belongsToMany(DecreeCategoryModel, {
+  through: "decrees_category_map", // Nama tabel perantara
+  foreignKey: "decrees_id", // Kolom foreign key di table perantara
+});
+
+DecreeCategoryModel.belongsToMany(DecreesModel, {
+  through: "decrees_category_map", // Nama tabel perantara
+  foreignKey: "category_id", // Kolom foreign key di table perantara
+});
+
 DecreesModel.belongsTo(DecreeCategoryModel, {
   foreignKey: "category_id", // Sesuai kolom foreign key di tabel decrees
   as: "category", // Alias untuk relasi

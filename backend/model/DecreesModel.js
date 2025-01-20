@@ -18,24 +18,24 @@ const Decrees = db.define("decrees", {
       key: "id",
     },
   },
-  category_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "decrees_categories",
-      key: "id",
-    },
-  },
+  // category_id: {
+  //   type: DataTypes.INTEGER,
+  //   allowNull: false,
+  //   references: {
+  //     model: "decrees_categories",
+  //     key: "id",
+  //   },
+  // },
   title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  number: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   description: {
     type: DataTypes.STRING,
-    allowNull: false,
-  },
-  status: {
-    type: DataTypes.ENUM("draft", "approved", "canceled"),
     allowNull: false,
   },
   effective_date: {
