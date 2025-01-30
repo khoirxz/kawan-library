@@ -30,12 +30,12 @@ const Decrees = db.define("decrees", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  description: {
+  number: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  status: {
-    type: DataTypes.ENUM("draft", "approved", "canceled"),
+  description: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
   effective_date: {

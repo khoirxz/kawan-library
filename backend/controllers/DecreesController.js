@@ -14,6 +14,7 @@ const getAllDecrees = async (req, res) => {
       ? {
           [Op.or]: [
             { title: { [Op.like]: `%${search}%` } },
+            { number: { [Op.like]: `%${search}%` } },
             { description: { [Op.like]: `%${search}%` } },
           ],
         }
@@ -106,8 +107,8 @@ const createDecree = async (req, res) => {
       user_id,
       category_id,
       title,
+      number,
       description,
-      status,
       effective_date,
       expired_date,
     } = req.body;
@@ -120,8 +121,8 @@ const createDecree = async (req, res) => {
       user_id: Joi.string().optional().allow(null, ""),
       category_id: Joi.number().required(),
       title: Joi.string().required(),
+      number: Joi.string().required(),
       description: Joi.string().required(),
-      status: Joi.string().required(),
       effective_date: Joi.date().required(),
       expired_date: Joi.date().allow(null),
     });
@@ -135,8 +136,8 @@ const createDecree = async (req, res) => {
       user_id: user_id || null,
       title,
       description,
+      number,
       category_id,
-      status,
       effective_date,
       expired_date: expired_date || null,
       file_path: req.file.filename,
@@ -160,9 +161,9 @@ const updateDecreeById = async (req, res) => {
     const {
       user_id,
       title,
+      number,
       description,
       category_id,
-      status,
       effective_date,
       expired_date,
     } = req.body;
@@ -170,9 +171,9 @@ const updateDecreeById = async (req, res) => {
     const schema = Joi.object({
       user_id: Joi.string().optional(),
       title: Joi.string().required(),
+      number: Joi.string().allow(null),
       description: Joi.string().required(),
       category_id: Joi.string().required(),
-      status: Joi.string().required(),
       effective_date: Joi.date().required(),
       expired_date: Joi.date().allow(null),
     });
@@ -189,9 +190,9 @@ const updateDecreeById = async (req, res) => {
         {
           user_id,
           title,
+          number,
           description,
           category_id,
-          status,
           effective_date,
           expired_date,
           file_path: req.file.filename,
@@ -208,9 +209,9 @@ const updateDecreeById = async (req, res) => {
         {
           user_id,
           title,
+          number,
           description,
           category_id,
-          status,
           effective_date,
           expired_date,
         },
