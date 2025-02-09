@@ -1,13 +1,12 @@
 const { UsersModel } = require("../../model/index");
 const responseHandler = require("../../helpers/responseHandler");
 
-const getUserProfile = async (req, res) => {
+const fetch = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const { id } = req.query;
 
-    const data = await UsersModel.findOne({
+    const options = {
       attributes: { exclude: ["password", "token"] },
-      where: { id: userId ? userId : req.decoded.userId },
       include: [
         "user_data",
         "user_contact",
@@ -17,7 +16,14 @@ const getUserProfile = async (req, res) => {
         "certifications",
         "decrees",
       ],
-    });
+    };
+
+    let data;
+    if (req.decoded.role === "admin") {
+      data = await UsersModel.findByPk(id ? id : req.decoded.userId, options);
+    } else {
+      data = await UsersModel.findByPk(req.decoded.userId, options);
+    }
 
     responseHandler(res, 200, {
       message: "Success get all users",
@@ -30,4 +36,4 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { getUserProfile };
+module.exports = { fetch };

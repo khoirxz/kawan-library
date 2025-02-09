@@ -10,11 +10,11 @@ const { validateInput } = require("../../middleware/validateMiddleware");
 
 // controllers user
 const {
-  getUsers,
-  getUsersById,
-  createUser,
-  updateUser,
-  deleteUser,
+  fetchAll,
+  fetchById,
+  create,
+  update,
+  destroy,
   uploadAvatar,
   getAvatarById,
   deleteAvatar,
@@ -38,17 +38,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage, limits: { fileSize: 8000000 } });
 
-router.get("/", authMiddleware, adminRoleMiddleware, getUsers);
-router.get("/:id", authMiddleware, adminRoleMiddleware, getUsersById);
+router.get("/", authMiddleware, adminRoleMiddleware, fetchAll);
+router.get("/:id", authMiddleware, adminRoleMiddleware, fetchById);
 router.post(
   "/",
   authMiddleware,
   adminRoleMiddleware,
   validateInput(createUserSchema),
-  createUser
+  create
 );
-router.put("/:id", authMiddleware, validateInput(updateUserSchema), updateUser);
-router.delete("/:id", authMiddleware, adminRoleMiddleware, deleteUser);
+router.put("/:id", authMiddleware, validateInput(updateUserSchema), update);
+router.delete("/:id", authMiddleware, adminRoleMiddleware, destroy);
 
 // upload avatar
 router.post(

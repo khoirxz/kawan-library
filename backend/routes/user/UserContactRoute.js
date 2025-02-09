@@ -2,7 +2,7 @@ const express = require("express");
 
 // controllers user data
 const {
-  getById,
+  fetchById,
   create,
   update,
 } = require("../../controllers/user/UserContactController.js");
@@ -10,7 +10,7 @@ const { authMiddleware } = require("../../middleware/authMiddleware.js");
 
 const router = express.Router();
 
-router.get("/:id", authMiddleware, getById);
+router.get("/:id", authMiddleware, fetchById);
 router.post("/", authMiddleware, create);
 router.put("/", authMiddleware, update);
 

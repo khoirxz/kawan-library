@@ -15,7 +15,7 @@ const AuthRoute = require("./routes/AuthRoute.js");
 // routes users
 const UsersRoute = require("./routes/user/UsersRoute.js");
 // routes decrees
-const DecreesRoute = require("./routes/DecreesRoute.js");
+const DecreesRoute = require("./routes/decree/DecreesRoute.js");
 // routes certifications
 const CertificationsRoute = require("./routes/CertificationsRoute.js");
 // routes User Data
@@ -29,7 +29,7 @@ const UserGeographyRoute = require("./routes/user/UserGeographyRoute.js");
 // routes job history
 const UserJobHistoryRoute = require("./routes/user/UserJobHistoryRoute.js");
 // routes decree category
-const DecreeCategoryRoute = require("./routes/DecreeCategoryRoute.js");
+const DecreeCategoryRoute = require("./routes/decree/DecreeCategoryRoute.js");
 // routes user portfolio
 const UserPortfolioRoute = require("./routes/user/UserPortfolioRoute.js");
 // routes user profile

@@ -2,13 +2,16 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 
+const { CertificateSchema } = require("../validation/CertificateScheme.js");
+const { validateInput } = require("../middleware/validateMiddleware.js");
+
 // controllers certifications
 const {
-  getAllCertificates,
-  getCertificateById,
-  createCertificate,
-  updateCertificateById,
-  deleteCertificateById,
+  fetchAll,
+  fetchById,
+  create,
+  update,
+  destroy,
 } = require("../controllers/CertificationsController.js");
 const {
   authMiddleware,
@@ -34,27 +37,24 @@ const upload = multer({
   },
 });
 
-router.get("/", authMiddleware, getAllCertificates);
-router.get("/id/:id", authMiddleware, getCertificateById);
+router.get("/", authMiddleware, fetchAll);
+router.get("/id/:id", authMiddleware, fetchById);
 router.post(
   "/",
   authMiddleware,
   adminRoleMiddleware,
   upload.single("certificateFile"),
-  createCertificate
+  validateInput(CertificateSchema),
+  create
 );
 router.put(
   "/:id",
   authMiddleware,
   adminRoleMiddleware,
   upload.single("certificateFile"),
-  updateCertificateById
+  validateInput(CertificateSchema),
+  update
 );
-router.delete(
-  "/:id",
-  authMiddleware,
-  adminRoleMiddleware,
-  deleteCertificateById
-);
+router.delete("/:id", authMiddleware, adminRoleMiddleware, destroy);
 
 module.exports = router;

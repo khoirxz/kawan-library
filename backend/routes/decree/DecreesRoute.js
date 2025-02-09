@@ -2,18 +2,21 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 
+const { DecreeSchema } = require("../../validation/DecreeScheme.js");
+const { validateInput } = require("../../middleware/validateMiddleware.js");
+
 // controllers decrees
 const {
-  getAllDecrees,
-  getDecreeById,
-  createDecree,
-  updateDecreeById,
-  deleteDecreeById,
-} = require("../controllers/DecreesController.js");
+  fetchAll,
+  fetchById,
+  create,
+  update,
+  destroy,
+} = require("../../controllers/decree/DecreesController.js");
 const {
   authMiddleware,
   adminRoleMiddleware,
-} = require("../middleware/authMiddleware.js");
+} = require("../../middleware/authMiddleware.js");
 
 const router = express.Router();
 
@@ -31,22 +34,24 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage, limits: { fileSize: 8000000 } });
 
 // Example: GET /decrees?search=cert&userId=123&page=2&limit=5
-router.get("/", authMiddleware, getAllDecrees);
-router.get("/:id", authMiddleware, getDecreeById);
+router.get("/", authMiddleware, fetchAll);
+router.get("/:id", authMiddleware, fetchById);
 router.post(
   "/",
   authMiddleware,
   adminRoleMiddleware,
   upload.single("decreeFile"),
-  createDecree
+  validateInput(DecreeSchema),
+  create
 );
 router.put(
   "/:id",
   authMiddleware,
   adminRoleMiddleware,
   upload.single("decreeFile"),
-  updateDecreeById
+  validateInput(DecreeSchema),
+  update
 );
-router.delete("/:id", authMiddleware, adminRoleMiddleware, deleteDecreeById);
+router.delete("/:id", authMiddleware, adminRoleMiddleware, destroy);
 
 module.exports = router;

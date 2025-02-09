@@ -2,12 +2,14 @@ const Joi = require("joi");
 const { UserContactModel } = require("../../model/index");
 const responseHandler = require("../../helpers/responseHandler");
 
-const getById = async (req, res) => {
+const fetchById = async (req, res) => {
+  const { id } = req.query;
+
   const schema = Joi.object({
     id: Joi.string().required(),
   });
 
-  const { error } = schema.validate(req.params);
+  const { error } = schema.validate(req.query);
 
   if (error) {
     return responseHandler(res, 400, {
@@ -19,21 +21,9 @@ const getById = async (req, res) => {
     let data;
 
     if (req.decoded.role === "admin") {
-      data = await UserContactModel.findAll({
-        where: { user_id: req.params.id },
-      });
-
-      if (data.length === 0) {
-        return res.status(204).json({
-          code: 204,
-          status: "success",
-          message: "User data not found",
-        });
-      }
+      data = await UserContactModel.findByPk(id ? id : req.decoded.id);
     } else {
-      data = await UserContactModel.findAll({
-        where: { user_id: req.decoded.id },
-      });
+      data = await UserContactModel.findByPk(req.decoded.id);
     }
 
     responseHandler(res, 200, {
@@ -185,4 +175,4 @@ const update = async (req, res) => {
   }
 };
 
-module.exports = { getById, create, update };
+module.exports = { fetchById, create, update };

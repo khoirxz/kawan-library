@@ -5,34 +5,32 @@ const { UsersModel } = require("../../model/index");
 const responseHandler = require("../../helpers/responseHandler");
 const { Paginate } = require("../../helpers/paginationHandler");
 
-const getUsers = async (req, res) => {
+const fetchAll = async (req, res) => {
   try {
-    const { search, page, limit } = req.query;
+    const { search = "", page = 1, limit = 10 } = req.query;
 
-    // Filter pencarian
-    const whereClause = search
-      ? {
-          [Op.or]: [{ username: { [Op.like]: `%${search}%` } }],
-        }
-      : {};
-
-    const where = {
-      ...whereClause,
-    };
-
-    // Pagination
-    const result = await Paginate(UsersModel, {
+    const { data, pagination } = await Paginate(UsersModel, {
+      attributes: [
+        "id",
+        "role",
+        "username",
+        "avatarImg",
+        "verified",
+        "createdAt",
+        "updatedAt",
+      ],
+      Op,
+      search,
+      where: "username",
       page,
       limit,
-      where,
-      include: ["user_data", "user_data_employe"],
-      attributes: ["id", "role", "username", "avatarImg", "verified"],
+      order: [["createdAt", "DESC"]],
     });
 
     responseHandler(res, 200, {
       message: "Success get all users",
-      data: result.data,
-      pagination: result.pagination,
+      data,
+      pagination,
     });
   } catch (error) {
     responseHandler(res, 500, {
@@ -41,10 +39,9 @@ const getUsers = async (req, res) => {
   }
 };
 
-const getUsersById = async (req, res) => {
+const fetchById = async (req, res) => {
   try {
-    const data = await UsersModel.findAll({
-      where: { id: req.params.id },
+    const data = await UsersModel.findByPk(req.params.id, {
       attributes: ["id", "role", "username", "avatarImg", "verified"],
     });
 
@@ -59,7 +56,7 @@ const getUsersById = async (req, res) => {
   }
 };
 
-const createUser = async (req, res) => {
+const create = async (req, res) => {
   try {
     const { username, password, role, verified } = req.body;
 
@@ -95,15 +92,14 @@ const createUser = async (req, res) => {
   }
 };
 
-const updateUser = async (req, res) => {
+const update = async (req, res) => {
   try {
-    const { username, role, password, verified } = req.body;
-
+    const { username, role, password = "", verified } = req.body;
+    const { id } = req.params;
     // check if user exist
-    const oldData = await UsersModel.findAll({
-      where: { id: req.params.id },
-    });
-    if (oldData.length == 0) {
+    const oldData = await UsersModel.findByPk(id);
+
+    if (oldData === null) {
       return responseHandler(res, 404, {
         message: "User not found",
       });
@@ -126,28 +122,32 @@ const updateUser = async (req, res) => {
 
     let newPassword;
     if (password === "") {
-      newPassword = oldData[0].password;
+      newPassword = oldData.password;
     } else if (password) {
       newPassword = await argon2.hash(password);
-    } else {
-      newPassword = undefined;
     }
 
-    // update user
-    await UsersModel.update(
-      {
-        username: username,
-        role: role,
-        password: newPassword,
-        verified: verified,
-      },
-      {
-        where: { id: req.params.id },
-      }
-    );
+    if (req.decoded.role === "admin" || req.decoded.id == req.params.id) {
+      // update user
+      await UsersModel.update(
+        {
+          username: username,
+          role: role,
+          password: newPassword,
+          verified: verified,
+        },
+        {
+          where: { id: req.params.id },
+        }
+      );
+    } else {
+      return responseHandler(res, 403, {
+        message: "You don't have permission to update this user",
+      });
+    }
 
-    const data = await UsersModel.findAll({
-      where: { id: req.params.id },
+    const data = await UsersModel.findByPk(req.params.id, {
+      attributes: ["id", "role", "username", "avatarImg", "verified"],
     });
 
     responseHandler(res, 200, {
@@ -161,10 +161,10 @@ const updateUser = async (req, res) => {
   }
 };
 
-const deleteUser = async (req, res) => {
+const destroy = async (req, res) => {
   try {
     // check if user exist
-    const oldData = await UsersModel.findAll({
+    const oldData = await UsersModel.findByPk({
       where: { id: req.params.id },
     });
 
@@ -180,6 +180,7 @@ const deleteUser = async (req, res) => {
     const data = await UsersModel.destroy({
       where: { id: req.params.id },
     });
+
     responseHandler(res, 200, {
       message: "Success delete user",
       data,
@@ -278,11 +279,11 @@ const deleteAvatar = async (req, res) => {
 };
 
 module.exports = {
-  getUsers,
-  getUsersById,
-  createUser,
-  updateUser,
-  deleteUser,
+  fetchAll,
+  fetchById,
+  create,
+  update,
+  destroy,
   uploadAvatar,
   getAvatarById,
   deleteAvatar,

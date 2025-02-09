@@ -1,66 +1,58 @@
-const Joi = require("joi");
 const fs = require("fs");
 const Op = require("sequelize").Op;
 const { CertificationsModel } = require("../model/index");
 const responseHandler = require("../helpers/responseHandler");
-const { Paginate } = require("../helpers/paginationHandler");
 
-const getAllCertificates = async (req, res) => {
+const fetchAll = async (req, res) => {
   try {
-    // Example: GET /certificates?search=cert&userId=123&page=2&limit=5
+    const { search = "", page = 1, limit = 10, userId = "" } = req.query;
+    const pageNumber = parseInt(page, 10); // Ensure radix is specified
+    const pageSize = parseInt(limit, 10); // Ensure radix is specified
 
-    // Ambil query dari request
-    const { search, userId, page, limit } = req.query;
-
-    // Filter pencarian
-    const whereClause =
-      search !== undefined && search !== null && search !== ""
-        ? {
-            [Op.or]: [
-              { title: { [Op.like]: `%${search}%` } },
-              { description: { [Op.like]: `%${search}%` } },
-            ],
-          }
-        : {};
-
-    // Filter user berdasarkan role
-    const userFilter =
-      req.decoded.role === "admin"
-        ? (() => {
-            if (userId === undefined || userId === null || userId === "") {
-              return {};
-            } else {
-              return { user_id: userId };
-            }
-          })()
-        : { user_id: req.decoded.userId };
-
-    // Gabungkan filter pencarian dan user
-    const where = {
-      ...whereClause,
-      ...userFilter,
+    const whereClause = {
+      where: {
+        [Op.or]: [
+          { title: { [Op.like]: `%${search}%` } },
+          { description: { [Op.like]: `%${search}%` } },
+        ],
+      },
+      limit: pageSize,
+      offet: (pageNumber - 1) * pageSize,
+      order: [["createdAt", "DESC"]],
     };
 
-    // Pagination
-    const result = await Paginate(CertificationsModel, {
-      page,
-      limit,
-      where,
-      include: [
-        {
-          association: "user",
-          attributes: {
-            exclude: ["password", "token", "createdAt", "updatedAt"],
-          },
+    let data;
+    if (req.decoded.role === "admin") {
+      // check if user_id exist
+      if (userId) {
+        whereClause.where.user_id = userId;
+      }
+
+      data = await CertificationsModel.findAndCountAll({
+        ...whereClause,
+      });
+    } else {
+      data = await CertificationsModel.findAndCountAll({
+        ...whereClause,
+        where: {
+          user_id: req.decoded.id,
+          [Op.or]: [
+            { title: { [Op.like]: `%${search}%` } },
+            { description: { [Op.like]: `%${search}%` } },
+          ],
         },
-      ],
-      attributes: { exclude: ["user_id"] },
-    });
+      });
+    }
 
     responseHandler(res, 200, {
       message: "Success get all certificates",
-      pagination: result.pagination,
-      data: result.data,
+      data: data.rows,
+      pagination: {
+        page: pageNumber,
+        limit: pageSize,
+        totalPage: Math.ceil(data.count / pageSize),
+        totalData: data.count,
+      },
     });
   } catch (error) {
     responseHandler(res, 500, {
@@ -69,12 +61,18 @@ const getAllCertificates = async (req, res) => {
   }
 };
 
-const getCertificateById = async (req, res) => {
+const fetchById = async (req, res) => {
   try {
-    const data = await CertificationsModel.findOne({
-      where: { id: req.params.id },
+    const { id } = req.params;
+
+    const data = await CertificationsModel.findByPk(id, {
       attributes: { exclude: ["user_id"] },
-      include: ["user"],
+      include: [
+        {
+          association: "user",
+          attributes: { exclude: ["password", "token", "verified"] },
+        },
+      ],
     });
 
     if (!data) {
@@ -94,28 +92,13 @@ const getCertificateById = async (req, res) => {
   }
 };
 
-const createCertificate = async (req, res) => {
+const create = async (req, res) => {
   try {
     const { user_id, title, description, date } = req.body;
 
     if (!req.file) {
       return responseHandler(res, 400, {
         message: "File is required",
-      });
-    }
-
-    const schema = Joi.object({
-      user_id: Joi.string().optional().allow(null, ""),
-      title: Joi.string().required(),
-      description: Joi.string().required(),
-      date: Joi.date().required(),
-    });
-
-    const { error } = schema.validate(req.body);
-
-    if (error) {
-      return responseHandler(res, 400, {
-        message: error.message,
       });
     }
 
@@ -139,33 +122,16 @@ const createCertificate = async (req, res) => {
   }
 };
 
-const updateCertificateById = async (req, res) => {
+const update = async (req, res) => {
   try {
-    const oldData = await CertificationsModel.findOne({
-      where: { id: req.params.id },
-    });
+    const { id } = req.params;
+    const { user_id, title, description, date } = req.body;
+
+    const oldData = await CertificationsModel.findByPk(id);
 
     if (!oldData) {
       return responseHandler(res, 404, {
         message: "Certificate not found",
-      });
-    }
-
-    const { user_id, title, description, date } = req.body;
-
-    const schema = Joi.object({
-      user_id: Joi.string().required(),
-      title: Joi.string().required(),
-      description: Joi.string().required(),
-      date: Joi.date().required(),
-    });
-
-    const { error } = schema.validate(req.body);
-
-    if (error) {
-      return responseHandler(res, 404, {
-        message: "Lengkapi data dengan benar",
-        data: error.message,
       });
     }
 
@@ -174,14 +140,14 @@ const updateCertificateById = async (req, res) => {
     if (req.file) {
       await CertificationsModel.update(
         {
-          user_id,
+          user_id: user_id || oldData.user_id,
           title,
           description,
           date,
           file_path: req.file.filename,
         },
         {
-          where: { id: req.params.id },
+          where: { id: id },
         }
       );
 
@@ -189,19 +155,19 @@ const updateCertificateById = async (req, res) => {
     } else {
       data = await CertificationsModel.update(
         {
-          user_id,
+          user_id: user_id || oldData.user_id,
           title,
           description,
           date,
         },
         {
-          where: { id: req.params.id },
+          where: { id: id },
         }
       );
     }
 
     data = await CertificationsModel.findOne({
-      where: { id: req.params.id },
+      where: { id: id },
     });
 
     return responseHandler(res, 200, {
@@ -215,11 +181,11 @@ const updateCertificateById = async (req, res) => {
   }
 };
 
-const deleteCertificateById = async (req, res) => {
+const destroy = async (req, res) => {
   try {
-    const data = await CertificationsModel.findOne({
-      where: { id: req.params.id },
-    });
+    const { id } = req.params;
+
+    const data = await CertificationsModel.findByPk(id);
 
     if (!data) {
       return responseHandler(res, 404, {
@@ -230,7 +196,7 @@ const deleteCertificateById = async (req, res) => {
     fs.unlinkSync("public/uploads/certificates/" + data.file_path);
 
     await CertificationsModel.destroy({
-      where: { id: req.params.id },
+      where: { id: id },
     });
 
     responseHandler(res, 200, {
@@ -244,9 +210,9 @@ const deleteCertificateById = async (req, res) => {
 };
 
 module.exports = {
-  getAllCertificates,
-  getCertificateById,
-  createCertificate,
-  updateCertificateById,
-  deleteCertificateById,
+  fetchAll,
+  fetchById,
+  create,
+  update,
+  destroy,
 };

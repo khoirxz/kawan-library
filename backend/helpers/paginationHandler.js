@@ -1,39 +1,54 @@
 // helper for pagination
-const Paginate = async (model, options) => {
-  const {
-    page = 1,
-    limit = 10,
-    where = {},
-    include = [],
-    attributes = [],
-    order = [["createdAt", "DESC"]],
-  } = options;
+/**
+ *
+ * @param {Object} model - The Sequelize model to paginate.
+ * @param {Object} options - The options for pagination.
+ * @param {Array} options.attributes - The attributes to select.
+ * @param {Object} options.Op - The Sequelize operators.
+ * @param {string} options.search - The search term.
+ * @param {string} options.where - The field to search.
+ * @param {number} options.page - The page number.
+ * @param {number} options.limit - The number of items per page.
+ * @returns {Promise<Object>} The paginated data and pagination info.
+ */
+const Paginate = async (
+  model,
+  { attributes, Op, search, where, page, limit, order, include = [] }
+) => {
+  const pageNumber = parseInt(page, 10); // Ensure radix is specified
+  const pageSize = parseInt(limit, 10); // Ensure radix is specified
 
-  // Konversi page dan limit menjadi angka
-  const pageNumber = parseInt(page, 10);
-  const pageSize = parseInt(limit, 10);
-  const offset = (pageNumber - 1) * pageSize;
+  const whereCondition = search
+    ? { [where]: { [Op.like]: `%${search}%` } }
+    : {};
 
-  // Query ke database
-  const { count, rows } = await model.findAndCountAll({
-    where,
-    include,
-    attributes,
-    limit: pageSize,
-    offset,
-    order,
-  });
-
-  // hitung metadata pagination
-  const totalPages = Math.ceil(count / pageSize);
+  let data;
+  if (attributes) {
+    data = await model.findAndCountAll({
+      attributes,
+      where: whereCondition,
+      limit: pageSize,
+      offset: (pageNumber - 1) * pageSize,
+      order,
+      include: include,
+    });
+  } else {
+    data = await model.findAndCountAll({
+      where: whereCondition,
+      limit: pageSize,
+      offset: (pageNumber - 1) * pageSize,
+      order,
+      include: include,
+    });
+  }
 
   return {
-    data: rows,
+    data: data.rows,
     pagination: {
-      totalItem: count,
-      totalPages,
-      currentPage: pageNumber,
-      pageSize,
+      page: pageNumber,
+      limit: pageSize,
+      total: data.count,
+      totalPage: Math.ceil(data.count / pageSize),
     },
   };
 };
