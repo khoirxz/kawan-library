@@ -10,7 +10,7 @@ const { authMiddleware } = require("../../middleware/authMiddleware.js");
 
 const router = express.Router();
 
-router.get("/:id", authMiddleware, fetchById);
+router.get("/", authMiddleware, fetchById);
 router.post("/", authMiddleware, create);
 router.put("/", authMiddleware, update);
 

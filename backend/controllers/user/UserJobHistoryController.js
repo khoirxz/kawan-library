@@ -1,17 +1,53 @@
+const Op = require("sequelize").Op;
 const JobHistoryModel = require("../../model/user/UserJobHistoryModel");
 const UsersModel = require("../../model/user/UsersModel");
 const responseHandler = require("../../helpers/responseHandler");
 
 // getAllUserJobHistory is get all user job history with id user
-const getAllUserJobHistory = async function (req, res) {
+const fetchAll = async function (req, res) {
   try {
-    const id = req.params.id;
+    // user id
+    const { id } = req.params;
+    const { search = "", page = 1, limit = 10 } = req.query;
+    const pageNumber = parseInt(page, 10); // Ensure radix is specified
+    const pageSize = parseInt(limit, 10); // Ensure radix is specified
 
-    const data = await JobHistoryModel.findAll({ where: { user_id: id } });
+    const whereClause = {
+      limit: pageSize,
+      offset: (pageNumber - 1) * pageSize,
+      order: [["createdAt", "DESC"]],
+    };
+
+    let data;
+    if (req.decoded.role === "admin") {
+      data = await JobHistoryModel.findAndCountAll({
+        ...whereClause,
+        where: {
+          [Op.or]: [{ user_id: id }],
+          [Op.and]: [{ company_name: { [Op.like]: `%${search}%` } }],
+        },
+      });
+    } else {
+      data = await JobHistoryModel.findAndCountAll({
+        ...whereClause,
+        where: {
+          [Op.or]: [{ user_id: req.decoded.userId }],
+          [Op.and]: [{ company_name: { [Op.like]: `%${search}%` } }],
+        },
+      });
+    }
 
     return responseHandler(res, 200, {
-      message: "Success get all user job history",
-      data: data,
+      message: `Success get ${
+        req.decoded.role === "admin" ? "all" : req.decoded.username
+      } job history`,
+      data: data.rows,
+      pagination: {
+        page: pageNumber,
+        limit: pageSize,
+        totalData: data.count,
+        totalPage: Math.ceil(data.count / pageSize),
+      },
     });
   } catch (error) {
     return responseHandler(res, 500, {
@@ -20,13 +56,11 @@ const getAllUserJobHistory = async function (req, res) {
   }
 };
 
-const getUserJobHistoryById = async function (req, res) {
+const fetchAllById = async function (req, res) {
   try {
     const { id } = req.params;
 
-    const data = await JobHistoryModel.findAll({
-      where: { id: id },
-    });
+    const data = await JobHistoryModel.findByPk(id);
 
     return responseHandler(res, 200, {
       message: "Success get user job history",
@@ -39,7 +73,7 @@ const getUserJobHistoryById = async function (req, res) {
   }
 };
 
-const createUserJobHistory = async function (req, res) {
+const create = async function (req, res) {
   try {
     const {
       user_id,
@@ -100,7 +134,7 @@ const createUserJobHistory = async function (req, res) {
   }
 };
 
-const updateUserJobHistory = async function (req, res) {
+const update = async function (req, res) {
   try {
     const { id } = req.params;
     const {
@@ -115,11 +149,9 @@ const updateUserJobHistory = async function (req, res) {
     } = req.body;
 
     // check if user exist
-    const user = await UsersModel.findAll({
-      where: { id: user_id },
-    });
+    const user = await UsersModel.findByPk(user_id);
 
-    if (user.length == 0) {
+    if (!user) {
       return responseHandler(res, 404, {
         message: "User not found",
       });
@@ -171,14 +203,12 @@ const updateUserJobHistory = async function (req, res) {
   }
 };
 
-const deleteUserJobHistory = async function (req, res) {
+const destroy = async function (req, res) {
   try {
     const { id } = req.params;
 
     // cek jika data sudah ada
-    const oldData = await JobHistoryModel.findAll({
-      where: { id: id },
-    });
+    const oldData = await JobHistoryModel.findByPk(id);
 
     if (!oldData) {
       return responseHandler(res, 404, {
@@ -219,9 +249,9 @@ const deleteUserJobHistory = async function (req, res) {
 };
 
 module.exports = {
-  getAllUserJobHistory,
-  getUserJobHistoryById,
-  createUserJobHistory,
-  updateUserJobHistory,
-  deleteUserJobHistory,
+  fetchAll,
+  fetchAllById,
+  create,
+  update,
+  destroy,
 };

@@ -19,13 +19,22 @@ const fetchAll = async (req, res) => {
       limit: pageSize,
       offet: (pageNumber - 1) * pageSize,
       order: [["createdAt", "DESC"]],
+      include: [
+        {
+          association: "user",
+          attributes: {
+            exclude: ["password", "token", "createdAt", "updatedAt"],
+          },
+        },
+      ],
+      attributes: { exclude: ["user_id"] },
     };
 
     let data;
     if (req.decoded.role === "admin") {
       // check if user_id exist
       if (userId) {
-        whereClause.where.user_id = userId;
+        whereClause.where.user_id = userId || null;
       }
 
       data = await CertificationsModel.findAndCountAll({
@@ -35,7 +44,7 @@ const fetchAll = async (req, res) => {
       data = await CertificationsModel.findAndCountAll({
         ...whereClause,
         where: {
-          user_id: req.decoded.id,
+          user_id: req.decoded.userId,
           [Op.or]: [
             { title: { [Op.like]: `%${search}%` } },
             { description: { [Op.like]: `%${search}%` } },

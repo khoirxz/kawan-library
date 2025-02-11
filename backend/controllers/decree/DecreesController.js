@@ -5,7 +5,13 @@ const responseHandler = require("../../helpers/responseHandler");
 
 const fetchAll = async (req, res) => {
   try {
-    const { search = "", page = 1, limit = 10 } = req.query;
+    const {
+      search = "",
+      page = 1,
+      limit = 10,
+      userId = "",
+      isUser = false,
+    } = req.query;
     const pageNumber = parseInt(page, 10); // Ensure radix is specified
     const pageSize = parseInt(limit, 10); // Ensure radix is specified
 
@@ -18,6 +24,7 @@ const fetchAll = async (req, res) => {
         "description",
         "effective_date",
         "expired_date",
+        "file_path",
         "createdAt",
         "updatedAt",
       ],
@@ -33,8 +40,18 @@ const fetchAll = async (req, res) => {
         ...whereClause,
         where: {
           [Op.or]: [
-            { title: { [Op.like]: `%${search}%` } },
-            { number: { [Op.like]: `%${search}%` } },
+            userId ? { user_id: userId } : { user_id: { [Op.ne]: null } },
+            isUser
+              ? { "$category.isPublic$": true }
+              : { "$category.isPublic$": { [Op.ne]: null } }, // Include public categories
+          ],
+          [Op.and]: [
+            {
+              [Op.or]: [
+                { title: { [Op.like]: `%${search}%` } },
+                { number: { [Op.like]: `%${search}%` } },
+              ],
+            },
           ],
         },
         include: [
@@ -43,15 +60,19 @@ const fetchAll = async (req, res) => {
             attributes: ["id", "isPublic", "title", "description"],
             required: false, // Tetap tampilkan meskipun kategori null
           },
+          {
+            association: "user",
+            attributes: ["id", "role", "username", "avatarImg", "verified"],
+          },
         ],
       });
     } else {
-      const userId = req.decoded.userId;
+      const Id = req.decoded.userId;
       data = await DecreesModel.findAndCountAll({
         ...whereClause,
         where: {
           [Op.or]: [
-            { user_id: userId },
+            { user_id: Id },
             { "$category.isPublic$": true }, // Include public categories
           ],
           [Op.and]: [

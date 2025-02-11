@@ -47,7 +47,7 @@ const Paginate = async (
     pagination: {
       page: pageNumber,
       limit: pageSize,
-      total: data.count,
+      totalData: data.count,
       totalPage: Math.ceil(data.count / pageSize),
     },
   };

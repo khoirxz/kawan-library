@@ -3,36 +3,16 @@ const Joi = require("joi");
 
 // controllers job history
 const {
-  getAllUserJobHistory,
-  getUserJobHistoryById,
-  createUserJobHistory,
-  updateUserJobHistory,
-  deleteUserJobHistory,
+  fetchAll,
+  fetchAllById,
+  create,
+  update,
+  destroy,
 } = require("../../controllers/user/UserJobHistoryController.js");
 const { authMiddleware } = require("../../middleware/authMiddleware.js");
 
 const router = express.Router();
 
-/**
- * Middleware to validate the input data for job history operations.
- *
- * Validates the request body against a predefined schema that includes:
- * - user_id: Required number
- * - company_name: Required string
- * - position: Required string
- * - start_date: Required date
- * - end_date: Optional date
- * - job_description: Required string
- * - location: Required string
- * - is_current: Required boolean
- *
- * If validation fails, responds with a 400 status code and error message.
- * Otherwise, proceeds to the next middleware or route handler.
- *
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
- */
 const filterInput = (req, res, next) => {
   const schema = Joi.object({
     user_id: Joi.string().required(),
@@ -57,10 +37,10 @@ const filterInput = (req, res, next) => {
   next();
 };
 
-router.get("/:id", authMiddleware, getAllUserJobHistory);
-router.get("/id/:id", authMiddleware, getUserJobHistoryById);
-router.post("/", authMiddleware, filterInput, createUserJobHistory);
-router.put("/:id", authMiddleware, filterInput, updateUserJobHistory);
-router.delete("/:id", authMiddleware, deleteUserJobHistory);
+router.get("/:id", authMiddleware, fetchAll);
+router.get("/id/:id", authMiddleware, fetchAllById);
+router.post("/", authMiddleware, filterInput, create);
+router.put("/:id", authMiddleware, filterInput, update);
+router.delete("/:id", authMiddleware, destroy);
 
 module.exports = router;
