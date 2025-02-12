@@ -42,11 +42,7 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: [
-      "http://localhost:3000",
-      "https://localhost:*",
-      "https://bprkawan.co.id/library",
-    ],
+    origin: globals.ORIGIN,
   })
 );
 
@@ -57,10 +53,42 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // access to http://localhost:5000/api.library/uploads/avatars
 // access to http://localhost:5000/api.library/uploads/decrees
 // access to http://localhost:5000/api.library/uploads/certificates
-app.use("/api.library/", express.static("public"));
+app.use(`${globals.BASE_URL}/`, express.static("public"));
+
+// validasi Origin Header
+app.use((req, res, next) => {
+  // define allowed origin
+  // config 1
+  const allowedOrigin = globals.ORIGIN;
+  const origin = req.get("origin"); // req.headers.origin;
+
+  // find match with origin
+  if (allowedOrigin.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+  } else {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
+  // config 2
+  // with referer
+  // const allowedReferers = globals.ORIGIN;
+  // const referer = req.headers.referer;
+
+  // if (
+  //   !referer ||
+  //   !allowedReferers.some((allowedReferer) =>
+  //     referer.startsWith(allowedReferer)
+  //   )
+  // ) {
+  //   return res.status(403).json({ error: "Access denied" });
+  // }
+
+  next();
+});
 
 // routes
-app.get("/api.library", (req, res) => {
+app.get(globals.BASE_URL, (req, res) => {
   db.authenticate()
     .then(() => {
       res
@@ -76,20 +104,21 @@ app.get("/api.library", (req, res) => {
     });
 });
 
-app.use("/api.library/auth/", AuthRoute);
-app.use("/api.library/decree/category/", DecreeCategoryRoute);
+app.use(`${globals.BASE_URL}/auth/`, AuthRoute);
+// app.use(`/api.library/decree/category/"`, DecreeCategoryRoute);
+app.use(`${globals.BASE_URL}/decree/category`, DecreeCategoryRoute);
 // routes berasosiasi dengan data user
-app.use("/api.library/users/", UsersRoute);
-app.use("/api.library/decrees/", DecreesRoute);
-app.use("/api.library/certifications/", CertificationsRoute);
-app.use("/api.library/user/data/", UserDataRoute);
-app.use("/api.library/user/contact/", UserContact);
-app.use("/api.library/user/data/employe/", UserDataEmployeRoute);
-app.use("/api.library/user/geography/", UserGeographyRoute);
-app.use("/api.library/user/job/history/", UserJobHistoryRoute);
+app.use(`${globals.BASE_URL}/users/`, UsersRoute);
+app.use(`${globals.BASE_URL}/decrees/`, DecreesRoute);
+app.use(`${globals.BASE_URL}/certifications/`, CertificationsRoute);
+app.use(`${globals.BASE_URL}/user/data/`, UserDataRoute);
+app.use(`${globals.BASE_URL}/user/contact/`, UserContact);
+app.use(`${globals.BASE_URL}/user/data/employe/`, UserDataEmployeRoute);
+app.use(`${globals.BASE_URL}/user/geography/`, UserGeographyRoute);
+app.use(`${globals.BASE_URL}/user/job/history/`, UserJobHistoryRoute);
 
-app.use("/api.library/user/profile/", UserProfileRoute);
-app.use("/api.library/user/portfolio/", UserPortfolioRoute);
+app.use(`${globals.BASE_URL}/user/profile/`, UserProfileRoute);
+app.use(`${globals.BASE_URL}/user/portfolio/`, UserPortfolioRoute);
 
 // async to db
 (() => db.sync())();

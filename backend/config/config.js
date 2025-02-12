@@ -6,7 +6,13 @@ const globals = {
   PASSWORD: process.env.PASSWORD || "",
   TABLE: process.env.TABLE || "",
   PORT: process.env.PORT || 5000,
-  BASE_URL: process.env.BASE_URL || "/api.library",
+  BASE_URL: process.env.BASE_URL || "",
+  ORIGIN: [
+    "http://localhost:3000",
+    "https://localhost:*",
+    "https://bprkawan.co.id/library",
+    "https://larekalihgarden.my.id/karyakelola",
+  ],
 };
 
 module.exports = {

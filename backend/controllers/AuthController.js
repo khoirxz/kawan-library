@@ -136,7 +136,9 @@ const login = async (req, res) => {
     await UsersModel.update({ token: token }, { where: { id: userId } });
     res.cookie("token", token, {
       httpOnly: true,
+      secure: true,
       maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "strict",
     });
 
     responseHandler(res, 200, {
